@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 290 76" fill="none">
+
+  <!-- 年輪背景淡綠 -->
+  <path d="M36,5 C57,3 69,19 69,37 C69,56 54,70 36,70 C18,70 3,55 3,37 C3,19 15,6 36,5 Z"
+        fill="#ecfdf5"/>
+
+  <!-- 年輪 Ring 1 (最外層，最粗) — 偏橫向橢圓 -->
+  <path d="M36,5 C57,3 69,19 69,37 C69,56 54,70 36,70 C18,70 3,55 3,37 C3,19 15,6 36,5 Z"
+        stroke="#15803d" stroke-width="3"/>
+
+  <!-- 年輪 Ring 2 — 圓心偏右上，左側寬、右側窄 -->
+  <path d="M38,13 C55,12 64,25 64,38 C64,52 53,63 38,63 C23,63 13,52 13,39 C13,26 22,14 38,13 Z"
+        stroke="#15803d" stroke-width="2.1"/>
+
+  <!-- 年輪 Ring 3 — 圓心偏左下，上方窄、下方寬 -->
+  <path d="M34,22 C47,20 57,30 58,40 C59,50 51,59 38,60 C26,60 18,51 18,41 C18,31 24,23 34,22 Z"
+        stroke="#15803d" stroke-width="1.5"/>
+
+  <!-- 年輪 Ring 4 (最內層，細) — 偏右下 -->
+  <path d="M38,31 C46,30 53,35 53,42 C53,49 47,55 39,55 C31,56 25,50 25,42 C25,34 30,32 38,31 Z"
+        stroke="#15803d" stroke-width="1.1"/>
+
+  <!-- ── 高音譜號（白色光暈層，讓符號從年輪中凸顯） ── -->
+  <line x1="37" y1="13" x2="37" y2="60" stroke="white" stroke-width="5" stroke-linecap="round"/>
+  <path d="M37,13 C44,10 50,15 50,23 C50,31 44,34 37,35 C33,35 29,32 29,28 C29,24 33,22 37,23 C39,23 41,25 40,27"
+        stroke="white" stroke-width="5" stroke-linecap="round"/>
+  <ellipse cx="37" cy="45" rx="10" ry="8.5" stroke="white" stroke-width="5"/>
+  <path d="M37,60 C37,64 33,66 31,64 C29,62 30,60 33,60"
+        stroke="white" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- ── 高音譜號（深綠主體） ── -->
+  <!-- 符桿（垂直主幹） -->
+  <line x1="37" y1="13" x2="37" y2="60" stroke="#15803d" stroke-width="2.2" stroke-linecap="round"/>
+  <!-- 頂部螺旋捲曲 -->
+  <path d="M37,13 C44,10 50,15 50,23 C50,31 44,34 37,35 C33,35 29,32 29,28 C29,24 33,22 37,23 C39,23 41,25 40,27"
+        stroke="#15803d" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <!-- G 音橢圓（環繞 G 音線） -->
+  <ellipse cx="37" cy="45" rx="10" ry="8.5" stroke="#15803d" stroke-width="2.2"/>
+  <!-- 底部尾鉤 -->
+  <path d="M37,60 C37,64 33,66 31,64 C29,62 30,60 33,60"
+        stroke="#15803d" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+
+  <!-- 細分隔線 -->
+  <line x1="83" y1="13" x2="83" y2="63" stroke="#15803d" stroke-width="0.6" opacity="0.3"/>
+
+  <!-- ECHO -->
+  <text x="93" y="32"
+        font-family="'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, 'Times New Roman', serif"
+        font-size="21" font-weight="800" fill="#15803d" letter-spacing="6">ECHO</text>
+
+  <!-- 中間細橫線 -->
+  <line x1="93" y1="40" x2="258" y2="40" stroke="#15803d" stroke-width="0.5" opacity="0.35"/>
+
+  <!-- TREE -->
+  <text x="93" y="58"
+        font-family="'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, 'Times New Roman', serif"
+        font-size="21" font-weight="800" fill="#15803d" letter-spacing="6">TREE</text>
+
+</svg>
