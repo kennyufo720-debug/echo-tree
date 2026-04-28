@@ -15,8 +15,8 @@ import { useOrders } from '@/lib/store'
 // 生產環境改成正式網址；本機開發指向 soul 資料夾
 const ANYDEEE_BASE_URL =
   typeof window !== 'undefined' && window.location.hostname === 'localhost'
-    ? `${window.location.origin}/rwa-dex.html`   // public/rwa-dex.html
-    : 'https://anydeee.com/rwa-dex.html'
+    ? `${window.location.origin}/rwa-dex.html`
+    : 'https://anydeee.vercel.app/rwa-dex.html'
 
 /** 依票券事件挑選對應樹種 */
 function pickTreeSym(eventTitle: string): string {
