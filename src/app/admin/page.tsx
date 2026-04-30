@@ -442,7 +442,7 @@ function MerchEditModal({ item, onSave, onClose }: { item: MerchItem; onSave: (i
           <Field label="商品名稱"><Input value={form.name} onChange={e => set('name', e.target.value)} /></Field>
           <Field label="說明"><Input value={form.description} onChange={e => set('description', e.target.value)} /></Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="兌換點數"><Input type="number" value={form.points} onChange={e => set('points', Number(e.target.value))} /></Field>
+            <Field label="售價 (NT$)"><Input type="number" value={form.points} onChange={e => set('points', Number(e.target.value))} /></Field>
             <Field label="庫存"><Input type="number" value={form.stock} onChange={e => set('stock', Number(e.target.value))} /></Field>
           </div>
           <Field label="標籤文字"><Input value={form.tag} onChange={e => set('tag', e.target.value)} /></Field>

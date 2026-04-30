@@ -156,8 +156,8 @@ export default function MemberPage() {
                     <div className="text-xs text-gray-400">{o.at}</div>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className="text-emerald-600 font-black text-sm">-{o.points.toLocaleString()}</div>
-                    <div className="text-[10px] text-gray-400">點數</div>
+                    <div className="text-emerald-600 font-black text-sm">NT${o.points.toLocaleString()}</div>
+                    <div className="text-[10px] text-gray-400">台幣</div>
                   </div>
                 </div>
               ))}
