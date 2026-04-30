@@ -40,11 +40,17 @@ export default function Navbar() {
           <Link href="/treasure">
             <Button variant="ghost" size="sm"> 藏寶圖</Button>
           </Link>
+          <Link href="/store">
+            <Button variant="ghost" size="sm" className="text-emerald-700 font-semibold">🌲 限量商城</Button>
+          </Link>
           <Link href="/points">
             <Button variant="ghost" size="sm"> 點數兌換</Button>
           </Link>
           <Link href="/forest">
             <Button variant="ghost" size="sm"> 名人堂</Button>
+          </Link>
+          <Link href="/member">
+            <Button variant="ghost" size="sm"> 會員後台</Button>
           </Link>
           <Link href="/admin">
             <Button variant="ghost" size="sm">後台</Button>
@@ -111,8 +117,10 @@ export default function Navbar() {
                 </Button>
               </Link>
               <Link href="/treasure"><Button variant="ghost" className="w-full justify-start"> 子瑜藏寶圖</Button></Link>
+              <Link href="/store"><Button variant="ghost" className="w-full justify-start text-emerald-700 font-semibold">🌲 限量商城</Button></Link>
               <Link href="/points"><Button variant="ghost" className="w-full justify-start"> 點數兌換</Button></Link>
               <Link href="/forest"><Button variant="ghost" className="w-full justify-start"> 回音森林名人堂</Button></Link>
+              <Link href="/member"><Button variant="ghost" className="w-full justify-start"> 會員後台</Button></Link>
               <Link href="/admin"><Button variant="ghost" className="w-full justify-start">後台管理</Button></Link>
               <Link href="/verify">
                 <Button className={`w-full ${user.verified ? 'bg-green-600 hover:bg-green-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}>
