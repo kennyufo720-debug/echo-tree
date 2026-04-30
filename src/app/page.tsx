@@ -115,6 +115,7 @@ const DEFAULT_STORE: StoreItem[] = [
   { id: 'm5', name: '限定 Tee 上衣', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80', points: 1480, tag: '限量', tagColor: '#ec4899', stock: 30 },
   { id: 'm6', name: '音樂節馬克杯',  image: 'https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=400&q=80', points: 590,  tag: '熱門', tagColor: '#f97316', stock: 60 },
   { id: 'm7', name: '折疊雨傘',      image: 'https://images.unsplash.com/photo-1558618047-3c5c3a4ed6c6?w=400&q=80', points: 980,  tag: '實用', tagColor: '#3b82f6', stock: 40 },
+  { id: 'm8', name: 'PSY X ECHO 森林滅火器', image: '/psy-x-echo-extinguisher.jpg', points: 2480, tag: '聯名', tagColor: '#0ea5e9', stock: 50 },
 ]
 
 export default function HomePage() {
@@ -127,7 +128,10 @@ export default function HomePage() {
     const load = () => {
       try {
         const saved = JSON.parse(localStorage.getItem(ADMIN_KEY) ?? '{}')
-        if (saved.merchs?.length) setStoreItems(saved.merchs)
+        if (saved.merchs?.length) {
+          const savedIds = new Set(saved.merchs.map((m: StoreItem) => m.id))
+          setStoreItems([...saved.merchs, ...DEFAULT_STORE.filter(d => !savedIds.has(d.id))])
+        }
       } catch { /* noop */ }
     }
     load()

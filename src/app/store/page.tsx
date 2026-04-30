@@ -51,7 +51,10 @@ function loadMerchs(): MerchItem[] {
   if (typeof window === 'undefined') return DEFAULT_MERCHS
   try {
     const saved = JSON.parse(localStorage.getItem(ADMIN_KEY) ?? '{}')
-    return saved.merchs ?? DEFAULT_MERCHS
+    if (!saved.merchs?.length) return DEFAULT_MERCHS
+    const savedIds = new Set(saved.merchs.map((m: MerchItem) => m.id))
+    const merged = [...saved.merchs, ...DEFAULT_MERCHS.filter(d => !savedIds.has(d.id))]
+    return merged
   } catch { return DEFAULT_MERCHS }
 }
 

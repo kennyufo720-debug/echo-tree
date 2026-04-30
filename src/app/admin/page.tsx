@@ -102,7 +102,11 @@ function loadAdminState(): AdminState {
       appearance:     { ...DEFAULT_APPEARANCE,  ...(saved.appearance ?? {}) },
       homepage:       { ...DEFAULT_HOMEPAGE,     ...(saved.homepage ?? {}) },
       eventOverrides: saved.eventOverrides ?? {},
-      merchs:         saved.merchs ?? DEFAULT_MERCHS,
+      merchs:         (() => {
+        if (!saved.merchs?.length) return DEFAULT_MERCHS
+        const savedIds = new Set(saved.merchs.map((m: MerchItem) => m.id))
+        return [...saved.merchs, ...DEFAULT_MERCHS.filter(d => !savedIds.has(d.id))]
+      })(),
     }
   } catch { return { appearance: DEFAULT_APPEARANCE, homepage: DEFAULT_HOMEPAGE, eventOverrides: {}, merchs: DEFAULT_MERCHS } }
 }
