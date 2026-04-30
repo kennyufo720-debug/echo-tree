@@ -106,8 +106,28 @@ function loadAdminState(): AdminState {
   } catch { return { appearance: DEFAULT_APPEARANCE, homepage: DEFAULT_HOMEPAGE, eventOverrides: {}, merchs: DEFAULT_MERCHS } }
 }
 
-function saveAdminState(state: AdminState) {
-  localStorage.setItem(ADMIN_KEY, JSON.stringify(state))
+function saveAdminState(state: AdminState): string | null {
+  try {
+    // Strip oversized base64 images to URL hints before saving
+    const safe: AdminState = {
+      ...state,
+      merchs: state.merchs.map(m => {
+        // base64 strings start with "data:"; keep but warn if > 400KB each
+        if (m.image?.startsWith('data:') && m.image.length > 400_000) {
+          console.warn(`商品「${m.name}」圖片過大 (${Math.round(m.image.length/1024)}KB)，建議改用 URL`)
+        }
+        return m
+      }),
+    }
+    localStorage.setItem(ADMIN_KEY, JSON.stringify(safe))
+    return null
+  } catch (e) {
+    const msg = (e as Error).message ?? '未知錯誤'
+    if (msg.includes('quota') || msg.includes('QuotaExceeded')) {
+      return '儲存失敗：圖片檔案太大，請改用圖片 URL 替代上傳'
+    }
+    return `儲存失敗：${msg}`
+  }
 }
 
 // ── Reusable UI helpers ───────────────────────────────────
@@ -149,13 +169,24 @@ function ColorField({ label, value, onChange, hint }: { label: string; value: st
 
 function ImageField({ label, value, onChange, hint }: { label: string; value: string; onChange: (v: string) => void; hint?: string }) {
   const fileRef = useRef<HTMLInputElement>(null)
-  const [urlInput, setUrlInput] = useState(value)
+  // Sync displayed URL input with external value changes (e.g. when modal opens for different item)
+  const [urlInput, setUrlInput] = useState(() => value?.startsWith('data:') ? '（已上傳）' : (value ?? ''))
+  const [sizeWarn, setSizeWarn] = useState('')
+  useEffect(() => {
+    setUrlInput(value?.startsWith('data:') ? '（已上傳）' : (value ?? ''))
+  }, [value])
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+    // Warn if file > 300 KB (becomes ~400 KB base64, risky for localStorage)
+    if (file.size > 300_000) {
+      setSizeWarn(`圖片 ${Math.round(file.size / 1024)} KB，建議 < 300 KB 或改用圖片 URL`)
+    } else {
+      setSizeWarn('')
+    }
     const reader = new FileReader()
-    reader.onload = () => { const r = reader.result as string; onChange(r); setUrlInput(r) }
+    reader.onload = () => { const r = reader.result as string; onChange(r); setUrlInput('（已上傳）') }
     reader.readAsDataURL(file)
   }
 
@@ -174,7 +205,12 @@ function ImageField({ label, value, onChange, hint }: { label: string; value: st
           </Button>
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
         </div>
-        {value && (
+        {sizeWarn && (
+          <div className="text-xs text-orange-600 bg-orange-50 border border-orange-200 rounded-lg px-3 py-1.5">
+            ⚠️ {sizeWarn}
+          </div>
+        )}
+        {value && !value.startsWith('（') && (
           <div className="relative w-full h-28 rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
             <img src={value} alt="預覽" className="w-full h-full object-cover" onError={e => (e.currentTarget.style.display = 'none')} />
             <div className="absolute inset-0 flex items-center justify-center text-gray-300 text-xs">預覽</div>
@@ -506,11 +542,31 @@ export default function AdminPage() {
   }
 
   function handleSave() {
-    saveAdminState(adminState)
+    const err = saveAdminState(adminState)
+    if (err) {
+      setToast('⚠️ ' + err)
+      setTimeout(() => setToast(''), 5000)
+      return
+    }
     setSavedState(adminState)
     setDirty(false)
     setToast(' 已儲存並發布！')
     setTimeout(() => setToast(''), 2500)
+  }
+
+  function handleAddMerch() {
+    const newItem: MerchItem = {
+      id: `m_${Date.now()}`,
+      name: '新商品',
+      image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=400&q=80',
+      points: 500,
+      tag: '新品',
+      tagColor: '#8b5cf6',
+      description: '商品說明',
+      stock: 50,
+    }
+    update(s => ({ ...s, merchs: [...s.merchs, newItem] }))
+    setEditingMerch(newItem)
   }
   function handleReset() {
     if (savedState) { setAdminState(savedState); setDirty(false) }
@@ -889,7 +945,7 @@ export default function AdminPage() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base flex items-center gap-2"><ShoppingBag className="h-4 w-4 text-emerald-600" />點數商城商品</CardTitle>
-                <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1">
+                <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1" onClick={handleAddMerch}>
                   <Plus className="h-3.5 w-3.5" />新增商品
                 </Button>
               </div>
