@@ -1,7 +1,7 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
-import { Search, MapPin, Calendar, ChevronRight, Flame, Clock, Tag, MessageSquare, ShoppingBag } from 'lucide-react'
+import { Search, MapPin, Calendar, ChevronRight, Flame, Clock, Tag, MessageSquare, ShoppingBag, ChevronLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -119,11 +119,25 @@ const DEFAULT_STORE: StoreItem[] = [
   { id: 'm9', name: 'echo tree 低碳限量T雪', image: '/echo-tree-tee-white.jpg', points: 890, tag: '限量', tagColor: '#10b981', stock: 60 },
 ]
 
+const featuredEvents = mockEvents.filter(e => e.status === 'on-sale').slice(0, 5)
+
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedCity, setSelectedCity] = useState('全部城市')
   const [search, setSearch] = useState('')
   const [storeItems, setStoreItems] = useState<StoreItem[]>(DEFAULT_STORE)
+  const [heroIdx, setHeroIdx] = useState(0)
+  const touchStartX = useRef<number | null>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(null)
+
+  const next = useCallback(() => setHeroIdx(i => (i + 1) % featuredEvents.length), [])
+  const prev = useCallback(() => setHeroIdx(i => (i - 1 + featuredEvents.length) % featuredEvents.length), [])
+
+  // Auto-play
+  useEffect(() => {
+    timerRef.current = setTimeout(next, 4500)
+    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
+  }, [heroIdx, next])
 
   useEffect(() => {
     const load = () => {
@@ -147,47 +161,74 @@ export default function HomePage() {
     return matchCategory && matchCity && matchSearch
   })
 
-  const featuredEvent = mockEvents[0]
-
   return (
     <div>
-      {/* Hero */}
-      <section className="relative h-[480px] overflow-hidden">
-        <img
-          src={featuredEvent.image}
-          alt={featuredEvent.title}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
-        <div className="absolute inset-0 flex items-center">
-          <div className="container mx-auto px-4">
-            <div className="max-w-lg">
-              <Badge className="bg-emerald-600 text-white mb-3">精選活動</Badge>
-              <h1 className="text-4xl font-bold text-white mb-2">{featuredEvent.title}</h1>
-              <p className="text-emerald-200 text-lg mb-2">{featuredEvent.artist}</p>
-              <div className="flex gap-4 text-white/80 text-sm mb-6">
-                <span className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  {featuredEvent.date}
-                </span>
-                <span className="flex items-center gap-1">
-                  <MapPin className="h-4 w-4" />
-                  {featuredEvent.venue}
-                </span>
-              </div>
-              <div className="flex gap-3">
-                <Link href={`/events/${featuredEvent.id}`}>
-                  <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                    立即購票
-                    <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </Link>
-                <Button size="lg" variant="outline" className="text-white border-white/50 hover:bg-white/10 bg-transparent">
-                  了解更多
-                </Button>
+      {/* Hero Carousel */}
+      <section
+        className="relative h-[480px] overflow-hidden select-none"
+        onTouchStart={e => { touchStartX.current = e.touches[0].clientX }}
+        onTouchEnd={e => {
+          if (touchStartX.current === null) return
+          const diff = touchStartX.current - e.changedTouches[0].clientX
+          if (Math.abs(diff) > 40) { if (timerRef.current) clearTimeout(timerRef.current); diff > 0 ? next() : prev() }
+          touchStartX.current = null
+        }}
+      >
+        {featuredEvents.map((ev, idx) => (
+          <div
+            key={ev.id}
+            className="absolute inset-0 transition-opacity duration-700"
+            style={{ opacity: idx === heroIdx ? 1 : 0, zIndex: idx === heroIdx ? 10 : 0 }}
+          >
+            <img src={ev.image} alt={ev.title} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
+            <div className="absolute inset-0 flex items-center">
+              <div className="container mx-auto px-4">
+                <div className="max-w-lg">
+                  <Badge className="bg-emerald-600 text-white mb-3">精選活動</Badge>
+                  <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 leading-snug">{ev.title}</h1>
+                  <p className="text-emerald-200 text-base mb-2">{ev.artist}</p>
+                  <div className="flex gap-4 text-white/80 text-sm mb-6">
+                    <span className="flex items-center gap-1"><Calendar className="h-4 w-4" />{ev.date}</span>
+                    <span className="flex items-center gap-1"><MapPin className="h-4 w-4" />{ev.venue}</span>
+                  </div>
+                  <div className="flex gap-3">
+                    <Link href={`/events/${ev.id}`}>
+                      <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                        立即購票 <ChevronRight className="h-4 w-4 ml-1" />
+                      </Button>
+                    </Link>
+                    <Link href={`/events/${ev.id}`}>
+                      <Button size="lg" variant="outline" className="text-white border-white/50 hover:bg-white/10 bg-transparent">
+                        了解更多
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+        ))}
+
+        {/* Prev / Next arrows (hidden on mobile) */}
+        <button onClick={() => { if (timerRef.current) clearTimeout(timerRef.current); prev() }}
+          className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-black/30 hover:bg-black/50 items-center justify-center text-white transition-colors">
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <button onClick={() => { if (timerRef.current) clearTimeout(timerRef.current); next() }}
+          className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-black/30 hover:bg-black/50 items-center justify-center text-white transition-colors">
+          <ChevronRight className="h-5 w-5" />
+        </button>
+
+        {/* Dot indicators */}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+          {featuredEvents.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => { if (timerRef.current) clearTimeout(timerRef.current); setHeroIdx(i) }}
+              className={`h-2 rounded-full transition-all duration-300 ${i === heroIdx ? 'w-6 bg-white' : 'w-2 bg-white/40'}`}
+            />
+          ))}
         </div>
       </section>
 
