@@ -44,6 +44,7 @@ const DEFAULT_MERCHS: MerchItem[] = [
   { id: 'm5', name: '限定 Tee 上衣', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80', points: 1480, tag: '限量', tagColor: '#ec4899', description: '100% 有機棉 T-Shirt，回音樹 2026 巡演限定款，尺碼 S–XL。', stock: 30 },
   { id: 'm6', name: '音樂節馬克杯',  image: 'https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=600&q=80', points: 590,  tag: '熱門', tagColor: '#f97316', description: '陶瓷馬克杯 350ml，雙面印刷回音樹 Logo，微波爐安全。', stock: 60 },
   { id: 'm7', name: '折疊雨傘',      image: 'https://images.unsplash.com/photo-1558618047-3c5c3a4ed6c6?w=600&q=80', points: 980,  tag: '實用', tagColor: '#3b82f6', description: '超輕量折疊傘，附收納袋，抗UV塗層，直徑 100cm。', stock: 40 },
+  { id: 'm8', name: 'PSY X ECHO 森林滅火器', image: '/psy-x-echo-extinguisher.jpg', points: 2480, tag: '聯名', tagColor: '#0ea5e9', description: 'PSY × ECHO TREE 限量聯名款森林滅火器，天空藍消光塗裝，COLLAB EDITION // MODEL: PAS-01，附收納掛架，限量發售。', stock: 50 },
 ]
 
 function loadMerchs(): MerchItem[] {
