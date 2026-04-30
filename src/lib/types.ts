@@ -15,6 +15,7 @@ export interface Event {
   status: 'on-sale' | 'sold-out' | 'coming-soon'
   tags: string[]
   videoId?: string
+  imagePosition?: string
 }
 
 export interface SeatSection {

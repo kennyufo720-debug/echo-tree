@@ -180,7 +180,7 @@ export default function HomePage() {
             className="absolute inset-0 transition-opacity duration-700"
             style={{ opacity: idx === heroIdx ? 1 : 0, zIndex: idx === heroIdx ? 10 : 0 }}
           >
-            <img src={ev.image} alt={ev.title} className="w-full h-full object-cover" />
+            <img src={ev.image} alt={ev.title} className="w-full h-full object-cover" style={{ objectPosition: ev.imagePosition ?? 'center' }} />
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
             <div className="absolute inset-0 flex items-center">
               <div className="container mx-auto px-4">

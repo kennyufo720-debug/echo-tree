@@ -17,6 +17,7 @@ export const mockEvents: Event[] = [
     availableSeats: 560,
     status: 'on-sale',
     tags: ['熱門', '爵士', 'AI歌手'],
+    imagePosition: '50% 20%',
   },
   {
     id: '7',
