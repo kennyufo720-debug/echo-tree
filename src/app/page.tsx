@@ -186,86 +186,44 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 藝人周邊 */}
+      {/* 藝人周邊 + 限量商城 */}
       <section className="bg-white border-b overflow-hidden">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-3 mb-3">
             <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full"> 藝人周邊</span>
-            <span className="text-xs text-gray-400 hidden sm:inline">限量商品</span>
-            <Link href="/points" className="ml-auto text-[11px] text-emerald-600 font-medium hover:underline flex items-center gap-0.5">
+            <span className="text-xs font-bold text-white bg-emerald-600 px-2 py-0.5 rounded-full">🌲 限量商城</span>
+            <span className="text-xs text-gray-400 hidden sm:inline">· 點數折抵 10%</span>
+            <Link href="/store" className="ml-auto text-[11px] text-emerald-600 font-medium hover:underline flex items-center gap-0.5">
               全部 <ChevronRight className="h-3 w-3" />
             </Link>
           </div>
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-            {[
-              { artist: '回音樹', item: 'ESG 限定帆布袋', price: 580, sold: 68,
-                image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&q=80' },
-              { artist: '回音樹', item: '簽名海報 A2', price: 350, sold: 92,
-                image: 'https://img.youtube.com/vi/iLQTVMjdzvY/maxresdefault.jpg' },
-              { artist: '回音樹', item: '演出紀念 T-shirt', price: 890, sold: 45,
-                image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&q=80' },
-              { artist: '回音樹', item: '植樹認養憑證', price: 1200, sold: 31,
-                image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=300&q=80' },
-              { artist: '回音樹', item: '限量徽章組', price: 280, sold: 77,
-                image: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=300&q=80' },
-              { artist: 'PSY', item: '江南大叔 濕身 T-shirt', price: 990, sold: 55,
-                image: 'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=300&q=80' },
-              { artist: 'PSY', item: '限定騎馬舞徽章', price: 380, sold: 83,
-                image: 'https://images.unsplash.com/photo-1619983081563-430f63602796?w=300&q=80' },
-            ].map((merch, i) => (
-              <div key={i} className="shrink-0 w-36 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer border border-gray-100">
-                <div className="h-24 overflow-hidden bg-gray-100">
-                  <img src={merch.image} alt={merch.item} className="w-full h-full object-cover" />
-                </div>
-                <div className="p-2 bg-white">
-                  <p className="text-[10px] text-gray-400 mb-0.5">{merch.artist}</p>
-                  <p className="text-[11px] font-bold text-gray-900 leading-tight mb-1">{merch.item}</p>
-                  <p className="text-emerald-600 font-bold text-xs">NT$ {merch.price}</p>
-                  <div className="mt-1">
-                    <div className="h-1 bg-gray-100 rounded-full">
-                      <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${merch.sold}%` }} />
-                    </div>
-                    <p className="text-[9px] text-gray-400 mt-0.5">已售 {merch.sold}%</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 限量商城 */}
-      <section className="bg-gradient-to-br from-emerald-900 to-teal-800 overflow-hidden">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center gap-2 mb-4">
-            <ShoppingBag className="h-4 w-4 text-emerald-300" />
-            <span className="text-sm font-black text-white">🌲 限量商城</span>
-            <span className="text-xs text-emerald-300/70 hidden sm:inline">· 點數折抵 10%</span>
-            <Link href="/store" className="ml-auto text-[11px] text-emerald-300 font-semibold hover:text-white flex items-center gap-0.5 transition-colors">
-              查看全部 <ChevronRight className="h-3 w-3" />
-            </Link>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-            {storeItems.filter(i => i.stock > 0).slice(0, 8).map(item => (
-              <Link key={item.id} href="/store" className="shrink-0 w-32 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5 cursor-pointer border border-white/10 bg-white/5 backdrop-blur">
-                <div className="h-28 overflow-hidden bg-white/10 relative">
-                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" onError={e => { e.currentTarget.style.display = 'none' }} />
+            {storeItems.filter(i => i.stock > 0).map(item => (
+              <Link key={item.id} href="/store" className="shrink-0 w-36 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer border border-gray-100 group">
+                <div className="h-24 overflow-hidden bg-gray-100 relative">
+                  <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onError={e => { e.currentTarget.style.display = 'none' }} />
                   <span className="absolute top-1.5 left-1.5 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: item.tagColor }}>
                     {item.tag}
                   </span>
                 </div>
-                <div className="p-2">
-                  <p className="text-[11px] font-bold text-white leading-tight mb-1 line-clamp-2">{item.name}</p>
-                  <p className="text-emerald-300 font-black text-xs">NT${item.points.toLocaleString()}</p>
-                  <p className="text-white/40 text-[9px] mt-0.5">剩 {item.stock} 件</p>
+                <div className="p-2 bg-white">
+                  <p className="text-[10px] text-gray-400 mb-0.5">回音樹限量</p>
+                  <p className="text-[11px] font-bold text-gray-900 leading-tight mb-1 line-clamp-2">{item.name}</p>
+                  <p className="text-emerald-600 font-bold text-xs">NT${item.points.toLocaleString()}</p>
+                  <div className="mt-1">
+                    <div className="h-1 bg-gray-100 rounded-full">
+                      <div className="h-full bg-emerald-400 rounded-full transition-all" style={{ width: `${Math.round(((item as StoreItem & { total?: number }).total ? (1 - item.stock / ((item as StoreItem & { total?: number }).total ?? item.stock + 1)) : 0.3) * 100)}%` }} />
+                    </div>
+                    <p className="text-[9px] text-gray-400 mt-0.5">剩 {item.stock} 件</p>
+                  </div>
                 </div>
               </Link>
             ))}
-            {/* CTA card */}
-            <Link href="/store" className="shrink-0 w-32 rounded-xl border border-dashed border-white/20 flex flex-col items-center justify-center gap-2 hover:border-white/40 transition-colors cursor-pointer p-3 text-center">
-              <ShoppingBag className="h-6 w-6 text-white/40" />
-              <span className="text-[11px] text-white/60 font-medium leading-tight">更多商品</span>
-              <span className="text-[10px] text-emerald-400 font-bold">前往商城 →</span>
+            {/* 前往商城 CTA */}
+            <Link href="/store" className="shrink-0 w-36 rounded-xl border-2 border-dashed border-emerald-200 flex flex-col items-center justify-center gap-2 hover:border-emerald-400 hover:bg-emerald-50 transition-colors cursor-pointer p-3 text-center">
+              <ShoppingBag className="h-7 w-7 text-emerald-300" />
+              <span className="text-[11px] text-gray-500 font-medium leading-tight">更多商品</span>
+              <span className="text-[10px] text-emerald-600 font-bold">前往商城 →</span>
             </Link>
           </div>
         </div>
