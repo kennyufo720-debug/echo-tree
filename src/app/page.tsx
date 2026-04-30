@@ -1,7 +1,7 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Search, MapPin, Calendar, ChevronRight, Flame, Clock, Tag, MessageSquare } from 'lucide-react'
+import { Search, MapPin, Calendar, ChevronRight, Flame, Clock, Tag, MessageSquare, ShoppingBag } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -106,10 +106,34 @@ function EventCard({ event }: { event: Event }) {
   )
 }
 
+interface StoreItem { id: string; name: string; image: string; points: number; tag: string; tagColor: string; stock: number }
+const ADMIN_KEY = 'echotree_admin_config'
+const DEFAULT_STORE: StoreItem[] = [
+  { id: 'm1', name: '限定帆布袋',    image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&q=80', points: 490,  tag: '熱門', tagColor: '#f97316', stock: 50 },
+  { id: 'm2', name: '刺繡徽章組',    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80', points: 290,  tag: '新品', tagColor: '#8b5cf6', stock: 120 },
+  { id: 'm3', name: '演唱會手環',    image: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=400&q=80', points: 199,  tag: '限量', tagColor: '#ec4899', stock: 80 },
+  { id: 'm5', name: '限定 Tee 上衣', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80', points: 1480, tag: '限量', tagColor: '#ec4899', stock: 30 },
+  { id: 'm6', name: '音樂節馬克杯',  image: 'https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=400&q=80', points: 590,  tag: '熱門', tagColor: '#f97316', stock: 60 },
+  { id: 'm7', name: '折疊雨傘',      image: 'https://images.unsplash.com/photo-1558618047-3c5c3a4ed6c6?w=400&q=80', points: 980,  tag: '實用', tagColor: '#3b82f6', stock: 40 },
+]
+
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedCity, setSelectedCity] = useState('全部城市')
   const [search, setSearch] = useState('')
+  const [storeItems, setStoreItems] = useState<StoreItem[]>(DEFAULT_STORE)
+
+  useEffect(() => {
+    const load = () => {
+      try {
+        const saved = JSON.parse(localStorage.getItem(ADMIN_KEY) ?? '{}')
+        if (saved.merchs?.length) setStoreItems(saved.merchs)
+      } catch { /* noop */ }
+    }
+    load()
+    window.addEventListener('storage', load)
+    return () => window.removeEventListener('storage', load)
+  }, [])
 
   const filtered = mockEvents.filter(e => {
     const matchCategory = selectedCategory === 'all' || e.category === selectedCategory
@@ -206,6 +230,43 @@ export default function HomePage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 限量商城 */}
+      <section className="bg-gradient-to-br from-emerald-900 to-teal-800 overflow-hidden">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center gap-2 mb-4">
+            <ShoppingBag className="h-4 w-4 text-emerald-300" />
+            <span className="text-sm font-black text-white">🌲 限量商城</span>
+            <span className="text-xs text-emerald-300/70 hidden sm:inline">· 點數折抵 10%</span>
+            <Link href="/store" className="ml-auto text-[11px] text-emerald-300 font-semibold hover:text-white flex items-center gap-0.5 transition-colors">
+              查看全部 <ChevronRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            {storeItems.filter(i => i.stock > 0).slice(0, 8).map(item => (
+              <Link key={item.id} href="/store" className="shrink-0 w-32 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5 cursor-pointer border border-white/10 bg-white/5 backdrop-blur">
+                <div className="h-28 overflow-hidden bg-white/10 relative">
+                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" onError={e => { e.currentTarget.style.display = 'none' }} />
+                  <span className="absolute top-1.5 left-1.5 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: item.tagColor }}>
+                    {item.tag}
+                  </span>
+                </div>
+                <div className="p-2">
+                  <p className="text-[11px] font-bold text-white leading-tight mb-1 line-clamp-2">{item.name}</p>
+                  <p className="text-emerald-300 font-black text-xs">NT${item.points.toLocaleString()}</p>
+                  <p className="text-white/40 text-[9px] mt-0.5">剩 {item.stock} 件</p>
+                </div>
+              </Link>
+            ))}
+            {/* CTA card */}
+            <Link href="/store" className="shrink-0 w-32 rounded-xl border border-dashed border-white/20 flex flex-col items-center justify-center gap-2 hover:border-white/40 transition-colors cursor-pointer p-3 text-center">
+              <ShoppingBag className="h-6 w-6 text-white/40" />
+              <span className="text-[11px] text-white/60 font-medium leading-tight">更多商品</span>
+              <span className="text-[10px] text-emerald-400 font-bold">前往商城 →</span>
+            </Link>
           </div>
         </div>
       </section>
