@@ -2,6 +2,23 @@ import { Event, SeatSection, Order } from './types'
 
 export const mockEvents: Event[] = [
   {
+    id: '8',
+    title: '回音樹 AI 歌手 爵士女伶 Ann — 夜之旋律',
+    artist: 'Ann（回音樹 AI 歌手）',
+    venue: '台北 Legacy Taipei',
+    city: '台北',
+    date: '2026-06-14',
+    time: '20:00',
+    image: '/ann-jazz-singer.jpg',
+    category: 'concert',
+    priceFrom: 1200,
+    priceTo: 3600,
+    totalSeats: 800,
+    availableSeats: 560,
+    status: 'on-sale',
+    tags: ['熱門', '爵士', 'AI歌手'],
+  },
+  {
     id: '7',
     title: 'PSY 江南大叔 濕身系列 WORLD TOUR',
     artist: 'PSY (朴載相)',
