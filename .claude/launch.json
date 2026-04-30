@@ -4,7 +4,7 @@
     {
       "name": "ticketing",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": ["--prefix", "/Users/Alan.Yo/Desktop/回音樹官網", "run", "dev"],
       "port": 3001
     }
   ]

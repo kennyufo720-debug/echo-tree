@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Echo Goo - 演唱會票券平台",
-  description: "台灣最便利的演唱會與活動票券購買平台",
+  title: "Echo Tree｜回音樹 - 演唱會票券平台",
+  description: "台灣最便利的演唱會與活動票券購買平台，限量周邊商城，點數折抵。",
 };
 
 export default function RootLayout({
@@ -32,7 +32,7 @@ export default function RootLayout({
         <Navbar />
         <main className="flex-1">{children}</main>
         <footer className="border-t bg-white py-8 text-center text-sm text-gray-500">
-          © 2025 Echo Goo. 保留所有權利。
+          © 2026 Echo Tree 回音樹. 保留所有權利。
         </footer>
       </body>
     </html>

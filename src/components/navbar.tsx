@@ -17,7 +17,7 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="container mx-auto flex h-16 items-center gap-4 px-4">
         <Link href="/" className="flex items-center shrink-0">
-          <img src="/logo.svg" alt="回音樹 Echo Tree" className="h-11 w-auto object-contain" />
+          <img src="/logo.svg" alt="回音樹 Echo Tree" className="h-8 md:h-10 w-auto object-contain" />
         </Link>
 
         <div className="hidden md:flex flex-1 max-w-md mx-4">

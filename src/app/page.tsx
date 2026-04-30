@@ -205,16 +205,15 @@ export default function HomePage() {
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
             {storeItems.filter(i => i.stock > 0).map(item => (
               <Link key={item.id} href="/store" className="shrink-0 w-36 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer border border-gray-100 group">
-                <div className="h-24 overflow-hidden bg-gray-100 relative">
+                <div className="h-28 overflow-hidden bg-gray-100 relative">
                   <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onError={e => { e.currentTarget.style.display = 'none' }} />
-                  <span className="absolute top-1.5 left-1.5 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: item.tagColor }}>
+                  <span className="absolute top-1.5 left-1.5 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm" style={{ background: item.tagColor }}>
                     {item.tag}
                   </span>
                 </div>
-                <div className="p-2 bg-white">
-                  <p className="text-[10px] text-gray-400 mb-0.5">回音樹限量</p>
-                  <p className="text-[11px] font-bold text-gray-900 leading-tight mb-1 line-clamp-2">{item.name}</p>
-                  <p className="text-emerald-600 font-bold text-xs">NT${item.points.toLocaleString()}</p>
+                <div className="p-2.5 bg-white">
+                  <p className="text-[11px] font-bold text-gray-900 leading-snug mb-1 line-clamp-2">{item.name}</p>
+                  <p className="text-emerald-600 font-black text-xs">NT${item.points.toLocaleString()}</p>
                   <div className="mt-1">
                     <div className="h-1 bg-gray-100 rounded-full">
                       <div className="h-full bg-emerald-400 rounded-full transition-all" style={{ width: `${Math.round(((item as StoreItem & { total?: number }).total ? (1 - item.stock / ((item as StoreItem & { total?: number }).total ?? item.stock + 1)) : 0.3) * 100)}%` }} />
@@ -247,12 +246,12 @@ export default function HomePage() {
                 onChange={e => setSearch(e.target.value)}
               />
             </div>
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
               {cities.map(city => (
                 <button
                   key={city}
                   onClick={() => setSelectedCity(city)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                     selectedCity === city
                       ? 'bg-emerald-600 text-white'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'

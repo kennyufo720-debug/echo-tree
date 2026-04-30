@@ -125,13 +125,13 @@ export default function EventsPage() {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-6xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">所有活動</h1>
-        <p className="text-gray-500 text-sm mt-1">探索精彩演唱會、音樂節與更多活動</p>
+      <div className="mb-5">
+        <h1 className="text-xl font-black text-gray-900 tracking-tight">所有活動</h1>
+        <p className="text-gray-400 text-sm mt-0.5">探索精彩演唱會、音樂節與更多活動</p>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-2xl border shadow-sm p-4 mb-6 space-y-3">
+      <div className="bg-white rounded-2xl border shadow-sm p-3 mb-5 space-y-2.5">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
@@ -142,12 +142,12 @@ export default function EventsPage() {
           />
         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {categories.map(cat => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+              className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                 selectedCategory === cat.id
                   ? 'bg-emerald-600 text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -158,12 +158,12 @@ export default function EventsPage() {
           ))}
         </div>
 
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {cities.map(city => (
             <button
               key={city}
               onClick={() => setSelectedCity(city)}
-              className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+              className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                 selectedCity === city
                   ? 'bg-emerald-600 text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
