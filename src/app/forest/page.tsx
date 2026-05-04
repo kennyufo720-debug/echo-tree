@@ -292,28 +292,7 @@ function ForestMap({ onSelect }: { onSelect: (f: typeof artistForests[0]) => voi
                   <span style={{ fontSize: '6px', fontWeight: 900, color: '#000', lineHeight: 1 }}>{idx + 1}</span>
                 </div>
 
-                {/* 常駐藝人名稱標籤（永遠顯示） */}
-                <div style={{
-                  position: 'absolute',
-                  top: '100%',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  marginTop: '4px',
-                  background: 'rgba(0,0,0,0.82)',
-                  border: `1px solid ${rankColor}70`,
-                  borderRadius: '5px',
-                  padding: '2px 6px',
-                  whiteSpace: 'nowrap',
-                  pointerEvents: 'none',
-                  boxShadow: isActive ? `0 0 8px ${rankColor}44` : 'none',
-                  transition: 'box-shadow 0.3s ease',
-                }}>
-                  <span style={{ fontSize: '8px', fontFamily: 'monospace', fontWeight: 700, color: '#fff', lineHeight: 1.3 }}>
-                    {forest.artist}
-                  </span>
-                </div>
-
-                {/* Hover 展開詳細資訊 */}
+                {/* 點擊/Hover 才顯示藝人名稱 + 詳細資訊 */}
                 {(isHov || isActive) && (
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 whitespace-nowrap z-30 rounded-lg px-2.5 py-1.5"
                     style={{
