@@ -131,27 +131,28 @@ function ArtistAvatar({ forest, size = 'md' }: { forest: typeof artistForests[0]
   )
 }
 
+// 使用 vectorlogo.zone 水平 SVG 真實 logo
 const CORPS = [
-  { name: 'Apple',     bg: '#1d1d1f', domain: 'apple.com' },
-  { name: 'Google',    bg: '#fff',    domain: 'google.com' },
-  { name: 'Microsoft', bg: '#f3f3f3', domain: 'microsoft.com' },
-  { name: 'Tesla',     bg: '#E31937', domain: 'tesla.com' },
-  { name: 'Samsung',   bg: '#1428A0', domain: 'samsung.com' },
-  { name: 'Sony',      bg: '#000',    domain: 'sony.com' },
-  { name: 'BMW',       bg: '#0066B1', domain: 'bmw.com' },
-  { name: 'IKEA',      bg: '#0058A3', domain: 'ikea.com' },
-  { name: 'Siemens',   bg: '#009999', domain: 'siemens.com' },
-  { name: 'Unilever',  bg: '#1F36C7', domain: 'unilever.com' },
-  { name: 'TSMC',      bg: '#B22222', domain: 'tsmc.com' },
-  { name: 'ASUS',      bg: '#00539B', domain: 'asus.com' },
-  { name: 'Acer',      bg: '#83B81A', domain: 'acer.com' },
-  { name: 'MediaTek',  bg: '#E4003A', domain: 'mediatek.com' },
-  { name: 'HTC',       bg: '#69BE28', domain: 'htc.com' },
-  { name: 'Gogoro',    bg: '#FF6600', domain: 'gogoro.com' },
-  { name: 'Tencent',   bg: '#12B7F5', domain: 'tencent.com' },
-  { name: 'Alibaba',   bg: '#FF6A00', domain: 'alibaba.com' },
-  { name: 'Panasonic', bg: '#0047BB', domain: 'panasonic.com' },
-  { name: 'Philips',   bg: '#0B5ED7', domain: 'philips.com' },
+  { name: 'Apple',     slug: 'apple' },
+  { name: 'Google',    slug: 'google' },
+  { name: 'Microsoft', slug: 'microsoft' },
+  { name: 'Tesla',     slug: 'tesla' },
+  { name: 'Samsung',   slug: 'samsung' },
+  { name: 'Sony',      slug: 'sony' },
+  { name: 'BMW',       slug: 'bmw-group' },
+  { name: 'IKEA',      slug: 'ikea' },
+  { name: 'Siemens',   slug: 'siemens' },
+  { name: 'Unilever',  slug: 'unilever' },
+  { name: 'TSMC',      slug: 'tsmc' },
+  { name: 'ASUS',      slug: 'asus' },
+  { name: 'Acer',      slug: 'acer' },
+  { name: 'MediaTek',  slug: 'mediatek' },
+  { name: 'HTC',       slug: 'htc' },
+  { name: 'Gogoro',    slug: 'gogoro' },
+  { name: 'Tencent',   slug: 'tencent' },
+  { name: 'Alibaba',   slug: 'alibaba' },
+  { name: 'Panasonic', slug: 'panasonic' },
+  { name: 'Philips',   slug: 'philips' },
 ]
 
 const RANK_COLORS = ['#FFD700', '#C0C0C0', '#CD7F32', '#6EE7B7']
@@ -297,29 +298,41 @@ function ForestMap({ onSelect }: { onSelect: (f: typeof artistForests[0]) => voi
         </div>
       </div>
 
-      {/* ── 企業贊助跑馬燈（地圖外，更慢） ── */}
-      <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(52,211,153,0.15)', background: 'rgba(2,10,5,0.9)' }}>
+      {/* ── 企業贊助跑馬燈（地圖外，真實 logo 水平橫式） ── */}
+      <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(52,211,153,0.15)', background: 'rgba(2,10,5,0.92)' }}>
         <div className="flex items-center gap-2 px-3 py-1.5" style={{ borderBottom: '1px solid rgba(52,211,153,0.12)' }}>
           <TreePine className="h-3 w-3 text-emerald-600" />
           <span className="text-emerald-400 text-[9px] font-mono tracking-[0.2em]">感謝企業一起愛地球</span>
           <span className="text-emerald-700 text-[9px] font-mono ml-auto">ESG PARTNERS</span>
         </div>
-        <div className="overflow-hidden py-2 px-1">
-          <div className="flex gap-4 items-center" style={{ animation: 'corp-scroll 60s linear infinite', width: 'max-content' }}>
+        <div className="overflow-hidden py-3 px-2">
+          <div className="flex items-center gap-8" style={{ animation: 'corp-scroll 65s linear infinite', width: 'max-content' }}>
             {[...CORPS, ...CORPS].map((corp, i) => (
-              <div key={i} className="shrink-0 flex flex-col items-center gap-0.5">
-                <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden"
-                  style={{ background: corp.bg, border: '1px solid rgba(52,211,153,0.2)', boxShadow: '0 0 6px rgba(52,211,153,0.08)' }}
+              <div key={i} className="shrink-0 flex items-center">
+                <img
+                  src={`https://www.vectorlogo.zone/logos/${corp.slug}/${corp.slug}-ar21.svg`}
+                  alt={corp.name}
+                  style={{
+                    height: '22px',
+                    width: 'auto',
+                    maxWidth: '88px',
+                    objectFit: 'contain',
+                    filter: 'brightness(0) invert(1)',
+                    opacity: 0.7,
+                  }}
+                  onError={(e) => {
+                    const img = e.target as HTMLImageElement
+                    img.style.display = 'none'
+                    const span = img.nextElementSibling as HTMLElement
+                    if (span) span.style.display = 'inline'
+                  }}
+                />
+                <span
+                  style={{ display: 'none' }}
+                  className="text-white/60 text-[11px] font-bold tracking-widest uppercase"
                 >
-                  <img
-                    src={`https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${corp.domain}&size=128`}
-                    alt={corp.name}
-                    className="w-6 h-6 object-contain"
-                    onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0' }}
-                  />
-                </div>
-                <span className="text-emerald-600 text-[7px] font-mono leading-none">{corp.name}</span>
+                  {corp.name}
+                </span>
               </div>
             ))}
           </div>
