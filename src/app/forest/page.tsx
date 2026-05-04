@@ -25,7 +25,7 @@ const artistForests = [
     lightBg: 'bg-emerald-50',
     borderColor: 'border-emerald-200',
     image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&q=80',
-    mapX: 22, mapY: 25,
+    mapX: 22, mapY: 25, globeX: 34, globeY: 62,
     zone: '馬來西亞 吉蘭州 ACACIA 森林',
     description: 'ACACIA 森林為一處退化森林，適合進行永續森林再造，結合當地住民共同守護這片珍貴的土地，每棵樹都是跨越國界的 ESG 行動。',
   },
@@ -46,7 +46,7 @@ const artistForests = [
     lightBg: 'bg-green-50',
     borderColor: 'border-green-200',
     image: 'https://images.unsplash.com/photo-1542401886-65d6c61db217?w=400&q=80',
-    mapX: 62, mapY: 20,
+    mapX: 62, mapY: 20, globeX: 68, globeY: 40,
     zone: '花蓮秀林',
     description: '花蓮秀林的深邃林地，隨著每場演出持續擴張，是台灣最具活力的音樂森林',
   },
@@ -67,7 +67,7 @@ const artistForests = [
     lightBg: 'bg-amber-50',
     borderColor: 'border-amber-200',
     image: 'https://images.unsplash.com/photo-1425913397330-cf8af2ff40a1?w=400&q=80',
-    mapX: 42, mapY: 55,
+    mapX: 42, mapY: 55, globeX: 62, globeY: 52,
     zone: '南投仁愛',
     description: '規模最大的藝人森林，南投仁愛的百年林地見證了傑倫音樂的傳奇歲月',
   },
@@ -88,7 +88,7 @@ const artistForests = [
     lightBg: 'bg-violet-50',
     borderColor: 'border-violet-200',
     image: 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?w=400&q=80',
-    mapX: 78, mapY: 60,
+    mapX: 78, mapY: 60, globeX: 74, globeY: 30,
     zone: '宜蘭大同',
     description: '橫跨韓台的國際森林，每棵樹都是一次跨文化的 ESG 行動，Gangnam Style！',
   },
@@ -160,141 +160,175 @@ const RANK_LABELS = ['#1', '#2', '#3', '#4']
 
 function ForestMap({ onSelect }: { onSelect: (f: typeof artistForests[0]) => void }) {
   const [hovered, setHovered] = useState<string | null>(null)
-  // 依照種樹數量排名
+  const [pulsing, setPulsing] = useState<string | null>(null)
+  const [activeId, setActiveId] = useState<string | null>(null)
   const ranked = [...artistForests].sort((a, b) => b.trees - a.trees)
+
+  const handleClick = (forest: typeof artistForests[0]) => {
+    setActiveId(forest.id)
+    setPulsing(forest.id)
+    setTimeout(() => setPulsing(null), 1100)
+    onSelect(forest)
+  }
+
+  const activeIdx = ranked.findIndex(r => r.id === activeId)
+  const activeColor = activeIdx >= 0 ? RANK_COLORS[activeIdx] : null
 
   return (
     <div className="space-y-3">
-      {/* ── 科技感 HUD 地圖 ── */}
-      <div
-        className="relative w-full rounded-2xl overflow-hidden shadow-2xl"
-        style={{ paddingBottom: '72%', border: '1px solid rgba(52,211,153,0.25)' }}
-      >
-        <div className="absolute inset-0">
-          {/* 森林底圖 */}
-          <img
-            src="https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&q=80"
-            alt="forest"
-            className="w-full h-full object-cover"
-          />
-          {/* 科技暗化遮罩 */}
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg,rgba(2,20,10,0.82) 0%,rgba(5,46,22,0.65) 50%,rgba(1,15,8,0.88) 100%)' }} />
+      {/* ── 地球球體 ── */}
+      <div className="flex flex-col items-center gap-3">
 
-          {/* 格線 HUD 裝飾 */}
-          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 72" preserveAspectRatio="none" style={{ opacity: 0.08 }}>
-            {[10,20,30,40,50,60,70,80,90].map(x => <line key={`vl${x}`} x1={x} y1="0" x2={x} y2="72" stroke="#4ade80" strokeWidth="0.3"/>)}
-            {[12,24,36,48,60].map(y => <line key={`hl${y}`} x1="0" y1={y} x2="100" y2={y} stroke="#4ade80" strokeWidth="0.3"/>)}
-            <rect x="0" y="0" width="100" height="72" stroke="#4ade80" strokeWidth="0.5" fill="none"/>
-          </svg>
+        {/* 球體容器 */}
+        <div className="relative" style={{ width: '290px', height: '290px' }}>
 
-          {/* 發光河流 */}
-          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 72" preserveAspectRatio="none">
-            <path d="M 0 40 Q 18 32, 35 42 Q 52 52, 68 38 Q 82 26, 100 34"
-              stroke="rgba(52,211,153,0.15)" strokeWidth="4" fill="none" strokeLinecap="round"/>
-            <path d="M 0 40 Q 18 32, 35 42 Q 52 52, 68 38 Q 82 26, 100 34"
-              stroke="rgba(52,211,153,0.55)" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
-          </svg>
-
-          {/* HUD 標題 左上 */}
-          <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg"
-            style={{ background: 'rgba(0,0,0,0.65)', border: '1px solid rgba(52,211,153,0.35)', backdropFilter: 'blur(6px)' }}>
-            <TreePine className="h-3 w-3 text-emerald-400" />
-            <span className="text-emerald-300 text-[10px] font-mono tracking-wider">ECHO FOREST MAP</span>
-          </div>
-
-          {/* HUD 數據 右上 */}
-          <div className="absolute top-2.5 right-2.5 text-right px-2.5 py-1.5 rounded-lg"
-            style={{ background: 'rgba(0,0,0,0.65)', border: '1px solid rgba(52,211,153,0.35)', backdropFilter: 'blur(6px)' }}>
-            <p className="text-emerald-300 text-[11px] font-mono font-bold">{artistForests.reduce((s, f) => s + f.trees, 0).toLocaleString()} 棵</p>
-            <p className="text-emerald-600 text-[9px] font-mono">4 ZONES ACTIVE</p>
-          </div>
-
-          {/* 掃描線效果 */}
-          <div className="absolute inset-0 pointer-events-none" style={{
-            background: 'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.07) 3px,rgba(0,0,0,0.07) 4px)',
+          {/* 大氣層外發光 */}
+          <div className="absolute rounded-full pointer-events-none" style={{
+            inset: '-18px',
+            background: activeColor
+              ? `radial-gradient(circle, ${activeColor}22 60%, transparent 100%)`
+              : 'radial-gradient(circle, rgba(52,211,153,0.12) 60%, transparent 100%)',
+            transition: 'background 0.8s ease',
           }} />
 
-          {/* Artist Forest Pins — 排名排序 */}
+          {/* 軌道環 HUD */}
+          <div className="absolute rounded-full pointer-events-none" style={{
+            inset: '-6px',
+            border: '1px solid rgba(52,211,153,0.22)',
+            animation: 'orbit-spin 22s linear infinite',
+          }}>
+            <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translate(-50%,-50%)', width: '8px', height: '8px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 8px #34d399' }} />
+          </div>
+          <div className="absolute rounded-full pointer-events-none" style={{
+            inset: '-14px',
+            border: '1px dashed rgba(52,211,153,0.10)',
+            animation: 'orbit-spin 40s linear infinite reverse',
+          }} />
+
+          {/* 球體主體 */}
+          <div className="absolute inset-0 rounded-full overflow-hidden" style={{
+            boxShadow: activeColor
+              ? `0 0 50px ${activeColor}55, 0 20px 60px rgba(0,0,0,0.6), inset 0 0 60px rgba(0,0,0,0.5)`
+              : '0 0 40px rgba(52,211,153,0.18), 0 20px 60px rgba(0,0,0,0.6), inset 0 0 60px rgba(0,0,0,0.5)',
+            transition: 'box-shadow 0.7s ease',
+          }}>
+            {/* 森林底圖（Planet Forest） */}
+            <img
+              src="https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&q=80"
+              alt="forest globe"
+              className="w-full h-full object-cover scale-125"
+              style={{ filter: 'saturate(1.3) brightness(0.8)' }}
+            />
+            {/* 深綠科技遮罩 */}
+            <div className="absolute inset-0" style={{
+              background: 'radial-gradient(ellipse at 50% 50%, rgba(5,46,22,0.4) 0%, rgba(2,15,8,0.7) 100%)',
+            }} />
+            {/* 3D 球體光照 */}
+            <div className="absolute inset-0" style={{
+              background: 'radial-gradient(circle at 32% 28%, rgba(255,255,255,0.18) 0%, transparent 48%), radial-gradient(circle at 72% 76%, rgba(0,0,0,0.65) 0%, transparent 42%)',
+            }} />
+            {/* 球體邊緣暗化 */}
+            <div className="absolute inset-0 rounded-full" style={{ boxShadow: 'inset 0 0 55px rgba(0,0,0,0.75)' }} />
+            {/* 掃描線 */}
+            <div className="absolute inset-0 pointer-events-none" style={{
+              background: 'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px)',
+            }} />
+          </div>
+
+          {/* 球體上的 HUD 文字 */}
+          <div className="absolute inset-0 flex flex-col items-center justify-between py-5 pointer-events-none">
+            <span className="text-[8px] font-mono tracking-[0.25em] text-emerald-400/70">ECHO FOREST GLOBE</span>
+            <div className="text-center">
+              <p className="text-emerald-300 text-sm font-mono font-bold">{artistForests.reduce((s, f) => s + f.trees, 0)} 棵</p>
+              <p className="text-emerald-600 text-[8px] font-mono">4 FORESTS ACTIVE</p>
+            </div>
+          </div>
+
+          {/* 森林 Pin 點 */}
           {ranked.map((forest, idx) => {
             const rankColor = RANK_COLORS[idx]
-            const rankLabel = RANK_LABELS[idx]
+            const isActive = activeId === forest.id
+            const isPulsing = pulsing === forest.id
             const isHov = hovered === forest.id
+            const gx = (forest as typeof forest & { globeX: number }).globeX
+            const gy = (forest as typeof forest & { globeY: number }).globeY
             return (
               <button
                 key={forest.id}
-                className="absolute transition-all duration-200 hover:z-20 group"
-                style={{ left: `${forest.mapX}%`, top: `${forest.mapY}%`, transform: 'translate(-50%,-50%)' }}
-                onClick={() => onSelect(forest)}
+                className="absolute z-10 transition-all duration-300"
+                style={{ left: `${gx}%`, top: `${gy}%`, transform: 'translate(-50%,-50%)' }}
+                onClick={() => handleClick(forest)}
                 onMouseEnter={() => setHovered(forest.id)}
                 onMouseLeave={() => setHovered(null)}
               >
-                {/* HUD 卡片 */}
-                <div
-                  className="relative w-[74px] rounded-lg overflow-hidden transition-all duration-200"
-                  style={{
-                    border: `1.5px solid ${isHov ? rankColor : 'rgba(255,255,255,0.2)'}`,
-                    boxShadow: isHov ? `0 0 12px ${rankColor}55, 0 0 4px ${rankColor}88` : 'none',
-                    transform: isHov ? 'scale(1.1)' : 'scale(1)',
-                  }}
-                >
-                  {/* 排名徽章 */}
-                  <div
-                    className="absolute -top-0.5 -left-0.5 z-20 w-5 h-5 rounded-br-lg flex items-center justify-center"
-                    style={{ background: rankColor }}
-                  >
-                    <span className="text-black text-[8px] font-black leading-none">{rankLabel}</span>
-                  </div>
+                {/* 脈衝擴散環 */}
+                {isPulsing && <>
+                  <div style={{
+                    position: 'absolute', inset: '-10px', borderRadius: '50%',
+                    background: rankColor, animation: 'pin-pulse 1.1s ease-out forwards',
+                  }} />
+                  <div style={{
+                    position: 'absolute', inset: '-6px', borderRadius: '50%',
+                    border: `2px solid ${rankColor}`, animation: 'ring-expand 1.1s ease-out forwards',
+                  }} />
+                  <div style={{
+                    position: 'absolute', inset: '-18px', borderRadius: '50%',
+                    border: `1px solid ${rankColor}88`, animation: 'ring-expand 1.1s 0.15s ease-out forwards',
+                  }} />
+                </>}
 
-                  {/* 森林圖片 */}
-                  <div className="relative">
-                    <img src={forest.image} alt={forest.name} className="w-full h-10 object-cover" />
-                    {/* 掃描線 */}
-                    <div className="absolute inset-0" style={{
-                      background: 'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.18) 2px,rgba(0,0,0,0.18) 4px)',
-                    }}/>
-                    {/* 圖片上的綠色光暈 */}
-                    <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${rankColor}22 0%, transparent 60%)` }}/>
-                  </div>
-
-                  {/* 數據面板 */}
-                  <div className="px-1.5 py-1" style={{ background: 'rgba(2,15,8,0.92)' }}>
-                    <p className="text-[8px] font-mono leading-tight truncate" style={{ color: rankColor }}>{forest.name}</p>
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <span className="text-emerald-500 text-[7px] font-mono">🌳</span>
-                      <span className="text-emerald-300 text-[7px] font-mono font-bold">{forest.trees}</span>
-                      <span className="text-gray-600 text-[7px] font-mono ml-auto">{forest.zone}</span>
-                    </div>
-                  </div>
+                {/* Pin 本體 */}
+                <div style={{
+                  width: isActive ? '22px' : isHov ? '18px' : '13px',
+                  height: isActive ? '22px' : isHov ? '18px' : '13px',
+                  borderRadius: '50%',
+                  background: rankColor,
+                  border: '2px solid rgba(255,255,255,0.9)',
+                  boxShadow: `0 0 ${isActive ? 18 : isHov ? 10 : 5}px ${rankColor}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'all 0.3s cubic-bezier(0.34,1.56,0.64,1)',
+                  animation: isPulsing ? 'pin-bounce 0.5s cubic-bezier(0.34,1.56,0.64,1)' : undefined,
+                }}>
+                  <span style={{ fontSize: '6px', fontWeight: 900, color: '#000', lineHeight: 1 }}>{idx + 1}</span>
                 </div>
 
-                {/* 位置點 */}
-                <div className="w-1.5 h-1.5 rounded-full mx-auto mt-0.5" style={{ background: rankColor, boxShadow: `0 0 6px ${rankColor}` }}/>
-
-                {/* Tooltip */}
-                {isHov && (
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap z-30 rounded-lg px-3 py-2 text-left"
-                    style={{ background: 'rgba(2,15,8,0.95)', border: `1px solid ${rankColor}66`, boxShadow: `0 0 16px ${rankColor}33` }}>
-                    <p className="font-mono text-[10px] font-bold" style={{ color: rankColor }}>{rankLabel} {forest.name}</p>
-                    <p className="text-emerald-400 text-[9px] font-mono">{forest.trees} 棵 · {forest.co2.toLocaleString()} kg CO₂</p>
-                    <p className="text-emerald-600 text-[9px] font-mono">{forest.zone} · {forest.fans.toLocaleString()} 粉絲</p>
+                {/* Hover / Active 標籤 */}
+                {(isHov || isActive) && (
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 whitespace-nowrap z-30 rounded-lg px-2.5 py-1.5"
+                    style={{
+                      background: 'rgba(2,12,6,0.96)',
+                      border: `1px solid ${rankColor}55`,
+                      boxShadow: `0 0 20px ${rankColor}22`,
+                      animation: 'label-pop 0.25s cubic-bezier(0.34,1.56,0.64,1)',
+                    }}>
+                    <p style={{ fontSize: '9px', fontFamily: 'monospace', fontWeight: 700, color: rankColor }}>#{idx + 1} {forest.name}</p>
+                    <p style={{ fontSize: '8px', fontFamily: 'monospace', color: 'rgba(52,211,153,0.65)' }}>🌳 {forest.trees} 棵 · {forest.zone}</p>
                   </div>
                 )}
               </button>
             )
           })}
+        </div>
 
-          {/* 圖例 — 排名順序 */}
-          <div className="absolute bottom-2.5 left-2.5 rounded-lg px-2 py-1.5 space-y-1"
-            style={{ background: 'rgba(0,0,0,0.72)', border: '1px solid rgba(52,211,153,0.2)', backdropFilter: 'blur(6px)' }}>
-            {ranked.map((f, i) => (
-              <div key={f.id} className="flex items-center gap-1.5">
-                <span className="text-[8px] font-mono font-bold w-4" style={{ color: RANK_COLORS[i] }}>{RANK_LABELS[i]}</span>
-                <div className="w-1.5 h-1.5 rounded-full" style={{ background: RANK_COLORS[i] }}/>
-                <span className="text-[9px] font-mono text-emerald-300">{f.name}</span>
-                <span className="text-[8px] font-mono text-emerald-600 ml-1">{f.trees}棵</span>
-              </div>
-            ))}
-          </div>
+        {/* 排名列表（可點擊，連動地球） */}
+        <div className="grid grid-cols-2 gap-2 w-full">
+          {ranked.map((f, i) => (
+            <button
+              key={f.id}
+              onClick={() => handleClick(f)}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 text-left"
+              style={{
+                background: activeId === f.id ? `${RANK_COLORS[i]}18` : 'rgba(2,10,5,0.85)',
+                border: `1px solid ${activeId === f.id ? RANK_COLORS[i] : 'rgba(52,211,153,0.12)'}`,
+                boxShadow: activeId === f.id ? `0 0 12px ${RANK_COLORS[i]}22` : 'none',
+              }}
+            >
+              <span style={{ fontSize: '10px', fontFamily: 'monospace', fontWeight: 900, color: RANK_COLORS[i], minWidth: '20px' }}>#{i + 1}</span>
+              <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: RANK_COLORS[i], flexShrink: 0 }} />
+              <span style={{ fontSize: '9px', fontFamily: 'monospace', color: 'rgba(52,211,153,0.85)', flex: 1, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{f.name}</span>
+              <span style={{ fontSize: '8px', fontFamily: 'monospace', color: 'rgba(52,211,153,0.4)', flexShrink: 0 }}>{f.trees}棵</span>
+            </button>
+          ))}
         </div>
       </div>
 
@@ -343,6 +377,32 @@ function ForestMap({ onSelect }: { onSelect: (f: typeof artistForests[0]) => voi
         @keyframes corp-scroll {
           0%   { transform: translateX(0); }
           100% { transform: translateX(-50%); }
+        }
+        @keyframes orbit-spin {
+          0%   { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        @keyframes pin-pulse {
+          0%   { transform: scale(1);   opacity: 0.55; }
+          100% { transform: scale(4.5); opacity: 0; }
+        }
+        @keyframes ring-expand {
+          0%   { transform: scale(1);   opacity: 0.7; }
+          100% { transform: scale(3.5); opacity: 0; }
+        }
+        @keyframes pin-bounce {
+          0%   { transform: scale(1); }
+          35%  { transform: scale(1.6); }
+          65%  { transform: scale(0.88); }
+          100% { transform: scale(1); }
+        }
+        @keyframes label-pop {
+          0%   { transform: translate(-50%, 6px) scale(0.88); opacity: 0; }
+          100% { transform: translate(-50%, 0)   scale(1);    opacity: 1; }
+        }
+        @keyframes forest-detail-enter {
+          0%   { opacity: 0; transform: translateY(28px) scale(0.96); }
+          100% { opacity: 1; transform: translateY(0)    scale(1); }
         }
       `}</style>
     </div>
@@ -435,7 +495,11 @@ export default function ForestPage() {
 
           {/* Selected Forest Detail */}
           {selectedForest && (
-            <div className={`rounded-2xl overflow-hidden border-2 ${selectedForest.borderColor} shadow-md`}>
+            <div
+              key={selectedForest.id}
+              className={`rounded-2xl overflow-hidden border-2 ${selectedForest.borderColor} shadow-md`}
+              style={{ animation: 'forest-detail-enter 0.45s cubic-bezier(0.34,1.56,0.64,1)' }}
+            >
               <div className="relative h-32 overflow-hidden">
                 <img src={selectedForest.image} alt={selectedForest.name} className="w-full h-full object-cover" />
                 <div className={`absolute inset-0 bg-gradient-to-r ${selectedForest.bg} opacity-70`} />
