@@ -218,59 +218,44 @@ function ForestMap({ onSelect }: { onSelect: (f: typeof artistForests[0]) => voi
           </p>
           <div className="overflow-hidden">
             <div className="flex gap-3 items-center" style={{ animation: 'corp-scroll 28s linear infinite', width: 'max-content' }}>
-              {[
-                { name: 'Apple',        domain: 'apple.com' },
-                { name: 'Google',       domain: 'google.com' },
-                { name: 'Microsoft',    domain: 'microsoft.com' },
-                { name: 'Tesla',        domain: 'tesla.com' },
-                { name: 'Samsung',      domain: 'samsung.com' },
-                { name: 'Sony',         domain: 'sony.com' },
-                { name: 'BMW',          domain: 'bmw.com' },
-                { name: 'IKEA',         domain: 'ikea.com' },
-                { name: 'Siemens',      domain: 'siemens.com' },
-                { name: 'Unilever',     domain: 'unilever.com' },
-                { name: 'TSMC',         domain: 'tsmc.com' },
-                { name: 'ASUS',         domain: 'asus.com' },
-                { name: 'Acer',         domain: 'acer.com' },
-                { name: 'MediaTek',     domain: 'mediatek.com' },
-                { name: 'HTC',          domain: 'htc.com' },
-                { name: 'Gogoro',       domain: 'gogoro.com' },
-                { name: 'Tencent',      domain: 'tencent.com' },
-                { name: 'Alibaba',      domain: 'alibaba.com' },
-                { name: 'Panasonic',    domain: 'panasonic.com' },
-                { name: 'Philips',      domain: 'philips.com' },
-                // 複製一份實現無縫循環
-                { name: 'Apple',        domain: 'apple.com' },
-                { name: 'Google',       domain: 'google.com' },
-                { name: 'Microsoft',    domain: 'microsoft.com' },
-                { name: 'Tesla',        domain: 'tesla.com' },
-                { name: 'Samsung',      domain: 'samsung.com' },
-                { name: 'Sony',         domain: 'sony.com' },
-                { name: 'BMW',          domain: 'bmw.com' },
-                { name: 'IKEA',         domain: 'ikea.com' },
-                { name: 'Siemens',      domain: 'siemens.com' },
-                { name: 'Unilever',     domain: 'unilever.com' },
-                { name: 'TSMC',         domain: 'tsmc.com' },
-                { name: 'ASUS',         domain: 'asus.com' },
-                { name: 'Acer',         domain: 'acer.com' },
-                { name: 'MediaTek',     domain: 'mediatek.com' },
-                { name: 'HTC',          domain: 'htc.com' },
-                { name: 'Gogoro',       domain: 'gogoro.com' },
-                { name: 'Tencent',      domain: 'tencent.com' },
-                { name: 'Alibaba',      domain: 'alibaba.com' },
-                { name: 'Panasonic',    domain: 'panasonic.com' },
-                { name: 'Philips',      domain: 'philips.com' },
-              ].map((corp, i) => (
-                <div key={i} className="shrink-0 flex flex-col items-center gap-0.5 group">
-                  <div className="w-8 h-8 rounded-lg bg-white/15 backdrop-blur border border-white/20 flex items-center justify-center overflow-hidden group-hover:bg-white/30 transition-colors">
+              {((): { name: string; bg: string; domain: string }[] => {
+                const corps = [
+                  { name: 'Apple',     bg: '#1d1d1f', domain: 'apple.com' },
+                  { name: 'Google',    bg: '#fff',    domain: 'google.com' },
+                  { name: 'Microsoft', bg: '#f3f3f3', domain: 'microsoft.com' },
+                  { name: 'Tesla',     bg: '#E31937', domain: 'tesla.com' },
+                  { name: 'Samsung',   bg: '#1428A0', domain: 'samsung.com' },
+                  { name: 'Sony',      bg: '#000',    domain: 'sony.com' },
+                  { name: 'BMW',       bg: '#0066B1', domain: 'bmw.com' },
+                  { name: 'IKEA',      bg: '#0058A3', domain: 'ikea.com' },
+                  { name: 'Siemens',   bg: '#009999', domain: 'siemens.com' },
+                  { name: 'Unilever',  bg: '#1F36C7', domain: 'unilever.com' },
+                  { name: 'TSMC',      bg: '#B22222', domain: 'tsmc.com' },
+                  { name: 'ASUS',      bg: '#00539B', domain: 'asus.com' },
+                  { name: 'Acer',      bg: '#83B81A', domain: 'acer.com' },
+                  { name: 'MediaTek',  bg: '#E4003A', domain: 'mediatek.com' },
+                  { name: 'HTC',       bg: '#69BE28', domain: 'htc.com' },
+                  { name: 'Gogoro',    bg: '#FF6600', domain: 'gogoro.com' },
+                  { name: 'Tencent',   bg: '#12B7F5', domain: 'tencent.com' },
+                  { name: 'Alibaba',   bg: '#FF6A00', domain: 'alibaba.com' },
+                  { name: 'Panasonic', bg: '#0047BB', domain: 'panasonic.com' },
+                  { name: 'Philips',   bg: '#0B5ED7', domain: 'philips.com' },
+                ]
+                return [...corps, ...corps]
+              })().map((corp, i) => (
+                <div key={i} className="shrink-0 flex flex-col items-center gap-0.5">
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center border border-white/20 shadow overflow-hidden"
+                    style={{ background: corp.bg }}
+                  >
                     <img
-                      src={`https://logo.clearbit.com/${corp.domain}`}
+                      src={`https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${corp.domain}&size=128`}
                       alt={corp.name}
                       className="w-6 h-6 object-contain"
-                      onError={(e) => { (e.target as HTMLImageElement).style.display='none' }}
+                      onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0' }}
                     />
                   </div>
-                  <span className="text-white/60 text-[7px] leading-none">{corp.name}</span>
+                  <span className="text-white/70 text-[7px] leading-none font-medium">{corp.name}</span>
                 </div>
               ))}
             </div>
