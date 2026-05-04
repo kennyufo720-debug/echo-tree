@@ -279,12 +279,12 @@ function ForestMap({ onSelect }: { onSelect: (f: typeof artistForests[0]) => voi
 
                 {/* Pin 本體 */}
                 <div style={{
-                  width: isActive ? '22px' : isHov ? '18px' : '13px',
-                  height: isActive ? '22px' : isHov ? '18px' : '13px',
+                  width: isActive ? '22px' : isHov ? '18px' : '14px',
+                  height: isActive ? '22px' : isHov ? '18px' : '14px',
                   borderRadius: '50%',
                   background: rankColor,
-                  border: '2px solid rgba(255,255,255,0.9)',
-                  boxShadow: `0 0 ${isActive ? 18 : isHov ? 10 : 5}px ${rankColor}`,
+                  border: '2px solid rgba(255,255,255,0.95)',
+                  boxShadow: `0 0 ${isActive ? 18 : isHov ? 10 : 6}px ${rankColor}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   transition: 'all 0.3s cubic-bezier(0.34,1.56,0.64,1)',
                   animation: isPulsing ? 'pin-bounce 0.5s cubic-bezier(0.34,1.56,0.64,1)' : undefined,
@@ -292,7 +292,28 @@ function ForestMap({ onSelect }: { onSelect: (f: typeof artistForests[0]) => voi
                   <span style={{ fontSize: '6px', fontWeight: 900, color: '#000', lineHeight: 1 }}>{idx + 1}</span>
                 </div>
 
-                {/* Hover / Active 標籤 */}
+                {/* 常駐藝人名稱標籤（永遠顯示） */}
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  marginTop: '4px',
+                  background: 'rgba(0,0,0,0.82)',
+                  border: `1px solid ${rankColor}70`,
+                  borderRadius: '5px',
+                  padding: '2px 6px',
+                  whiteSpace: 'nowrap',
+                  pointerEvents: 'none',
+                  boxShadow: isActive ? `0 0 8px ${rankColor}44` : 'none',
+                  transition: 'box-shadow 0.3s ease',
+                }}>
+                  <span style={{ fontSize: '8px', fontFamily: 'monospace', fontWeight: 700, color: '#fff', lineHeight: 1.3 }}>
+                    {forest.artist}
+                  </span>
+                </div>
+
+                {/* Hover 展開詳細資訊 */}
                 {(isHov || isActive) && (
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 whitespace-nowrap z-30 rounded-lg px-2.5 py-1.5"
                     style={{
@@ -302,7 +323,7 @@ function ForestMap({ onSelect }: { onSelect: (f: typeof artistForests[0]) => voi
                       animation: 'label-pop 0.25s cubic-bezier(0.34,1.56,0.64,1)',
                     }}>
                     <p style={{ fontSize: '9px', fontFamily: 'monospace', fontWeight: 700, color: rankColor }}>#{idx + 1} {forest.name}</p>
-                    <p style={{ fontSize: '8px', fontFamily: 'monospace', color: 'rgba(52,211,153,0.65)' }}>🌳 {forest.trees} 棵 · {forest.zone}</p>
+                    <p style={{ fontSize: '8px', fontFamily: 'monospace', color: 'rgba(180,255,200,0.8)' }}>🌳 {forest.trees} 棵 · {forest.zone}</p>
                   </div>
                 )}
               </button>
@@ -312,23 +333,33 @@ function ForestMap({ onSelect }: { onSelect: (f: typeof artistForests[0]) => voi
 
         {/* 排名列表（可點擊，連動地球） */}
         <div className="grid grid-cols-2 gap-2 w-full">
-          {ranked.map((f, i) => (
-            <button
-              key={f.id}
-              onClick={() => handleClick(f)}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 text-left"
-              style={{
-                background: activeId === f.id ? `${RANK_COLORS[i]}18` : 'rgba(2,10,5,0.85)',
-                border: `1px solid ${activeId === f.id ? RANK_COLORS[i] : 'rgba(52,211,153,0.12)'}`,
-                boxShadow: activeId === f.id ? `0 0 12px ${RANK_COLORS[i]}22` : 'none',
-              }}
-            >
-              <span style={{ fontSize: '10px', fontFamily: 'monospace', fontWeight: 900, color: RANK_COLORS[i], minWidth: '20px' }}>#{i + 1}</span>
-              <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: RANK_COLORS[i], flexShrink: 0 }} />
-              <span style={{ fontSize: '9px', fontFamily: 'monospace', color: 'rgba(52,211,153,0.85)', flex: 1, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{f.name}</span>
-              <span style={{ fontSize: '8px', fontFamily: 'monospace', color: 'rgba(52,211,153,0.4)', flexShrink: 0 }}>{f.trees}棵</span>
-            </button>
-          ))}
+          {ranked.map((f, i) => {
+            const isAct = activeId === f.id
+            return (
+              <button
+                key={f.id}
+                onClick={() => handleClick(f)}
+                className="flex items-center gap-2 px-3 py-2.5 rounded-xl transition-all duration-300 text-left"
+                style={{
+                  background: isAct ? `${RANK_COLORS[i]}28` : 'rgba(15,30,18,0.95)',
+                  border: `1.5px solid ${isAct ? RANK_COLORS[i] : 'rgba(80,160,100,0.25)'}`,
+                  boxShadow: isAct ? `0 0 14px ${RANK_COLORS[i]}33` : 'none',
+                }}
+              >
+                {/* 排名號 */}
+                <span style={{ fontSize: '11px', fontFamily: 'monospace', fontWeight: 900, color: RANK_COLORS[i], minWidth: '22px', textShadow: `0 0 6px ${RANK_COLORS[i]}` }}>#{i + 1}</span>
+                {/* 色點 */}
+                <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: RANK_COLORS[i], flexShrink: 0, boxShadow: `0 0 4px ${RANK_COLORS[i]}` }} />
+                {/* 藝人名稱 — 白色清晰 */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: '10px', fontFamily: 'monospace', fontWeight: 700, color: '#ffffff', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', lineHeight: 1.3 }}>{f.artist}</p>
+                  <p style={{ fontSize: '8px', fontFamily: 'monospace', color: 'rgba(180,220,190,0.7)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', lineHeight: 1.2 }}>{f.name}</p>
+                </div>
+                {/* 棵數 */}
+                <span style={{ fontSize: '9px', fontFamily: 'monospace', color: isAct ? '#fff' : 'rgba(200,255,215,0.65)', fontWeight: isAct ? 700 : 400, flexShrink: 0 }}>{f.trees}棵</span>
+              </button>
+            )
+          })}
         </div>
       </div>
 
