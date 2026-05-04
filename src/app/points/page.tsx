@@ -147,6 +147,9 @@ function ItemCard({ item, pts, onAdd, onDetail }: { item: RewardItem; pts: numbe
 }
 
 // ── Main Page ─────────────────────────────────────────
+const ANYDEEE_URL = 'https://anydeee.com'
+const TREE_IDS = new Set(['t1', 't2', 't3', 't4'])
+
 export default function PointsPage() {
   const [activeTab, setActiveTab] = useState<'store' | 'history' | 'earn'>('store')
   const [activeCategory, setActiveCategory] = useState('all')
@@ -155,6 +158,8 @@ export default function PointsPage() {
   const [showCart, setShowCart] = useState(false)
   const [detailItem, setDetailItem] = useState<RewardItem | null>(null)
   const [orderDone, setOrderDone] = useState<string[] | null>(null)
+  const [treeAnim, setTreeAnim] = useState(false)
+  const [treeStage, setTreeStage] = useState<'growing' | 'cert' | 'done'>('growing')
   const storeUser = useUser()
   const [pts, setPts] = useState(USER_POINTS)
   // Sync with store
@@ -193,10 +198,19 @@ export default function PointsPage() {
 
   function checkout() {
     if (pts < cartTotal) return
-    setOrderDone(cart.map(c => c.name))
+    const names = cart.map(c => c.name)
+    const hasTree = cart.some(c => TREE_IDS.has(c.id))
     setPts(p => p - cartTotal)
     setCart([])
     setShowCart(false)
+    if (hasTree) {
+      setTreeStage('growing')
+      setTreeAnim(true)
+      setTimeout(() => setTreeStage('cert'), 2000)
+      setTimeout(() => setTreeStage('done'), 3500)
+    } else {
+      setOrderDone(names)
+    }
   }
 
   return (
@@ -487,6 +501,253 @@ export default function PointsPage() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ── Elf Forest Animation ── */}
+      {treeAnim && (
+        <div
+          className="fixed inset-0 z-50 overflow-hidden"
+          style={{ background: 'linear-gradient(180deg,#020d02 0%,#061a06 35%,#0a2a0a 65%,#041004 100%)' }}
+        >
+          {/* Stars */}
+          {[...Array(24)].map((_, i) => (
+            <div key={i} className="absolute rounded-full bg-white" style={{
+              width: `${1 + (i % 3)}px`, height: `${1 + (i % 3)}px`,
+              left: `${(i * 4.17) % 100}%`, top: `${(i * 3.73) % 42}%`,
+              animation: `elf-twinkle ${1.5 + (i % 4) * 0.5}s ease-in-out ${(i * 0.27) % 3}s infinite`,
+            }} />
+          ))}
+
+          {/* Moon */}
+          <div className="absolute" style={{ width: 44, height: 44, top: 28, right: 40, borderRadius: '50%', background: 'radial-gradient(circle at 35% 35%,#fffce0,#f0ce60)', boxShadow: '0 0 20px 6px rgba(240,200,80,0.22)' }} />
+
+          {/* Fireflies */}
+          {[...Array(7)].map((_, i) => (
+            <div key={i} className="absolute rounded-full" style={{
+              width: 4, height: 4, background: '#7fff7f',
+              left: `${12 + (i * 12.7) % 76}%`, top: `${38 + (i * 8.3) % 35}%`,
+              boxShadow: '0 0 8px 3px rgba(100,255,100,0.7)',
+              animation: `elf-firefly ${2.5 + (i % 3) * 0.8}s ease-in-out ${(i * 0.7) % 3}s infinite`,
+            }} />
+          ))}
+
+          {/* Back trees */}
+          <svg className="absolute bottom-0 left-0 w-full" style={{ height: '45%' }} viewBox="0 0 400 200" preserveAspectRatio="none">
+            {[15,55,95,135,175,215,255,295,335,375].map((x, i) => (
+              <g key={i} opacity="0.2">
+                <polygon points={`${x},200 ${x-13},90 ${x+13},90`} fill="#1a5c1a" />
+                <polygon points={`${x},105 ${x-9},20 ${x+9},20`} fill="#1a5c1a" />
+              </g>
+            ))}
+          </svg>
+
+          {/* Mid trees */}
+          <svg className="absolute bottom-0 left-0 w-full" style={{ height: '58%' }} viewBox="0 0 400 240" preserveAspectRatio="none">
+            {[0,50,100,150,200,250,300,350,400].map((x, i) => (
+              <g key={i} opacity="0.45">
+                <polygon points={`${x},240 ${x-17},100 ${x+17},100`} fill="#0a3b0a" />
+                <polygon points={`${x},115 ${x-12},20 ${x+12},20`} fill="#0a3b0a" />
+                <rect x={x-4} y="235" width="8" height="8" fill="#060f06" />
+              </g>
+            ))}
+          </svg>
+
+          {/* Front trees */}
+          <svg className="absolute bottom-0 left-0 w-full" style={{ height: '68%' }} viewBox="0 0 400 300" preserveAspectRatio="none">
+            {[-15,90,210,325,420].map((x, i) => (
+              <g key={i}>
+                <polygon points={`${x},300 ${x-26},95 ${x+26},95`} fill="#030b03" />
+                <polygon points={`${x},115 ${x-18},5 ${x+18},5`} fill="#030b03" />
+              </g>
+            ))}
+          </svg>
+
+          {/* Ground glow / mist */}
+          <div className="absolute bottom-0 left-0 right-0" style={{ height: '28%', background: 'linear-gradient(to top,rgba(10,80,10,0.38),transparent)', animation: 'elf-mist 5s ease-in-out infinite' }} />
+
+          {/* ── ELF + ENVELOPE ── */}
+          <div className="absolute" style={{ left: '50%', top: '10%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10 }}>
+
+            {/* Envelope — appears when cert/done */}
+            <div style={{
+              marginBottom: 4,
+              marginLeft: 36,
+              opacity: treeStage !== 'growing' ? 1 : 0,
+              transform: treeStage !== 'growing' ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.7)',
+              transition: 'all 0.9s ease-out 0.2s',
+              animation: treeStage === 'done' ? 'elf-envelope-float 2.5s ease-in-out infinite' : 'none',
+            }}>
+              <svg width="70" height="52" viewBox="0 0 70 52">
+                <ellipse cx="35" cy="26" rx="36" ry="28" fill="rgba(255,215,50,0.12)" />
+                <rect x="2" y="12" width="66" height="38" rx="4" fill="#f5e89a" stroke="#c8a830" strokeWidth="1.5" />
+                <path d="M2,12 L35,32 L68,12 Z" fill="#e8d058" stroke="#c8a830" strokeWidth="1.5" />
+                <path d="M2,50 L25,32" stroke="#c8a830" strokeWidth="1" opacity="0.35" />
+                <path d="M68,50 L45,32" stroke="#c8a830" strokeWidth="1" opacity="0.35" />
+                <circle cx="35" cy="44" r="7" fill="#9e1e0a" />
+                <text x="31.5" y="48.5" fontSize="9" fill="#ffd0c0">🌿</text>
+                <circle cx="61" cy="8" r="2" fill="#ffd700" opacity="0.8" />
+                <circle cx="9" cy="9" r="1.5" fill="#ffd700" opacity="0.65" />
+              </svg>
+            </div>
+
+            {/* Elf outer: slide-in from left */}
+            <div style={{
+              animation: treeStage === 'growing' ? 'elf-enter 1.8s cubic-bezier(0.22,0.61,0.36,1) forwards' : 'none',
+              transform: treeStage !== 'growing' ? 'translateX(0)' : undefined,
+            }}>
+              {/* Elf inner: bob/idle */}
+              <div style={{ animation: treeStage === 'growing' ? 'elf-walk 0.45s ease-in-out infinite' : 'elf-idle 3.5s ease-in-out infinite' }}>
+                <svg width="108" height="182" viewBox="0 0 108 182">
+                  {/* Shadow */}
+                  <ellipse cx="54" cy="178" rx="26" ry="5" fill="rgba(0,0,0,0.3)" />
+                  {/* Dress skirt */}
+                  <path d="M24,92 Q10,140 7,176 L101,176 Q98,140 84,92 Z" fill="#1b6e30" />
+                  <path d="M30,115 Q54,148 78,115 Q63,158 54,176 Q45,158 30,115 Z" fill="#135224" opacity="0.5" />
+                  {/* Belt */}
+                  <rect x="25" y="87" width="58" height="8" rx="4" fill="#7a3308" />
+                  <rect x="46" y="85" width="16" height="12" rx="3" fill="#c89020" />
+                  {/* Torso */}
+                  <path d="M27,64 Q25,87 24,92 L84,92 Q83,87 81,64 Z" fill="#228c38" />
+                  {/* Neck */}
+                  <rect x="44" y="54" width="20" height="14" rx="5" fill="#ffc59f" />
+                  {/* Head */}
+                  <ellipse cx="54" cy="38" rx="23" ry="25" fill="#ffc59f" />
+                  {/* Left pointy ear */}
+                  <path d="M31,39 C21,35 15,26 21,21 C26,28 31,33 33,39 Z" fill="#ffc59f" />
+                  <path d="M31,39 C24,35 21,28 25,24" stroke="#e0986e" strokeWidth="0.8" fill="none" />
+                  {/* Right pointy ear */}
+                  <path d="M77,39 C87,35 93,26 87,21 C82,28 77,33 75,39 Z" fill="#ffc59f" />
+                  <path d="M77,39 C84,35 87,28 83,24" stroke="#e0986e" strokeWidth="0.8" fill="none" />
+                  {/* Hair */}
+                  <ellipse cx="54" cy="24" rx="25" ry="16" fill="#7a2e0a" />
+                  <path d="M31,36 Q14,72 16,124" stroke="#7a2e0a" strokeWidth="9" fill="none" strokeLinecap="round" />
+                  <path d="M77,36 Q94,72 92,124" stroke="#7a2e0a" strokeWidth="9" fill="none" strokeLinecap="round" />
+                  {/* Hat */}
+                  <polygon points="54,1 34,35 74,35" fill="#156b1a" />
+                  <ellipse cx="54" cy="35" rx="22" ry="6" fill="#1a8820" />
+                  <rect x="32" y="32" width="44" height="5" fill="#0d5c10" />
+                  {/* Hat gem */}
+                  <circle cx="54" cy="16" r="5" fill="#ffd700" opacity="0.85" />
+                  <polygon points="54,11 55.8,15.8 61,15.8 56.9,18.7 58.5,23.5 54,20.5 49.5,23.5 51.1,18.7 47,15.8 52.2,15.8" fill="rgba(255,255,200,0.75)" />
+                  {/* Eyes */}
+                  <ellipse cx="42" cy="37" rx="6" ry="7" fill="white" />
+                  <ellipse cx="66" cy="37" rx="6" ry="7" fill="white" />
+                  <ellipse cx="43" cy="38" rx="4" ry="5" fill="#1a6b2a" />
+                  <ellipse cx="67" cy="38" rx="4" ry="5" fill="#1a6b2a" />
+                  <circle cx="44.5" cy="36.5" r="1.5" fill="white" />
+                  <circle cx="68.5" cy="36.5" r="1.5" fill="white" />
+                  {/* Eyebrows */}
+                  <path d="M36,28 Q42,25 48,28" stroke="#5c1e06" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+                  <path d="M60,28 Q66,25 72,28" stroke="#5c1e06" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+                  {/* Nose */}
+                  <ellipse cx="54" cy="46" rx="3" ry="2.2" fill="#e0986e" />
+                  {/* Smile */}
+                  <path d="M46,55 Q54,62 62,55" stroke="#c07040" strokeWidth="2" fill="none" strokeLinecap="round" />
+                  {/* Left arm */}
+                  <path d="M27,75 Q6,102 3,126" stroke="#ffc59f" strokeWidth="9" fill="none" strokeLinecap="round" />
+                  <ellipse cx="3" cy="129" rx="7" ry="7" fill="#ffc59f" />
+                  {/* Right arm — raised, offering envelope */}
+                  <path d="M81,73 Q100,54 106,38" stroke="#ffc59f" strokeWidth="9" fill="none" strokeLinecap="round" />
+                  <ellipse cx="107" cy="36" rx="7" ry="7" fill="#ffc59f" />
+                  {/* Hem sparkles */}
+                  <circle cx="11" cy="174" r="1.8" fill="#80ff80" opacity="0.55" />
+                  <circle cx="97" cy="172" r="1.8" fill="#80ff80" opacity="0.5" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Status text */}
+          {treeStage === 'growing' && (
+            <div className="absolute text-center px-6" style={{ bottom: 52, left: 0, right: 0, zIndex: 10 }}>
+              <p className="text-emerald-300 text-sm font-medium" style={{ animation: 'elf-pulse 1.5s ease-in-out infinite' }}>
+                神秘精靈正在靠近...
+              </p>
+            </div>
+          )}
+          {treeStage === 'cert' && (
+            <div className="absolute text-center px-6" style={{ bottom: 52, left: 0, right: 0, zIndex: 10 }}>
+              <p className="text-yellow-200 text-sm font-semibold" style={{ animation: 'elf-fade-in 0.6s ease-out' }}>
+                ✨ 精靈獻上你的樹憑證...
+              </p>
+            </div>
+          )}
+
+          {/* Certificate card — slides up when done */}
+          {treeStage === 'done' && (
+            <div className="absolute bottom-0 left-0 right-0 px-5 pb-6" style={{ animation: 'elf-slide-up 0.6s ease-out', zIndex: 20 }}>
+              <div className="bg-white rounded-3xl p-5 max-w-sm mx-auto shadow-2xl">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-11 h-11 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-xl shrink-0">🌲</div>
+                  <div>
+                    <div className="text-[10px] font-bold text-emerald-600 tracking-widest">ECHO TREE · 官方認證</div>
+                    <div className="text-base font-black text-gray-900">植樹認養憑證</div>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-400 leading-relaxed mb-4">
+                  本憑證由回音樹 ESG 計畫核發，已列入回音森林名人堂。感謝你為地球種下希望 🌱
+                </p>
+                <a
+                  href={ANYDEEE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full text-center font-bold py-3 rounded-2xl text-sm mb-2"
+                  style={{ background: 'linear-gradient(135deg,#22c55e,#14b8a6)', color: 'white', boxShadow: '0 4px 16px rgba(34,197,94,0.35)' }}
+                  onClick={() => setTreeAnim(false)}
+                >
+                  🌿 前往 ANYDEEE 查看憑證
+                </a>
+                <button onClick={() => setTreeAnim(false)} className="w-full text-xs text-gray-400 hover:text-gray-600 transition-colors py-1.5">
+                  稍後再看
+                </button>
+              </div>
+            </div>
+          )}
+
+          <style>{`
+            @keyframes elf-twinkle {
+              0%,100%{opacity:0.2;transform:scale(0.7);}
+              50%{opacity:1;transform:scale(1.3);}
+            }
+            @keyframes elf-firefly {
+              0%,100%{opacity:0.1;transform:translate(0,0);}
+              30%{opacity:0.9;transform:translate(12px,-18px);}
+              70%{opacity:0.5;transform:translate(-8px,-10px);}
+            }
+            @keyframes elf-enter {
+              from{transform:translateX(-105vw);}
+              to{transform:translateX(0);}
+            }
+            @keyframes elf-walk {
+              0%,100%{transform:translateY(0) rotate(-0.5deg);}
+              50%{transform:translateY(-6px) rotate(0.5deg);}
+            }
+            @keyframes elf-idle {
+              0%,100%{transform:translateY(0) rotate(-1deg);}
+              50%{transform:translateY(-5px) rotate(1deg);}
+            }
+            @keyframes elf-envelope-float {
+              0%,100%{transform:translateY(0) rotate(-4deg);}
+              50%{transform:translateY(-10px) rotate(4deg);}
+            }
+            @keyframes elf-mist {
+              0%,100%{opacity:0.7;}
+              50%{opacity:1;}
+            }
+            @keyframes elf-pulse {
+              0%,100%{opacity:0.6;}
+              50%{opacity:1;}
+            }
+            @keyframes elf-fade-in {
+              from{opacity:0;transform:translateY(8px);}
+              to{opacity:1;transform:translateY(0);}
+            }
+            @keyframes elf-slide-up {
+              from{opacity:0;transform:translateY(70px);}
+              to{opacity:1;transform:translateY(0);}
+            }
+          `}</style>
         </div>
       )}
 

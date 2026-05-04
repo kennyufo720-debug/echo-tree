@@ -20,131 +20,138 @@ function resolveHowTarget(how: string): { href: string; label: string; icon: Rea
 type Rarity = 'common' | 'rare' | 'epic' | 'legendary'
 interface Fragment { id: string; name: string; emoji: string; rarity: Rarity; obtained: boolean; date: string | null; how: string; group: string }
 
+const RARITY_EMOJI: Record<Rarity, string> = {
+  common: '🍃', rare: '💎', epic: '🌟', legendary: '👑',
+}
+function fragEmoji(f: { emoji: string; rarity: Rarity }) {
+  return f.emoji || RARITY_EMOJI[f.rarity]
+}
+
 const TW_GROUPS: { name: string; emoji: string; series: string; fragments: Omit<Fragment, 'group'>[] }[] = [
   {
-    name: '台北', emoji: '', series: '森之呼吸',
+    name: '台北', emoji: '🏙️', series: '森之呼吸',
     fragments: [
-      { id: 'tw01', name: '森之呼吸 01', emoji: '', rarity: 'common',    obtained: true,  date: '2026-04-15', how: '購買台北場票券' },
-      { id: 'tw02', name: '森之呼吸 02', emoji: '', rarity: 'common',    obtained: true,  date: '2026-04-16', how: '出席ESG音樂節' },
-      { id: 'tw03', name: '森之呼吸 03', emoji: '', rarity: 'common',    obtained: true,  date: '2026-04-18', how: 'GPS打卡台北場地' },
-      { id: 'tw04', name: '森之呼吸 04', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '購買第2張台北場票' },
-      { id: 'tw05', name: '森之呼吸 05', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '兌換 800 點數' },
-      { id: 'tw06', name: '森之呼吸 06', emoji: '', rarity: 'common',    obtained: false, date: null, how: '邀請 1 位好友' },
-      { id: 'tw07', name: '森之呼吸 07', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '分享活動至社群' },
-      { id: 'tw08', name: '森之呼吸 08', emoji: '', rarity: 'epic',      obtained: false, date: null, how: '完成個人資料' },
-      { id: 'tw09', name: '森之呼吸 09', emoji: '', rarity: 'legendary', obtained: false, date: null, how: '集齊森之呼吸 01–08' },
+      { id: 'tw01', name: '森之呼吸 01', emoji: '🌬️', rarity: 'common',    obtained: true,  date: '2026-04-15', how: '購買台北場票券' },
+      { id: 'tw02', name: '森之呼吸 02', emoji: '🍃', rarity: 'common',    obtained: true,  date: '2026-04-16', how: '出席ESG音樂節' },
+      { id: 'tw03', name: '森之呼吸 03', emoji: '🌿', rarity: 'common',    obtained: true,  date: '2026-04-18', how: 'GPS打卡台北場地' },
+      { id: 'tw04', name: '森之呼吸 04', emoji: '🌱', rarity: 'rare',      obtained: false, date: null, how: '購買第2張台北場票' },
+      { id: 'tw05', name: '森之呼吸 05', emoji: '💨', rarity: 'rare',      obtained: false, date: null, how: '兌換 800 點數' },
+      { id: 'tw06', name: '森之呼吸 06', emoji: '🌲', rarity: 'common',    obtained: false, date: null, how: '邀請 1 位好友' },
+      { id: 'tw07', name: '森之呼吸 07', emoji: '🌳', rarity: 'rare',      obtained: false, date: null, how: '分享活動至社群' },
+      { id: 'tw08', name: '森之呼吸 08', emoji: '🌴', rarity: 'epic',      obtained: false, date: null, how: '完成個人資料' },
+      { id: 'tw09', name: '森之呼吸 09', emoji: '👑', rarity: 'legendary', obtained: false, date: null, how: '集齊森之呼吸 01–08' },
     ],
   },
   {
-    name: '新北', emoji: '', series: '光之迴響',
+    name: '新北', emoji: '🌉', series: '光之迴響',
     fragments: [
-      { id: 'tw10', name: '光之迴響 01', emoji: '', rarity: 'common',    obtained: false, date: null, how: '購買新北場票券' },
-      { id: 'tw11', name: '光之迴響 02', emoji: '', rarity: 'common',    obtained: false, date: null, how: 'GPS打卡平溪' },
-      { id: 'tw12', name: '光之迴響 03', emoji: '', rarity: 'common',    obtained: false, date: null, how: '邀請好友' },
-      { id: 'tw13', name: '光之迴響 04', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '完成任務' },
-      { id: 'tw14', name: '光之迴響 05', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '購票折抵使用' },
-      { id: 'tw15', name: '光之迴響 06', emoji: '', rarity: 'common',    obtained: false, date: null, how: '分享活動' },
-      { id: 'tw16', name: '光之迴響 07', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '兌換點數商品' },
-      { id: 'tw17', name: '光之迴響 08', emoji: '', rarity: 'epic',      obtained: false, date: null, how: '完成KYC驗證' },
-      { id: 'tw18', name: '光之迴響 09', emoji: '', rarity: 'legendary', obtained: false, date: null, how: '集齊光之迴響 01–08' },
+      { id: 'tw10', name: '光之迴響 01', emoji: '💡', rarity: 'common',    obtained: false, date: null, how: '購買新北場票券' },
+      { id: 'tw11', name: '光之迴響 02', emoji: '✨', rarity: 'common',    obtained: false, date: null, how: 'GPS打卡平溪' },
+      { id: 'tw12', name: '光之迴響 03', emoji: '🌟', rarity: 'common',    obtained: false, date: null, how: '邀請好友' },
+      { id: 'tw13', name: '光之迴響 04', emoji: '⭐', rarity: 'rare',      obtained: false, date: null, how: '完成任務' },
+      { id: 'tw14', name: '光之迴響 05', emoji: '🌙', rarity: 'rare',      obtained: false, date: null, how: '購票折抵使用' },
+      { id: 'tw15', name: '光之迴響 06', emoji: '☀️', rarity: 'common',    obtained: false, date: null, how: '分享活動' },
+      { id: 'tw16', name: '光之迴響 07', emoji: '🌅', rarity: 'rare',      obtained: false, date: null, how: '兌換點數商品' },
+      { id: 'tw17', name: '光之迴響 08', emoji: '🎆', rarity: 'epic',      obtained: false, date: null, how: '完成KYC驗證' },
+      { id: 'tw18', name: '光之迴響 09', emoji: '🏆', rarity: 'legendary', obtained: false, date: null, how: '集齊光之迴響 01–08' },
     ],
   },
   {
-    name: '桃竹苗', emoji: '', series: '風之印記',
+    name: '桃竹苗', emoji: '🌄', series: '風之印記',
     fragments: [
-      { id: 'tw19', name: '風之印記 01', emoji: '', rarity: 'common',    obtained: false, date: null, how: '購買桃竹苗場票券' },
-      { id: 'tw20', name: '風之印記 02', emoji: '', rarity: 'common',    obtained: false, date: null, how: 'GPS打卡' },
-      { id: 'tw21', name: '風之印記 03', emoji: '', rarity: 'common',    obtained: false, date: null, how: '邀請好友' },
-      { id: 'tw22', name: '風之印記 04', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '完成任務' },
-      { id: 'tw23', name: '風之印記 05', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '購票折抵' },
-      { id: 'tw24', name: '風之印記 06', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '分享活動' },
-      { id: 'tw25', name: '風之印記 07', emoji: '', rarity: 'epic',      obtained: false, date: null, how: '兌換商品' },
-      { id: 'tw26', name: '風之印記 08', emoji: '', rarity: 'common',    obtained: false, date: null, how: '完成評價' },
-      { id: 'tw27', name: '風之印記 09', emoji: '', rarity: 'legendary', obtained: false, date: null, how: '集齊風之印記 01–08' },
+      { id: 'tw19', name: '風之印記 01', emoji: '💨', rarity: 'common',    obtained: false, date: null, how: '購買桃竹苗場票券' },
+      { id: 'tw20', name: '風之印記 02', emoji: '🍃', rarity: 'common',    obtained: false, date: null, how: 'GPS打卡' },
+      { id: 'tw21', name: '風之印記 03', emoji: '🌊', rarity: 'common',    obtained: false, date: null, how: '邀請好友' },
+      { id: 'tw22', name: '風之印記 04', emoji: '🌀', rarity: 'rare',      obtained: false, date: null, how: '完成任務' },
+      { id: 'tw23', name: '風之印記 05', emoji: '🌬️', rarity: 'rare',      obtained: false, date: null, how: '購票折抵' },
+      { id: 'tw24', name: '風之印記 06', emoji: '⚡', rarity: 'rare',      obtained: false, date: null, how: '分享活動' },
+      { id: 'tw25', name: '風之印記 07', emoji: '🌈', rarity: 'epic',      obtained: false, date: null, how: '兌換商品' },
+      { id: 'tw26', name: '風之印記 08', emoji: '🎐', rarity: 'common',    obtained: false, date: null, how: '完成評價' },
+      { id: 'tw27', name: '風之印記 09', emoji: '👑', rarity: 'legendary', obtained: false, date: null, how: '集齊風之印記 01–08' },
     ],
   },
   {
-    name: '台中', emoji: '', series: '花之密語',
+    name: '台中', emoji: '🌸', series: '花之密語',
     fragments: [
-      { id: 'tw28', name: '花之密語 01', emoji: '', rarity: 'common',    obtained: false, date: null, how: '購買台中場票券' },
-      { id: 'tw29', name: '花之密語 02', emoji: '', rarity: 'common',    obtained: false, date: null, how: 'GPS打卡台中' },
-      { id: 'tw30', name: '花之密語 03', emoji: '', rarity: 'common',    obtained: false, date: null, how: '邀請好友' },
-      { id: 'tw31', name: '花之密語 04', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '完成任務' },
-      { id: 'tw32', name: '花之密語 05', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '兌換 1200 點數' },
-      { id: 'tw33', name: '花之密語 06', emoji: '', rarity: 'common',    obtained: false, date: null, how: '分享活動' },
-      { id: 'tw34', name: '花之密語 07', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '完成評價' },
-      { id: 'tw35', name: '花之密語 08', emoji: '', rarity: 'epic',      obtained: false, date: null, how: '購票折抵' },
-      { id: 'tw36', name: '花之密語 09', emoji: '', rarity: 'legendary', obtained: false, date: null, how: '集齊花之密語 01–08' },
+      { id: 'tw28', name: '花之密語 01', emoji: '🌸', rarity: 'common',    obtained: false, date: null, how: '購買台中場票券' },
+      { id: 'tw29', name: '花之密語 02', emoji: '🌺', rarity: 'common',    obtained: false, date: null, how: 'GPS打卡台中' },
+      { id: 'tw30', name: '花之密語 03', emoji: '🌼', rarity: 'common',    obtained: false, date: null, how: '邀請好友' },
+      { id: 'tw31', name: '花之密語 04', emoji: '🌻', rarity: 'rare',      obtained: false, date: null, how: '完成任務' },
+      { id: 'tw32', name: '花之密語 05', emoji: '💐', rarity: 'rare',      obtained: false, date: null, how: '兌換 1200 點數' },
+      { id: 'tw33', name: '花之密語 06', emoji: '🌷', rarity: 'common',    obtained: false, date: null, how: '分享活動' },
+      { id: 'tw34', name: '花之密語 07', emoji: '🌹', rarity: 'rare',      obtained: false, date: null, how: '完成評價' },
+      { id: 'tw35', name: '花之密語 08', emoji: '🪷', rarity: 'epic',      obtained: false, date: null, how: '購票折抵' },
+      { id: 'tw36', name: '花之密語 09', emoji: '🎊', rarity: 'legendary', obtained: false, date: null, how: '集齊花之密語 01–08' },
     ],
   },
   {
-    name: '南投', emoji: '', series: '月之低語',
+    name: '南投', emoji: '🌲', series: '月之低語',
     fragments: [
-      { id: 'tw37', name: '月之低語 01', emoji: '', rarity: 'common',    obtained: false, date: null, how: '購買南投場票券' },
-      { id: 'tw38', name: '月之低語 02', emoji: '', rarity: 'common',    obtained: false, date: null, how: 'GPS打卡仁愛鄉' },
-      { id: 'tw39', name: '月之低語 03', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '邀請好友' },
-      { id: 'tw40', name: '月之低語 04', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '完成任務' },
-      { id: 'tw41', name: '月之低語 05', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '兌換點數' },
-      { id: 'tw42', name: '月之低語 06', emoji: '', rarity: 'epic',      obtained: false, date: null, how: '分享活動' },
-      { id: 'tw43', name: '月之低語 07', emoji: '', rarity: 'common',    obtained: false, date: null, how: '完成評價' },
-      { id: 'tw44', name: '月之低語 08', emoji: '', rarity: 'epic',      obtained: false, date: null, how: '購買子瑜見面會門票' },
-      { id: 'tw45', name: '月之低語 09', emoji: '', rarity: 'legendary', obtained: false, date: null, how: '集齊月之低語 01–08' },
+      { id: 'tw37', name: '月之低語 01', emoji: '🌙', rarity: 'common',    obtained: false, date: null, how: '購買南投場票券' },
+      { id: 'tw38', name: '月之低語 02', emoji: '🌛', rarity: 'common',    obtained: false, date: null, how: 'GPS打卡仁愛鄉' },
+      { id: 'tw39', name: '月之低語 03', emoji: '🌕', rarity: 'rare',      obtained: false, date: null, how: '邀請好友' },
+      { id: 'tw40', name: '月之低語 04', emoji: '🌖', rarity: 'rare',      obtained: false, date: null, how: '完成任務' },
+      { id: 'tw41', name: '月之低語 05', emoji: '⭐', rarity: 'rare',      obtained: false, date: null, how: '兌換點數' },
+      { id: 'tw42', name: '月之低語 06', emoji: '💫', rarity: 'epic',      obtained: false, date: null, how: '分享活動' },
+      { id: 'tw43', name: '月之低語 07', emoji: '✨', rarity: 'common',    obtained: false, date: null, how: '完成評價' },
+      { id: 'tw44', name: '月之低語 08', emoji: '🌌', rarity: 'epic',      obtained: false, date: null, how: '購買子瑜見面會門票' },
+      { id: 'tw45', name: '月之低語 09', emoji: '🌠', rarity: 'legendary', obtained: false, date: null, how: '集齊月之低語 01–08' },
     ],
   },
   {
-    name: '雲嘉南', emoji: '', series: '海之記憶',
+    name: '雲嘉南', emoji: '🌊', series: '海之記憶',
     fragments: [
-      { id: 'tw46', name: '海之記憶 01', emoji: '', rarity: 'common',    obtained: false, date: null, how: '購買雲嘉南場票券' },
-      { id: 'tw47', name: '海之記憶 02', emoji: '', rarity: 'common',    obtained: false, date: null, how: 'GPS打卡' },
-      { id: 'tw48', name: '海之記憶 03', emoji: '', rarity: 'common',    obtained: false, date: null, how: '邀請好友' },
-      { id: 'tw49', name: '海之記憶 04', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '完成任務' },
-      { id: 'tw50', name: '海之記憶 05', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '兌換點數' },
-      { id: 'tw51', name: '海之記憶 06', emoji: '', rarity: 'common',    obtained: false, date: null, how: '分享活動' },
-      { id: 'tw52', name: '海之記憶 07', emoji: '', rarity: 'epic',      obtained: false, date: null, how: '完成評價' },
-      { id: 'tw53', name: '海之記憶 08', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '購票折抵' },
-      { id: 'tw54', name: '海之記憶 09', emoji: '', rarity: 'legendary', obtained: false, date: null, how: '集齊海之記憶 01–08' },
+      { id: 'tw46', name: '海之記憶 01', emoji: '🌊', rarity: 'common',    obtained: false, date: null, how: '購買雲嘉南場票券' },
+      { id: 'tw47', name: '海之記憶 02', emoji: '🐚', rarity: 'common',    obtained: false, date: null, how: 'GPS打卡' },
+      { id: 'tw48', name: '海之記憶 03', emoji: '🐬', rarity: 'common',    obtained: false, date: null, how: '邀請好友' },
+      { id: 'tw49', name: '海之記憶 04', emoji: '🦀', rarity: 'rare',      obtained: false, date: null, how: '完成任務' },
+      { id: 'tw50', name: '海之記憶 05', emoji: '🐙', rarity: 'rare',      obtained: false, date: null, how: '兌換點數' },
+      { id: 'tw51', name: '海之記憶 06', emoji: '🐠', rarity: 'common',    obtained: false, date: null, how: '分享活動' },
+      { id: 'tw52', name: '海之記憶 07', emoji: '🦑', rarity: 'epic',      obtained: false, date: null, how: '完成評價' },
+      { id: 'tw53', name: '海之記憶 08', emoji: '🪸', rarity: 'rare',      obtained: false, date: null, how: '購票折抵' },
+      { id: 'tw54', name: '海之記憶 09', emoji: '🏆', rarity: 'legendary', obtained: false, date: null, how: '集齊海之記憶 01–08' },
     ],
   },
   {
-    name: '高屏', emoji: '', series: '雨之詩篇',
+    name: '高屏', emoji: '🌴', series: '雨之詩篇',
     fragments: [
-      { id: 'tw55', name: '雨之詩篇 01', emoji: '', rarity: 'common',    obtained: false, date: null, how: '購買高雄場票券' },
-      { id: 'tw56', name: '雨之詩篇 02', emoji: '', rarity: 'common',    obtained: false, date: null, how: 'GPS打卡高雄巨蛋' },
-      { id: 'tw57', name: '雨之詩篇 03', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '邀請好友' },
-      { id: 'tw58', name: '雨之詩篇 04', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '完成任務' },
-      { id: 'tw59', name: '雨之詩篇 05', emoji: '', rarity: 'common',    obtained: false, date: null, how: '兌換點數' },
-      { id: 'tw60', name: '雨之詩篇 06', emoji: '', rarity: 'epic',      obtained: false, date: null, how: '分享活動' },
-      { id: 'tw61', name: '雨之詩篇 07', emoji: '', rarity: 'common',    obtained: false, date: null, how: '完成評價' },
-      { id: 'tw62', name: '雨之詩篇 08', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '購票折抵' },
-      { id: 'tw63', name: '雨之詩篇 09', emoji: '', rarity: 'legendary', obtained: false, date: null, how: '集齊雨之詩篇 01–08' },
+      { id: 'tw55', name: '雨之詩篇 01', emoji: '🌧️', rarity: 'common',    obtained: false, date: null, how: '購買高雄場票券' },
+      { id: 'tw56', name: '雨之詩篇 02', emoji: '💧', rarity: 'common',    obtained: false, date: null, how: 'GPS打卡高雄巨蛋' },
+      { id: 'tw57', name: '雨之詩篇 03', emoji: '☔', rarity: 'rare',      obtained: false, date: null, how: '邀請好友' },
+      { id: 'tw58', name: '雨之詩篇 04', emoji: '🌈', rarity: 'rare',      obtained: false, date: null, how: '完成任務' },
+      { id: 'tw59', name: '雨之詩篇 05', emoji: '⛈️', rarity: 'common',    obtained: false, date: null, how: '兌換點數' },
+      { id: 'tw60', name: '雨之詩篇 06', emoji: '🌦️', rarity: 'epic',      obtained: false, date: null, how: '分享活動' },
+      { id: 'tw61', name: '雨之詩篇 07', emoji: '🌂', rarity: 'common',    obtained: false, date: null, how: '完成評價' },
+      { id: 'tw62', name: '雨之詩篇 08', emoji: '🫧', rarity: 'rare',      obtained: false, date: null, how: '購票折抵' },
+      { id: 'tw63', name: '雨之詩篇 09', emoji: '🌊', rarity: 'legendary', obtained: false, date: null, how: '集齊雨之詩篇 01–08' },
     ],
   },
   {
-    name: '花蓮', emoji: '', series: '石之傳說',
+    name: '花蓮', emoji: '🏔️', series: '石之傳說',
     fragments: [
-      { id: 'tw64', name: '石之傳說 01', emoji: '', rarity: 'common',    obtained: false, date: null, how: '購買花蓮場票券' },
-      { id: 'tw65', name: '石之傳說 02', emoji: '', rarity: 'common',    obtained: false, date: null, how: 'GPS打卡花蓮' },
-      { id: 'tw66', name: '石之傳說 03', emoji: '', rarity: 'common',    obtained: false, date: null, how: '邀請好友' },
-      { id: 'tw67', name: '石之傳說 04', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '完成任務' },
-      { id: 'tw68', name: '石之傳說 05', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '兌換點數' },
-      { id: 'tw69', name: '石之傳說 06', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '分享活動' },
-      { id: 'tw70', name: '石之傳說 07', emoji: '', rarity: 'epic',      obtained: false, date: null, how: '完成評價' },
-      { id: 'tw71', name: '石之傳說 08', emoji: '', rarity: 'epic',      obtained: false, date: null, how: '購票折抵' },
-      { id: 'tw72', name: '石之傳說 09', emoji: '', rarity: 'legendary', obtained: false, date: null, how: '集齊石之傳說 01–08' },
+      { id: 'tw64', name: '石之傳說 01', emoji: '🗿', rarity: 'common',    obtained: false, date: null, how: '購買花蓮場票券' },
+      { id: 'tw65', name: '石之傳說 02', emoji: '💎', rarity: 'common',    obtained: false, date: null, how: 'GPS打卡花蓮' },
+      { id: 'tw66', name: '石之傳說 03', emoji: '🪨', rarity: 'common',    obtained: false, date: null, how: '邀請好友' },
+      { id: 'tw67', name: '石之傳說 04', emoji: '⛰️', rarity: 'rare',      obtained: false, date: null, how: '完成任務' },
+      { id: 'tw68', name: '石之傳說 05', emoji: '🏔️', rarity: 'rare',      obtained: false, date: null, how: '兌換點數' },
+      { id: 'tw69', name: '石之傳說 06', emoji: '🌋', rarity: 'rare',      obtained: false, date: null, how: '分享活動' },
+      { id: 'tw70', name: '石之傳說 07', emoji: '🗻', rarity: 'epic',      obtained: false, date: null, how: '完成評價' },
+      { id: 'tw71', name: '石之傳說 08', emoji: '💠', rarity: 'epic',      obtained: false, date: null, how: '購票折抵' },
+      { id: 'tw72', name: '石之傳說 09', emoji: '👑', rarity: 'legendary', obtained: false, date: null, how: '集齊石之傳說 01–08' },
     ],
   },
   {
-    name: '台東離島', emoji: '', series: '島之靈魂',
+    name: '台東離島', emoji: '🏝️', series: '島之靈魂',
     fragments: [
-      { id: 'tw73', name: '島之靈魂 01', emoji: '', rarity: 'epic',      obtained: true,  date: '2026-04-20', how: 'GPS打卡台東延平' },
-      { id: 'tw74', name: '島之靈魂 02', emoji: '', rarity: 'common',    obtained: false, date: null, how: '購買台東場票券' },
-      { id: 'tw75', name: '島之靈魂 03', emoji: '', rarity: 'rare',      obtained: false, date: null, how: 'GPS打卡台東' },
-      { id: 'tw76', name: '島之靈魂 04', emoji: '', rarity: 'epic',      obtained: false, date: null, how: '完成任務' },
-      { id: 'tw77', name: '島之靈魂 05', emoji: '', rarity: 'epic',      obtained: false, date: null, how: '兌換 1500 點數' },
-      { id: 'tw78', name: '島之靈魂 06', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '邀請3位好友' },
-      { id: 'tw79', name: '島之靈魂 07', emoji: '', rarity: 'rare',      obtained: false, date: null, how: '分享活動' },
-      { id: 'tw80', name: '島之靈魂 08', emoji: '', rarity: 'legendary', obtained: false, date: null, how: '購買子瑜見面會門票' },
-      { id: 'tw81', name: '島之靈魂 09', emoji: '', rarity: 'legendary', obtained: false, date: null, how: '集齊全台 80 片碎片' },
+      { id: 'tw73', name: '島之靈魂 01', emoji: '🏝️', rarity: 'epic',      obtained: true,  date: '2026-04-20', how: 'GPS打卡台東延平' },
+      { id: 'tw74', name: '島之靈魂 02', emoji: '🌺', rarity: 'common',    obtained: false, date: null, how: '購買台東場票券' },
+      { id: 'tw75', name: '島之靈魂 03', emoji: '🦅', rarity: 'rare',      obtained: false, date: null, how: 'GPS打卡台東' },
+      { id: 'tw76', name: '島之靈魂 04', emoji: '🌴', rarity: 'epic',      obtained: false, date: null, how: '完成任務' },
+      { id: 'tw77', name: '島之靈魂 05', emoji: '🐚', rarity: 'epic',      obtained: false, date: null, how: '兌換 1500 點數' },
+      { id: 'tw78', name: '島之靈魂 06', emoji: '🌊', rarity: 'rare',      obtained: false, date: null, how: '邀請3位好友' },
+      { id: 'tw79', name: '島之靈魂 07', emoji: '🦜', rarity: 'rare',      obtained: false, date: null, how: '分享活動' },
+      { id: 'tw80', name: '島之靈魂 08', emoji: '👑', rarity: 'legendary', obtained: false, date: null, how: '購買子瑜見面會門票' },
+      { id: 'tw81', name: '島之靈魂 09', emoji: '🌟', rarity: 'legendary', obtained: false, date: null, how: '集齊全台 80 片碎片' },
     ],
   },
 ]
@@ -168,7 +175,7 @@ const REGIONS: {
   {
     id: 'taiwan',
     name: '台灣',
-    flag: '',
+    flag: '🇹🇼',
     artist: '周子瑜',
     artistInitial: '瑜',
     color: 'from-emerald-500 to-teal-600',
@@ -183,7 +190,7 @@ const REGIONS: {
   {
     id: 'china',
     name: '中國',
-    flag: '',
+    flag: '🇨🇳',
     artist: '黃子弘凡',
     artistInitial: '弘',
     color: 'from-rose-500 to-red-600',
@@ -194,15 +201,15 @@ const REGIONS: {
     mapBg: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=600&q=80',
     mapX: 54, mapY: 32,
     fragments: toFragments('中國', [
-      { id: 'cn1', name: '黃山雲海碎片', emoji: '', rarity: 'rare', obtained: false, date: null, how: '購買黃子弘凡中國巡演票券' },
-      { id: 'cn2', name: '桂林山水碎片', emoji: '', rarity: 'epic', obtained: false, date: null, how: '兌換 2000 Echo 點數' },
-      { id: 'cn3', name: '西湖春雨碎片', emoji: '', rarity: 'common', obtained: false, date: null, how: '邀請 3 位好友加入' },
+      { id: 'cn1', name: '黃山雲海碎片', emoji: '⛅', rarity: 'rare', obtained: false, date: null, how: '購買黃子弘凡中國巡演票券' },
+      { id: 'cn2', name: '桂林山水碎片', emoji: '🏔️', rarity: 'epic', obtained: false, date: null, how: '兌換 2000 Echo 點數' },
+      { id: 'cn3', name: '西湖春雨碎片', emoji: '🌸', rarity: 'common', obtained: false, date: null, how: '邀請 3 位好友加入' },
     ]),
   },
   {
     id: 'malaysia',
     name: '馬來西亞',
-    flag: '',
+    flag: '🇲🇾',
     artist: '周子瑜',
     artistInitial: '瑜',
     color: 'from-blue-500 to-cyan-600',
@@ -213,14 +220,14 @@ const REGIONS: {
     mapBg: 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=600&q=80',
     mapX: 60, mapY: 60,
     fragments: toFragments('馬來西亞', [
-      { id: 'my1', name: '雨林彩虹碎片', emoji: '', rarity: 'epic', obtained: false, date: null, how: '購買馬來西亞場票券' },
-      { id: 'my2', name: '熱帶雨林碎片', emoji: '', rarity: 'rare', obtained: false, date: null, how: 'GPS打卡活動現場' },
+      { id: 'my1', name: '雨林彩虹碎片', emoji: '🌈', rarity: 'epic', obtained: false, date: null, how: '購買馬來西亞場票券' },
+      { id: 'my2', name: '熱帶雨林碎片', emoji: '🌿', rarity: 'rare', obtained: false, date: null, how: 'GPS打卡活動現場' },
     ]),
   },
   {
     id: 'japan',
     name: '日本',
-    flag: '',
+    flag: '🇯🇵',
     artist: '周子瑜',
     artistInitial: '瑜',
     color: 'from-pink-500 to-rose-400',
@@ -231,17 +238,17 @@ const REGIONS: {
     mapBg: 'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=600&q=80',
     mapX: 82, mapY: 28,
     fragments: toFragments('日本', [
-      { id: 'jp1', name: '富士山雪碎片', emoji: '', rarity: 'legendary', obtained: false, date: null, how: '購買日本場限定票券' },
-      { id: 'jp2', name: '京都楓葉碎片', emoji: '', rarity: 'epic', obtained: false, date: null, how: '完成集章活動' },
+      { id: 'jp1', name: '富士山雪碎片', emoji: '🗻', rarity: 'legendary', obtained: false, date: null, how: '購買日本場限定票券' },
+      { id: 'jp2', name: '京都楓葉碎片', emoji: '🍁', rarity: 'epic', obtained: false, date: null, how: '完成集章活動' },
     ]),
   },
 ]
 
 const REWARDS = [
-  { threshold: 3,  title: '台灣森林初探', reward: '子瑜限定數位壁紙 × 3', icon: '' },
-  { threshold: 6,  title: '亞洲探索者', reward: 'Echo 點數 +1000 點', icon: '' },
-  { threshold: 9,  title: '森林守護傳說', reward: '子瑜親簽周邊兌換資格', icon: '' },
-  { threshold: 11, title: '子瑜全球傳奇', reward: '見面會優先入場 + 限量 NFT 憑證', icon: '' },
+  { threshold: 3,  title: '台灣森林初探', reward: '子瑜限定數位壁紙 × 3', icon: '🖼️' },
+  { threshold: 6,  title: '亞洲探索者', reward: 'Echo 點數 +1000 點', icon: '💰' },
+  { threshold: 9,  title: '森林守護傳說', reward: '子瑜親簽周邊兌換資格', icon: '✍️' },
+  { threshold: 11, title: '子瑜全球傳奇', reward: '見面會優先入場 + 限量 NFT 憑證', icon: '👑' },
 ]
 
 const RARITY: Record<string, { label: string; color: string; border: string; glow: string }> = {
@@ -270,7 +277,7 @@ export default function TreasurePage() {
     <div className="min-h-screen bg-gray-950 text-white">
       {/* Hero */}
       <div className="relative overflow-hidden">
-        <img src="https://images.unsplash.com/photo-1446941611757-91d2c3bd3d45?w=800&q=80" alt="world" className="w-full h-52 object-cover opacity-50" />
+        <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=80" alt="world" className="w-full h-52 object-cover opacity-50" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-950/50 to-gray-950" />
         <div className="absolute inset-0 flex flex-col justify-end px-4 pb-4">
           <div className="flex items-center gap-2 mb-2">
@@ -404,8 +411,8 @@ export default function TreasurePage() {
                           onClick={() => setSelectedFrag(frag)}
                           className={`rounded-xl border ${frag.obtained ? r.border : 'border-dashed border-gray-800'} bg-gray-900 p-2 flex flex-col items-center gap-1 transition-all hover:scale-105 active:scale-95`}
                         >
-                          <span className={`text-2xl ${frag.obtained ? '' : 'grayscale opacity-20'}`}>
-                            {frag.obtained ? frag.emoji : ''}
+                          <span className={`text-2xl ${frag.obtained ? '' : 'opacity-20'}`}>
+                            {frag.obtained ? fragEmoji(frag) : RARITY_EMOJI[frag.rarity as Rarity]}
                           </span>
                           <span className={`text-[9px] font-medium leading-tight text-center line-clamp-2 ${frag.obtained ? 'text-white' : 'text-gray-700'}`}>
                             {frag.obtained ? frag.name : `#${frag.id.replace(/[a-z]/g,'')}`}
@@ -435,7 +442,7 @@ export default function TreasurePage() {
             {/* World Map */}
             <div className="relative rounded-2xl overflow-hidden border border-gray-800" style={{ paddingBottom: '72%' }}>
               <div className="absolute inset-0">
-                <img src="https://images.unsplash.com/photo-1446941611757-91d2c3bd3d45?w=800&q=80" alt="world map" className="w-full h-full object-cover opacity-30" />
+                <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=80" alt="world map" className="w-full h-full object-cover opacity-30" />
                 <div className="absolute inset-0 bg-gradient-to-b from-gray-950/40 to-gray-950/60" />
 
                 {/* Region pins on map */}
