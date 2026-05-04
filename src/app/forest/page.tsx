@@ -131,144 +131,207 @@ function ArtistAvatar({ forest, size = 'md' }: { forest: typeof artistForests[0]
   )
 }
 
+const CORPS = [
+  { name: 'Apple',     bg: '#1d1d1f', domain: 'apple.com' },
+  { name: 'Google',    bg: '#fff',    domain: 'google.com' },
+  { name: 'Microsoft', bg: '#f3f3f3', domain: 'microsoft.com' },
+  { name: 'Tesla',     bg: '#E31937', domain: 'tesla.com' },
+  { name: 'Samsung',   bg: '#1428A0', domain: 'samsung.com' },
+  { name: 'Sony',      bg: '#000',    domain: 'sony.com' },
+  { name: 'BMW',       bg: '#0066B1', domain: 'bmw.com' },
+  { name: 'IKEA',      bg: '#0058A3', domain: 'ikea.com' },
+  { name: 'Siemens',   bg: '#009999', domain: 'siemens.com' },
+  { name: 'Unilever',  bg: '#1F36C7', domain: 'unilever.com' },
+  { name: 'TSMC',      bg: '#B22222', domain: 'tsmc.com' },
+  { name: 'ASUS',      bg: '#00539B', domain: 'asus.com' },
+  { name: 'Acer',      bg: '#83B81A', domain: 'acer.com' },
+  { name: 'MediaTek',  bg: '#E4003A', domain: 'mediatek.com' },
+  { name: 'HTC',       bg: '#69BE28', domain: 'htc.com' },
+  { name: 'Gogoro',    bg: '#FF6600', domain: 'gogoro.com' },
+  { name: 'Tencent',   bg: '#12B7F5', domain: 'tencent.com' },
+  { name: 'Alibaba',   bg: '#FF6A00', domain: 'alibaba.com' },
+  { name: 'Panasonic', bg: '#0047BB', domain: 'panasonic.com' },
+  { name: 'Philips',   bg: '#0B5ED7', domain: 'philips.com' },
+]
+
+const RANK_COLORS = ['#FFD700', '#C0C0C0', '#CD7F32', '#6EE7B7']
+const RANK_LABELS = ['#1', '#2', '#3', '#4']
+
 function ForestMap({ onSelect }: { onSelect: (f: typeof artistForests[0]) => void }) {
   const [hovered, setHovered] = useState<string | null>(null)
+  // 依照種樹數量排名
+  const ranked = [...artistForests].sort((a, b) => b.trees - a.trees)
 
   return (
-    <div className="relative w-full rounded-2xl overflow-hidden shadow-lg" style={{ paddingBottom: '70%' }}>
-      <div className="absolute inset-0">
-        {/* 背景 - 森林意象 */}
-        <img
-          src="https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&q=80"
-          alt="forest"
-          className="w-full h-full object-cover"
-        />
-        {/* 暗化遮罩 */}
-        <div className="absolute inset-0 bg-gradient-to-b from-emerald-900/60 via-green-800/50 to-emerald-900/70" />
+    <div className="space-y-3">
+      {/* ── 科技感 HUD 地圖 ── */}
+      <div
+        className="relative w-full rounded-2xl overflow-hidden shadow-2xl"
+        style={{ paddingBottom: '72%', border: '1px solid rgba(52,211,153,0.25)' }}
+      >
+        <div className="absolute inset-0">
+          {/* 森林底圖 */}
+          <img
+            src="https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&q=80"
+            alt="forest"
+            className="w-full h-full object-cover"
+          />
+          {/* 科技暗化遮罩 */}
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg,rgba(2,20,10,0.82) 0%,rgba(5,46,22,0.65) 50%,rgba(1,15,8,0.88) 100%)' }} />
 
-        {/* 河流裝飾 */}
-        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 70" preserveAspectRatio="none">
-          <path d="M 0 38 Q 18 30, 35 40 Q 52 50, 68 36 Q 82 24, 100 32"
-            stroke="rgba(147,210,240,0.5)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-        </svg>
+          {/* 格線 HUD 裝飾 */}
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 72" preserveAspectRatio="none" style={{ opacity: 0.08 }}>
+            {[10,20,30,40,50,60,70,80,90].map(x => <line key={`vl${x}`} x1={x} y1="0" x2={x} y2="72" stroke="#4ade80" strokeWidth="0.3"/>)}
+            {[12,24,36,48,60].map(y => <line key={`hl${y}`} x1="0" y1={y} x2="100" y2={y} stroke="#4ade80" strokeWidth="0.3"/>)}
+            <rect x="0" y="0" width="100" height="72" stroke="#4ade80" strokeWidth="0.5" fill="none"/>
+          </svg>
 
-        {/* 標題 */}
-        <div className="absolute top-3 left-3 bg-black/40 backdrop-blur-sm rounded-xl px-3 py-1.5">
-          <p className="text-white text-xs font-bold flex items-center gap-1.5">
-            <TreePine className="h-3.5 w-3.5 text-emerald-300" />
-            回音森林地圖
-          </p>
-        </div>
+          {/* 發光河流 */}
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 72" preserveAspectRatio="none">
+            <path d="M 0 40 Q 18 32, 35 42 Q 52 52, 68 38 Q 82 26, 100 34"
+              stroke="rgba(52,211,153,0.15)" strokeWidth="4" fill="none" strokeLinecap="round"/>
+            <path d="M 0 40 Q 18 32, 35 42 Q 52 52, 68 38 Q 82 26, 100 34"
+              stroke="rgba(52,211,153,0.55)" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+          </svg>
 
-        {/* 總計 */}
-        <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-sm rounded-xl px-3 py-1.5 text-right">
-          <p className="text-emerald-300 text-xs font-bold"> {artistForests.reduce((s, f) => s + f.trees, 0)} 棵</p>
-          <p className="text-white/60 text-[10px]">4 座藝人森林</p>
-        </div>
+          {/* HUD 標題 左上 */}
+          <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg"
+            style={{ background: 'rgba(0,0,0,0.65)', border: '1px solid rgba(52,211,153,0.35)', backdropFilter: 'blur(6px)' }}>
+            <TreePine className="h-3 w-3 text-emerald-400" />
+            <span className="text-emerald-300 text-[10px] font-mono tracking-wider">ECHO FOREST MAP</span>
+          </div>
 
-        {/* Artist Forest Pins */}
-        {artistForests.map(forest => (
-          <button
-            key={forest.id}
-            className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 hover:scale-110 hover:z-20 group"
-            style={{ left: `${forest.mapX}%`, top: `${forest.mapY}%` }}
-            onClick={() => onSelect(forest)}
-            onMouseEnter={() => setHovered(forest.id)}
-            onMouseLeave={() => setHovered(null)}
-          >
-            {/* Forest image card */}
-            <div className={`w-20 rounded-xl overflow-hidden shadow-lg border-2 transition-all ${hovered === forest.id ? 'border-white scale-110' : 'border-white/40'}`}>
-              <img
-                src={forest.image}
-                alt={forest.name}
-                className="w-full h-12 object-cover"
-              />
-              <div className={`bg-gradient-to-r ${forest.bg} px-1.5 py-1`}>
-                <p className="text-white text-[9px] font-bold leading-tight truncate">{forest.name}</p>
-                <p className="text-white/80 text-[8px]"> {forest.trees} 棵</p>
-              </div>
-            </div>
-            {/* Connector dot */}
-            <div className={`w-2 h-2 rounded-full mx-auto mt-0.5 bg-gradient-to-br ${forest.gradFrom} ${forest.gradTo} shadow`} />
+          {/* HUD 數據 右上 */}
+          <div className="absolute top-2.5 right-2.5 text-right px-2.5 py-1.5 rounded-lg"
+            style={{ background: 'rgba(0,0,0,0.65)', border: '1px solid rgba(52,211,153,0.35)', backdropFilter: 'blur(6px)' }}>
+            <p className="text-emerald-300 text-[11px] font-mono font-bold">{artistForests.reduce((s, f) => s + f.trees, 0).toLocaleString()} 棵</p>
+            <p className="text-emerald-600 text-[9px] font-mono">4 ZONES ACTIVE</p>
+          </div>
 
-            {/* Tooltip */}
-            {hovered === forest.id && (
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-black/90 text-white text-[10px] rounded-lg px-2.5 py-1.5 whitespace-nowrap z-30 shadow-xl">
-                <p className="font-bold">{forest.name}</p>
-                <p className="text-gray-300">{forest.zone} · {forest.fans.toLocaleString()} 粉絲</p>
-              </div>
-            )}
-          </button>
-        ))}
+          {/* 掃描線效果 */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            background: 'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.07) 3px,rgba(0,0,0,0.07) 4px)',
+          }} />
 
-        {/* 圖例 */}
-        <div className="absolute bottom-2 left-2 bg-black/50 backdrop-blur-sm rounded-xl p-2 text-white text-[10px] space-y-0.5">
-          {artistForests.map(f => (
-            <div key={f.id} className="flex items-center gap-1.5">
-              <div className={`w-2 h-2 rounded-full bg-gradient-to-br ${f.gradFrom} ${f.gradTo}`} />
-              <span>{f.name}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* ── 企業贊助 Logo 橫幅 ── */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent pt-6 pb-2 px-2">
-          <p className="text-center text-white/90 text-[10px] font-bold tracking-widest mb-1.5 flex items-center justify-center gap-1">
-            🌍 感謝企業一起愛地球
-          </p>
-          <div className="overflow-hidden">
-            <div className="flex gap-3 items-center" style={{ animation: 'corp-scroll 28s linear infinite', width: 'max-content' }}>
-              {((): { name: string; bg: string; domain: string }[] => {
-                const corps = [
-                  { name: 'Apple',     bg: '#1d1d1f', domain: 'apple.com' },
-                  { name: 'Google',    bg: '#fff',    domain: 'google.com' },
-                  { name: 'Microsoft', bg: '#f3f3f3', domain: 'microsoft.com' },
-                  { name: 'Tesla',     bg: '#E31937', domain: 'tesla.com' },
-                  { name: 'Samsung',   bg: '#1428A0', domain: 'samsung.com' },
-                  { name: 'Sony',      bg: '#000',    domain: 'sony.com' },
-                  { name: 'BMW',       bg: '#0066B1', domain: 'bmw.com' },
-                  { name: 'IKEA',      bg: '#0058A3', domain: 'ikea.com' },
-                  { name: 'Siemens',   bg: '#009999', domain: 'siemens.com' },
-                  { name: 'Unilever',  bg: '#1F36C7', domain: 'unilever.com' },
-                  { name: 'TSMC',      bg: '#B22222', domain: 'tsmc.com' },
-                  { name: 'ASUS',      bg: '#00539B', domain: 'asus.com' },
-                  { name: 'Acer',      bg: '#83B81A', domain: 'acer.com' },
-                  { name: 'MediaTek',  bg: '#E4003A', domain: 'mediatek.com' },
-                  { name: 'HTC',       bg: '#69BE28', domain: 'htc.com' },
-                  { name: 'Gogoro',    bg: '#FF6600', domain: 'gogoro.com' },
-                  { name: 'Tencent',   bg: '#12B7F5', domain: 'tencent.com' },
-                  { name: 'Alibaba',   bg: '#FF6A00', domain: 'alibaba.com' },
-                  { name: 'Panasonic', bg: '#0047BB', domain: 'panasonic.com' },
-                  { name: 'Philips',   bg: '#0B5ED7', domain: 'philips.com' },
-                ]
-                return [...corps, ...corps]
-              })().map((corp, i) => (
-                <div key={i} className="shrink-0 flex flex-col items-center gap-0.5">
+          {/* Artist Forest Pins — 排名排序 */}
+          {ranked.map((forest, idx) => {
+            const rankColor = RANK_COLORS[idx]
+            const rankLabel = RANK_LABELS[idx]
+            const isHov = hovered === forest.id
+            return (
+              <button
+                key={forest.id}
+                className="absolute transition-all duration-200 hover:z-20 group"
+                style={{ left: `${forest.mapX}%`, top: `${forest.mapY}%`, transform: 'translate(-50%,-50%)' }}
+                onClick={() => onSelect(forest)}
+                onMouseEnter={() => setHovered(forest.id)}
+                onMouseLeave={() => setHovered(null)}
+              >
+                {/* HUD 卡片 */}
+                <div
+                  className="relative w-[74px] rounded-lg overflow-hidden transition-all duration-200"
+                  style={{
+                    border: `1.5px solid ${isHov ? rankColor : 'rgba(255,255,255,0.2)'}`,
+                    boxShadow: isHov ? `0 0 12px ${rankColor}55, 0 0 4px ${rankColor}88` : 'none',
+                    transform: isHov ? 'scale(1.1)' : 'scale(1)',
+                  }}
+                >
+                  {/* 排名徽章 */}
                   <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center border border-white/20 shadow overflow-hidden"
-                    style={{ background: corp.bg }}
+                    className="absolute -top-0.5 -left-0.5 z-20 w-5 h-5 rounded-br-lg flex items-center justify-center"
+                    style={{ background: rankColor }}
                   >
-                    <img
-                      src={`https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${corp.domain}&size=128`}
-                      alt={corp.name}
-                      className="w-6 h-6 object-contain"
-                      onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0' }}
-                    />
+                    <span className="text-black text-[8px] font-black leading-none">{rankLabel}</span>
                   </div>
-                  <span className="text-white/70 text-[7px] leading-none font-medium">{corp.name}</span>
+
+                  {/* 森林圖片 */}
+                  <div className="relative">
+                    <img src={forest.image} alt={forest.name} className="w-full h-10 object-cover" />
+                    {/* 掃描線 */}
+                    <div className="absolute inset-0" style={{
+                      background: 'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.18) 2px,rgba(0,0,0,0.18) 4px)',
+                    }}/>
+                    {/* 圖片上的綠色光暈 */}
+                    <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${rankColor}22 0%, transparent 60%)` }}/>
+                  </div>
+
+                  {/* 數據面板 */}
+                  <div className="px-1.5 py-1" style={{ background: 'rgba(2,15,8,0.92)' }}>
+                    <p className="text-[8px] font-mono leading-tight truncate" style={{ color: rankColor }}>{forest.name}</p>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <span className="text-emerald-500 text-[7px] font-mono">🌳</span>
+                      <span className="text-emerald-300 text-[7px] font-mono font-bold">{forest.trees}</span>
+                      <span className="text-gray-600 text-[7px] font-mono ml-auto">{forest.zone}</span>
+                    </div>
+                  </div>
                 </div>
-              ))}
-            </div>
+
+                {/* 位置點 */}
+                <div className="w-1.5 h-1.5 rounded-full mx-auto mt-0.5" style={{ background: rankColor, boxShadow: `0 0 6px ${rankColor}` }}/>
+
+                {/* Tooltip */}
+                {isHov && (
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap z-30 rounded-lg px-3 py-2 text-left"
+                    style={{ background: 'rgba(2,15,8,0.95)', border: `1px solid ${rankColor}66`, boxShadow: `0 0 16px ${rankColor}33` }}>
+                    <p className="font-mono text-[10px] font-bold" style={{ color: rankColor }}>{rankLabel} {forest.name}</p>
+                    <p className="text-emerald-400 text-[9px] font-mono">{forest.trees} 棵 · {forest.co2.toLocaleString()} kg CO₂</p>
+                    <p className="text-emerald-600 text-[9px] font-mono">{forest.zone} · {forest.fans.toLocaleString()} 粉絲</p>
+                  </div>
+                )}
+              </button>
+            )
+          })}
+
+          {/* 圖例 — 排名順序 */}
+          <div className="absolute bottom-2.5 left-2.5 rounded-lg px-2 py-1.5 space-y-1"
+            style={{ background: 'rgba(0,0,0,0.72)', border: '1px solid rgba(52,211,153,0.2)', backdropFilter: 'blur(6px)' }}>
+            {ranked.map((f, i) => (
+              <div key={f.id} className="flex items-center gap-1.5">
+                <span className="text-[8px] font-mono font-bold w-4" style={{ color: RANK_COLORS[i] }}>{RANK_LABELS[i]}</span>
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: RANK_COLORS[i] }}/>
+                <span className="text-[9px] font-mono text-emerald-300">{f.name}</span>
+                <span className="text-[8px] font-mono text-emerald-600 ml-1">{f.trees}棵</span>
+              </div>
+            ))}
           </div>
         </div>
-
-        <style>{`
-          @keyframes corp-scroll {
-            0%   { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-          }
-        `}</style>
       </div>
+
+      {/* ── 企業贊助跑馬燈（地圖外，更慢） ── */}
+      <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(52,211,153,0.15)', background: 'rgba(2,10,5,0.9)' }}>
+        <div className="flex items-center gap-2 px-3 py-1.5" style={{ borderBottom: '1px solid rgba(52,211,153,0.12)' }}>
+          <TreePine className="h-3 w-3 text-emerald-600" />
+          <span className="text-emerald-400 text-[9px] font-mono tracking-[0.2em]">感謝企業一起愛地球</span>
+          <span className="text-emerald-700 text-[9px] font-mono ml-auto">ESG PARTNERS</span>
+        </div>
+        <div className="overflow-hidden py-2 px-1">
+          <div className="flex gap-4 items-center" style={{ animation: 'corp-scroll 60s linear infinite', width: 'max-content' }}>
+            {[...CORPS, ...CORPS].map((corp, i) => (
+              <div key={i} className="shrink-0 flex flex-col items-center gap-0.5">
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden"
+                  style={{ background: corp.bg, border: '1px solid rgba(52,211,153,0.2)', boxShadow: '0 0 6px rgba(52,211,153,0.08)' }}
+                >
+                  <img
+                    src={`https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${corp.domain}&size=128`}
+                    alt={corp.name}
+                    className="w-6 h-6 object-contain"
+                    onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0' }}
+                  />
+                </div>
+                <span className="text-emerald-600 text-[7px] font-mono leading-none">{corp.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes corp-scroll {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
     </div>
   )
 }
