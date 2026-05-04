@@ -210,6 +210,79 @@ function ForestMap({ onSelect }: { onSelect: (f: typeof artistForests[0]) => voi
             </div>
           ))}
         </div>
+
+        {/* ── 企業贊助 Logo 橫幅 ── */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent pt-6 pb-2 px-2">
+          <p className="text-center text-white/90 text-[10px] font-bold tracking-widest mb-1.5 flex items-center justify-center gap-1">
+            🌍 感謝企業一起愛地球
+          </p>
+          <div className="overflow-hidden">
+            <div className="flex gap-3 items-center" style={{ animation: 'corp-scroll 28s linear infinite', width: 'max-content' }}>
+              {[
+                { name: 'Apple',        domain: 'apple.com' },
+                { name: 'Google',       domain: 'google.com' },
+                { name: 'Microsoft',    domain: 'microsoft.com' },
+                { name: 'Tesla',        domain: 'tesla.com' },
+                { name: 'Samsung',      domain: 'samsung.com' },
+                { name: 'Sony',         domain: 'sony.com' },
+                { name: 'BMW',          domain: 'bmw.com' },
+                { name: 'IKEA',         domain: 'ikea.com' },
+                { name: 'Siemens',      domain: 'siemens.com' },
+                { name: 'Unilever',     domain: 'unilever.com' },
+                { name: 'TSMC',         domain: 'tsmc.com' },
+                { name: 'ASUS',         domain: 'asus.com' },
+                { name: 'Acer',         domain: 'acer.com' },
+                { name: 'MediaTek',     domain: 'mediatek.com' },
+                { name: 'HTC',          domain: 'htc.com' },
+                { name: 'Gogoro',       domain: 'gogoro.com' },
+                { name: 'Tencent',      domain: 'tencent.com' },
+                { name: 'Alibaba',      domain: 'alibaba.com' },
+                { name: 'Panasonic',    domain: 'panasonic.com' },
+                { name: 'Philips',      domain: 'philips.com' },
+                // 複製一份實現無縫循環
+                { name: 'Apple',        domain: 'apple.com' },
+                { name: 'Google',       domain: 'google.com' },
+                { name: 'Microsoft',    domain: 'microsoft.com' },
+                { name: 'Tesla',        domain: 'tesla.com' },
+                { name: 'Samsung',      domain: 'samsung.com' },
+                { name: 'Sony',         domain: 'sony.com' },
+                { name: 'BMW',          domain: 'bmw.com' },
+                { name: 'IKEA',         domain: 'ikea.com' },
+                { name: 'Siemens',      domain: 'siemens.com' },
+                { name: 'Unilever',     domain: 'unilever.com' },
+                { name: 'TSMC',         domain: 'tsmc.com' },
+                { name: 'ASUS',         domain: 'asus.com' },
+                { name: 'Acer',         domain: 'acer.com' },
+                { name: 'MediaTek',     domain: 'mediatek.com' },
+                { name: 'HTC',          domain: 'htc.com' },
+                { name: 'Gogoro',       domain: 'gogoro.com' },
+                { name: 'Tencent',      domain: 'tencent.com' },
+                { name: 'Alibaba',      domain: 'alibaba.com' },
+                { name: 'Panasonic',    domain: 'panasonic.com' },
+                { name: 'Philips',      domain: 'philips.com' },
+              ].map((corp, i) => (
+                <div key={i} className="shrink-0 flex flex-col items-center gap-0.5 group">
+                  <div className="w-8 h-8 rounded-lg bg-white/15 backdrop-blur border border-white/20 flex items-center justify-center overflow-hidden group-hover:bg-white/30 transition-colors">
+                    <img
+                      src={`https://logo.clearbit.com/${corp.domain}`}
+                      alt={corp.name}
+                      className="w-6 h-6 object-contain"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display='none' }}
+                    />
+                  </div>
+                  <span className="text-white/60 text-[7px] leading-none">{corp.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <style>{`
+          @keyframes corp-scroll {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+        `}</style>
       </div>
     </div>
   )
