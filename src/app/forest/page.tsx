@@ -10,13 +10,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 const artistForests = [
   {
     id: 'tzuyu',
-    name: '周子瑜森林',
+    name: '子瑜森林',
     artist: '周子瑜',
     initial: '瑜',
     trees: 156,
     co2: 3980,
     fans: 4820,
-    badge: '森林女神',
+    badge: '守護天使',
     color: '#34d399',
     gradFrom: 'from-emerald-300',
     gradTo: 'to-teal-500',
@@ -26,8 +26,8 @@ const artistForests = [
     borderColor: 'border-emerald-200',
     image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&q=80',
     mapX: 22, mapY: 25,
-    zone: '台東延平',
-    description: '由粉絲共同認養，坐落於台東延平的翠綠山林，每棵樹都承載著對子瑜的愛',
+    zone: '馬來西亞 吉蘭州 ACACIA 森林',
+    description: 'ACACIA 森林為一處退化森林，適合進行永續森林再造，結合當地住民共同守護這片珍貴的土地，每棵樹都是跨越國界的 ESG 行動。',
   },
   {
     id: 'huangzihongfan',
@@ -109,7 +109,7 @@ const hallOfFame = [
 ]
 
 const forestZones = [
-  { id: 'tzuyu', name: '台東延平', lat: 23.05, lng: 121.06, trees: 156 },
+  { id: 'tzuyu', name: '馬來西亞 吉蘭州 ACACIA 森林', lat: 5.98, lng: 102.11, trees: 156 },
   { id: 'huang', name: '花蓮秀林', lat: 24.06, lng: 121.51, trees: 134 },
   { id: 'jay', name: '南投仁愛', lat: 23.96, lng: 121.15, trees: 203 },
   { id: 'psy', name: '宜蘭大同', lat: 24.68, lng: 121.54, trees: 89 },
