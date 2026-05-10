@@ -17,6 +17,7 @@ interface RewardItem {
   category: string
   emoji: string
   bg: string
+  image?: string
   popular?: boolean
   limited?: boolean
   new?: boolean
@@ -46,33 +47,33 @@ const CATEGORIES = [
 
 const ITEMS: RewardItem[] = [
   // Discount（10點 = 1元）
-  { id: 'd1', name: '購票折抵 NT$100', desc: '10點折抵1元 · 結帳時折抵 NT$100，無使用期限，全場次適用', points: 1000, stock: 50, category: 'discount', emoji: '', bg: 'from-emerald-400 to-teal-500', popular: true },
-  { id: 'd2', name: '購票折抵 NT$300', desc: '10點折抵1元 · 結帳時折抵 NT$300，無使用期限，全場次適用', points: 3000, stock: 20, category: 'discount', emoji: '', bg: 'from-emerald-500 to-green-600' },
-  { id: 'd3', name: '購票折抵 NT$500', desc: '10點折抵1元 · 單筆訂單折抵 NT$500，限定場次使用', points: 5000, stock: 10, category: 'discount', emoji: '', bg: 'from-teal-400 to-cyan-500' },
-  { id: 'd4', name: 'VIP 區免費升等', desc: '指定場次座位免費升等至 VIP 區，限量供應', points: 3000, stock: 5, category: 'discount', emoji: '', bg: 'from-amber-400 to-orange-500', limited: true },
-  { id: 'd5', name: '早鳥優先購票資格', desc: '指定場次提前 24 小時購票，限定會員', points: 800, stock: 30, category: 'discount', emoji: '', bg: 'from-yellow-400 to-amber-500', new: true },
+  { id: 'd1', name: '購票折抵 NT$100', desc: '10點折抵1元 · 結帳時折抵 NT$100，無使用期限，全場次適用', points: 1000, stock: 50, category: 'discount', emoji: '🎟️', bg: 'from-emerald-400 to-teal-500', image: 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=400&q=80', popular: true },
+  { id: 'd2', name: '購票折抵 NT$300', desc: '10點折抵1元 · 結帳時折抵 NT$300，無使用期限，全場次適用', points: 3000, stock: 20, category: 'discount', emoji: '🎟️', bg: 'from-emerald-500 to-green-600', image: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=400&q=80' },
+  { id: 'd3', name: '購票折抵 NT$500', desc: '10點折抵1元 · 單筆訂單折抵 NT$500，限定場次使用', points: 5000, stock: 10, category: 'discount', emoji: '🎟️', bg: 'from-teal-400 to-cyan-500', image: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400&q=80' },
+  { id: 'd4', name: 'VIP 區免費升等', desc: '指定場次座位免費升等至 VIP 區，限量供應', points: 3000, stock: 5, category: 'discount', emoji: '👑', bg: 'from-amber-400 to-orange-500', image: 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=400&q=80', limited: true },
+  { id: 'd5', name: '早鳥優先購票資格', desc: '指定場次提前 24 小時購票，限定會員', points: 800, stock: 30, category: 'discount', emoji: '⚡', bg: 'from-yellow-400 to-amber-500', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&q=80', new: true },
   // Merch
-  { id: 'm1', name: 'Echo Goo 帆布袋', desc: '限定 ESG 主題帆布袋，環保材質，附品牌印花', points: 1000, stock: 25, category: 'merch', emoji: '', bg: 'from-pink-400 to-rose-500', popular: true },
-  { id: 'm2', name: '回音樹限定徽章組', desc: '3 枚一組，含 ESG 主題徽章設計', points: 800, stock: 30, category: 'merch', emoji: '', bg: 'from-purple-400 to-violet-500' },
-  { id: 'm3', name: '藝人簽名海報 A2', desc: '回音樹親筆簽名海報，附保護套', points: 2000, stock: 8, category: 'merch', emoji: '', bg: 'from-rose-400 to-pink-500', limited: true },
-  { id: 'm4', name: '限量紀念 T-shirt', desc: 'ESG 音樂節紀念款，S/M/L/XL，純棉材質', points: 2500, stock: 5, category: 'merch', emoji: '', bg: 'from-indigo-400 to-blue-500', limited: true },
-  { id: 'm5', name: 'Echo Goo 馬克杯', desc: '雙層隔熱設計，含 Echo Goo 品牌 LOGO 烤印', points: 600, stock: 40, category: 'merch', emoji: '', bg: 'from-orange-400 to-amber-500', new: true },
-  { id: 'm6', name: '限定手機掛繩組', desc: '音符設計，附 3 款替換吊飾', points: 450, stock: 60, category: 'merch', emoji: '', bg: 'from-cyan-400 to-sky-500' },
+  { id: 'm1', name: 'Echo Goo 帆布袋', desc: '限定 ESG 主題帆布袋，環保材質，附品牌印花', points: 1000, stock: 25, category: 'merch', emoji: '👜', bg: 'from-pink-400 to-rose-500', image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&q=80', popular: true },
+  { id: 'm2', name: '回音樹限定徽章組', desc: '3 枚一組，含 ESG 主題徽章設計', points: 800, stock: 30, category: 'merch', emoji: '🏅', bg: 'from-purple-400 to-violet-500', image: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=400&q=80' },
+  { id: 'm3', name: '藝人簽名海報 A2', desc: '回音樹親筆簽名海報，附保護套', points: 2000, stock: 8, category: 'merch', emoji: '🎨', bg: 'from-rose-400 to-pink-500', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&q=80', limited: true },
+  { id: 'm4', name: '限量紀念 T-shirt', desc: 'ESG 音樂節紀念款，S/M/L/XL，純棉材質', points: 2500, stock: 5, category: 'merch', emoji: '👕', bg: 'from-indigo-400 to-blue-500', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80', limited: true },
+  { id: 'm5', name: 'Echo Goo 馬克杯', desc: '雙層隔熱設計，含 Echo Goo 品牌 LOGO 烤印', points: 600, stock: 40, category: 'merch', emoji: '☕', bg: 'from-orange-400 to-amber-500', image: 'https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=400&q=80', new: true },
+  { id: 'm6', name: '限定手機掛繩組', desc: '音符設計，附 3 款替換吊飾', points: 450, stock: 60, category: 'merch', emoji: '📱', bg: 'from-cyan-400 to-sky-500', image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&q=80' },
   // Tree
-  { id: 't1', name: '植樹認養憑證（1棵）', desc: '認養一棵樹，獲得專屬編號憑證，列入回音森林名人堂', points: 1500, stock: 100, category: 'tree', emoji: '', bg: 'from-green-400 to-emerald-500' },
-  { id: 't2', name: '回音森林命名樹', desc: '在回音森林地圖上擁有一棵以你名字命名的樹', points: 4000, stock: 20, category: 'tree', emoji: '', bg: 'from-emerald-500 to-green-700', popular: true },
-  { id: 't3', name: 'ESG 碳抵換憑證', desc: '官方認證碳抵換憑證，可用於企業 ESG 報告', points: 6000, stock: 10, category: 'tree', emoji: '', bg: 'from-teal-500 to-emerald-700', limited: true },
-  { id: 't4', name: '植樹 x3 超值包', desc: '一次認養 3 棵樹，享有獨家紀念品一份', points: 3800, stock: 15, category: 'tree', emoji: '', bg: 'from-lime-400 to-green-500', new: true },
+  { id: 't1', name: '植樹認養憑證（1棵）', desc: '認養一棵樹，獲得專屬編號憑證，列入回音森林名人堂', points: 1500, stock: 100, category: 'tree', emoji: '🌱', bg: 'from-green-400 to-emerald-500', image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=400&q=80' },
+  { id: 't2', name: '回音森林命名樹', desc: '在回音森林地圖上擁有一棵以你名字命名的樹', points: 4000, stock: 20, category: 'tree', emoji: '🌳', bg: 'from-emerald-500 to-green-700', image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&q=80', popular: true },
+  { id: 't3', name: 'ESG 碳抵換憑證', desc: '官方認證碳抵換憑證，可用於企業 ESG 報告', points: 6000, stock: 10, category: 'tree', emoji: '📜', bg: 'from-teal-500 to-emerald-700', image: 'https://images.unsplash.com/photo-1425913397330-cf8af2ff40a1?w=400&q=80', limited: true },
+  { id: 't4', name: '植樹 x3 超值包', desc: '一次認養 3 棵樹，享有獨家紀念品一份', points: 3800, stock: 15, category: 'tree', emoji: '🌲', bg: 'from-lime-400 to-green-500', image: 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?w=400&q=80', new: true },
   // Experience
-  { id: 'e1', name: '後台參觀體驗票', desc: '演出前 1 小時入場，近距離觀看舞台布置與排練', points: 5000, stock: 3, category: 'experience', emoji: '', bg: 'from-amber-400 to-yellow-500', limited: true },
-  { id: 'e2', name: '演出前見面會資格', desc: '演出開始前與藝人 15 分鐘見面、拍照與簽名', points: 8000, stock: 2, category: 'experience', emoji: '', bg: 'from-red-400 to-rose-500', limited: true },
-  { id: 'e3', name: 'VIP 包廂升等（雙人）', desc: '享有專屬雙人 VIP 包廂、飲料無限暢飲服務', points: 10000, stock: 1, category: 'experience', emoji: '', bg: 'from-purple-500 to-violet-600', limited: true },
-  { id: 'e4', name: '音響工程師一日體驗', desc: '跟隨音響工程師學習演唱會音響調音技術', points: 6500, stock: 2, category: 'experience', emoji: '', bg: 'from-slate-400 to-gray-600', new: true },
+  { id: 'e1', name: '後台參觀體驗票', desc: '演出前 1 小時入場，近距離觀看舞台布置與排練', points: 5000, stock: 3, category: 'experience', emoji: '🎬', bg: 'from-amber-400 to-yellow-500', image: 'https://images.unsplash.com/photo-1598387993441-a364f854c3e1?w=400&q=80', limited: true },
+  { id: 'e2', name: '演出前見面會資格', desc: '演出開始前與藝人 15 分鐘見面、拍照與簽名', points: 8000, stock: 2, category: 'experience', emoji: '🤝', bg: 'from-red-400 to-rose-500', image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&q=80', limited: true },
+  { id: 'e3', name: 'VIP 包廂升等（雙人）', desc: '享有專屬雙人 VIP 包廂、飲料無限暢飲服務', points: 10000, stock: 1, category: 'experience', emoji: '🥂', bg: 'from-purple-500 to-violet-600', image: 'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=400&q=80', limited: true },
+  { id: 'e4', name: '音響工程師一日體驗', desc: '跟隨音響工程師學習演唱會音響調音技術', points: 6500, stock: 2, category: 'experience', emoji: '🎛️', bg: 'from-slate-400 to-gray-600', image: 'https://images.unsplash.com/photo-1478737270197-2b10e62efd35?w=400&q=80', new: true },
   // Digital
-  { id: 'dg1', name: 'Echo Goo Premium 月票', desc: '享有無廣告、優先購票通知、獨家直播等特權，有效期 30 天', points: 1200, stock: 999, category: 'digital', emoji: '', bg: 'from-blue-400 to-indigo-500', popular: true },
-  { id: 'dg2', name: '數位專輯下載（回音樹）', desc: '回音樹最新專輯無損音質數位下載，含歌詞冊 PDF', points: 700, stock: 999, category: 'digital', emoji: '', bg: 'from-violet-400 to-purple-500' },
-  { id: 'dg3', name: '獨家直播存檔觀看權', desc: '解鎖過去 3 場演唱會高畫質直播存檔，永久觀看', points: 900, stock: 999, category: 'digital', emoji: '', bg: 'from-sky-400 to-blue-500', new: true },
-  { id: 'dg4', name: '個人化數位藝術 NFT', desc: '由回音樹親自授權的獨一無二數位藝術品', points: 3500, stock: 50, category: 'digital', emoji: '', bg: 'from-fuchsia-400 to-pink-500', limited: true },
+  { id: 'dg1', name: 'Echo Goo Premium 月票', desc: '享有無廣告、優先購票通知、獨家直播等特權，有效期 30 天', points: 1200, stock: 999, category: 'digital', emoji: '⭐', bg: 'from-blue-400 to-indigo-500', image: 'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=400&q=80', popular: true },
+  { id: 'dg2', name: '數位專輯下載（回音樹）', desc: '回音樹最新專輯無損音質數位下載，含歌詞冊 PDF', points: 700, stock: 999, category: 'digital', emoji: '🎵', bg: 'from-violet-400 to-purple-500', image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&q=80' },
+  { id: 'dg3', name: '獨家直播存檔觀看權', desc: '解鎖過去 3 場演唱會高畫質直播存檔，永久觀看', points: 900, stock: 999, category: 'digital', emoji: '📺', bg: 'from-sky-400 to-blue-500', image: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=400&q=80', new: true },
+  { id: 'dg4', name: '個人化數位藝術 NFT', desc: '由回音樹親自授權的獨一無二數位藝術品', points: 3500, stock: 50, category: 'digital', emoji: '🎨', bg: 'from-fuchsia-400 to-pink-500', image: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400&q=80', limited: true },
 ]
 
 const HISTORY = [
@@ -108,16 +109,32 @@ function getNextTier(pts: number) {
 function ItemCard({ item, pts, onAdd, onDetail }: { item: RewardItem; pts: number; onAdd: () => void; onDetail: () => void }) {
   const canAfford = pts >= item.points
   return (
-    <Card className="border-0 shadow-sm overflow-hidden hover:shadow-md transition-all cursor-pointer" onClick={onDetail}>
-      <div className={`h-28 bg-gradient-to-br ${item.bg} flex items-center justify-center relative`}>
-        <span className="text-5xl">{item.emoji}</span>
-        <div className="absolute top-2 left-2 flex flex-col gap-1">
+    <Card className="border-0 shadow-sm overflow-hidden hover:shadow-md transition-all cursor-pointer group" onClick={onDetail}>
+      {/* 圖片區域 */}
+      <div className={`h-28 bg-gradient-to-br ${item.bg} flex items-center justify-center relative overflow-hidden`}>
+        {item.image ? (
+          <>
+            <img
+              src={item.image}
+              alt={item.name}
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              onError={e => { e.currentTarget.style.display = 'none' }}
+            />
+            {/* 漸層遮罩讓 emoji 清晰 */}
+            <div className={`absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent`} />
+            {/* emoji 浮在圖片右下角 */}
+            <span className="absolute bottom-2 right-2.5 text-2xl drop-shadow-lg">{item.emoji}</span>
+          </>
+        ) : (
+          <span className="text-5xl">{item.emoji}</span>
+        )}
+        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
           {item.popular && <Badge className="bg-red-500 text-white text-[10px] px-1.5 py-0">熱門</Badge>}
           {item.limited && <Badge className="bg-amber-500 text-white text-[10px] px-1.5 py-0">限量</Badge>}
           {item.new && <Badge className="bg-blue-500 text-white text-[10px] px-1.5 py-0">新品</Badge>}
         </div>
         {item.stock <= 5 && item.stock > 0 && (
-          <div className="absolute bottom-2 right-2 bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+          <div className="absolute top-2 right-2 z-10 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded-full">
             剩 {item.stock} 件
           </div>
         )}
@@ -139,7 +156,7 @@ function ItemCard({ item, pts, onAdd, onDetail }: { item: RewardItem; pts: numbe
           disabled={!canAfford}
           onClick={e => { e.stopPropagation(); onAdd() }}
         >
-          {canAfford ? <><Plus className="h-3 w-3 mr-1" />加入兌換</>  : <><Lock className="h-3 w-3 mr-1" />點數不足</>}
+          {canAfford ? <><Plus className="h-3 w-3 mr-1" />加入兌換</> : <><Lock className="h-3 w-3 mr-1" />點數不足</>}
         </Button>
       </CardContent>
     </Card>
@@ -462,9 +479,15 @@ export default function PointsPage() {
       {detailItem && (
         <div className="fixed inset-0 z-50 flex flex-col justify-end bg-black/40" onClick={() => setDetailItem(null)}>
           <div className="bg-white rounded-t-3xl w-full max-w-md mx-auto overflow-hidden max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
-            <div className={`h-40 bg-gradient-to-br ${detailItem.bg} flex items-center justify-center relative shrink-0`}>
-              <span className="text-7xl">{detailItem.emoji}</span>
-              <button onClick={() => setDetailItem(null)} className="absolute top-4 right-4 bg-black/20 hover:bg-black/30 rounded-full p-1.5">
+            <div className={`h-40 bg-gradient-to-br ${detailItem.bg} flex items-center justify-center relative shrink-0 overflow-hidden`}>
+              {detailItem.image && (
+                <img src={detailItem.image} alt={detailItem.name}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  onError={e => { e.currentTarget.style.display = 'none' }} />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+              <span className="text-6xl relative z-10 drop-shadow-xl">{detailItem.emoji}</span>
+              <button onClick={() => setDetailItem(null)} className="absolute top-4 right-4 bg-black/30 hover:bg-black/50 rounded-full p-1.5 z-10">
                 <X className="h-4 w-4 text-white" />
               </button>
               <div className="absolute top-4 left-4 flex gap-1.5">
