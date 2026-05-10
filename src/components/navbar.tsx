@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { useTicketCount, useUser } from '@/lib/store'
 
 const NAV_ITEMS = [
+  { label: '首頁',         href: '/'         },
   { label: '活動',         href: '/events'   },
   { label: '論壇',         href: '/forum'    },
   { label: '藏寶圖',       href: '/treasure' },
