@@ -45,10 +45,10 @@ const CATEGORIES = [
 ]
 
 const ITEMS: RewardItem[] = [
-  // Discount
-  { id: 'd1', name: '購票折抵 NT$100', desc: '下次購票結帳時折抵 NT$100，無使用期限', points: 500, stock: 50, category: 'discount', emoji: '', bg: 'from-emerald-400 to-teal-500', popular: true },
-  { id: 'd2', name: '購票折抵 NT$300', desc: '下次購票結帳時折抵 NT$300，無使用期限', points: 1200, stock: 20, category: 'discount', emoji: '', bg: 'from-emerald-500 to-green-600' },
-  { id: 'd3', name: '購票折抵 NT$500', desc: '單筆訂單折抵 NT$500，限定場次使用', points: 1800, stock: 10, category: 'discount', emoji: '', bg: 'from-teal-400 to-cyan-500' },
+  // Discount（10點 = 1元）
+  { id: 'd1', name: '購票折抵 NT$100', desc: '10點折抵1元 · 結帳時折抵 NT$100，無使用期限，全場次適用', points: 1000, stock: 50, category: 'discount', emoji: '', bg: 'from-emerald-400 to-teal-500', popular: true },
+  { id: 'd2', name: '購票折抵 NT$300', desc: '10點折抵1元 · 結帳時折抵 NT$300，無使用期限，全場次適用', points: 3000, stock: 20, category: 'discount', emoji: '', bg: 'from-emerald-500 to-green-600' },
+  { id: 'd3', name: '購票折抵 NT$500', desc: '10點折抵1元 · 單筆訂單折抵 NT$500，限定場次使用', points: 5000, stock: 10, category: 'discount', emoji: '', bg: 'from-teal-400 to-cyan-500' },
   { id: 'd4', name: 'VIP 區免費升等', desc: '指定場次座位免費升等至 VIP 區，限量供應', points: 3000, stock: 5, category: 'discount', emoji: '', bg: 'from-amber-400 to-orange-500', limited: true },
   { id: 'd5', name: '早鳥優先購票資格', desc: '指定場次提前 24 小時購票，限定會員', points: 800, stock: 30, category: 'discount', emoji: '', bg: 'from-yellow-400 to-amber-500', new: true },
   // Merch
@@ -302,6 +302,20 @@ export default function PointsPage() {
                 </button>
               ))}
             </div>
+
+            {/* 票券折扣換算說明 */}
+            {(activeCategory === 'discount' || activeCategory === 'all') && (
+              <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5 mb-3">
+                <span className="text-lg">⭐</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-amber-800">票券折扣換算比例</p>
+                  <p className="text-[11px] text-amber-600 mt-0.5">每 <strong>10 點</strong> 折抵 <strong>NT$1</strong>｜可於結帳時直接折抵，無到期日</p>
+                </div>
+                <div className="shrink-0 bg-amber-400 text-white text-[10px] font-black px-2 py-1 rounded-lg">
+                  10pt = 1元
+                </div>
+              </div>
+            )}
 
             {/* Count */}
             <p className="text-xs text-gray-400 mb-3">{filtered.length} 件商品</p>
