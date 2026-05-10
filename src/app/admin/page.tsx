@@ -514,7 +514,49 @@ function MerchEditModal({ item, onSave, onClose }: { item: MerchItem; onSave: (i
 // ═════════════════════════════════════════════════════════
 // Main Admin Page
 // ═════════════════════════════════════════════════════════
+const ADMIN_PIN = 'echo2026'  // BUG-06: simple PIN gate for the hidden admin route
+
+// BUG-06 fix: PIN gate component (separate so hooks aren't called conditionally)
+function AdminPinGate({ onUnlock }: { onUnlock: () => void }) {
+  const [pinInput, setPinInput] = useState('')
+  const [pinError, setPinError] = useState(false)
+  const check = () => {
+    if (pinInput === ADMIN_PIN) onUnlock()
+    else { setPinError(true); setPinInput('') }
+  }
+  return (
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+      <div className="bg-gray-900 rounded-2xl p-8 w-full max-w-sm shadow-2xl border border-gray-800">
+        <div className="text-center mb-6">
+          <div className="w-14 h-14 bg-emerald-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <span className="text-2xl">🌳</span>
+          </div>
+          <h2 className="text-xl font-bold text-white">後台管理</h2>
+          <p className="text-gray-500 text-sm mt-1">請輸入管理員密碼</p>
+        </div>
+        <input
+          type="password"
+          placeholder="密碼"
+          className={`w-full bg-gray-800 text-white rounded-xl px-4 py-3 text-sm outline-none border ${pinError ? 'border-red-500' : 'border-gray-700'} focus:border-emerald-500 mb-3`}
+          value={pinInput}
+          onChange={e => { setPinInput(e.target.value); setPinError(false) }}
+          onKeyDown={e => e.key === 'Enter' && check()}
+          autoFocus
+        />
+        {pinError && <p className="text-red-400 text-xs mb-3">密碼錯誤</p>}
+        <button
+          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-3 text-sm font-medium transition-colors"
+          onClick={check}
+        >
+          進入後台
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function AdminPage() {
+  const [unlocked, setUnlocked] = useState(false)
   const [adminState, setAdminState] = useState<AdminState>({ appearance: DEFAULT_APPEARANCE, homepage: DEFAULT_HOMEPAGE, eventOverrides: {}, merchs: DEFAULT_MERCHS })
   const [savedState, setSavedState] = useState<AdminState | null>(null)
   const [dirty, setDirty] = useState(false)
@@ -603,6 +645,9 @@ export default function AdminPage() {
     { name: '林大地',  phone: '0966***987', verified: true,  orders: 12, joined: '2024-11-01', points: 8900 },
     { name: '黃子晴', phone: '0978***123', verified: false, orders: 0, joined: '2026-04-27', points: 50   },
   ].filter(u => !userSearch || u.name.includes(userSearch) || u.phone.includes(userSearch))
+
+  // BUG-06: show PIN gate until unlocked
+  if (!unlocked) return <AdminPinGate onUnlock={() => setUnlocked(true)} />
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-7xl">

@@ -80,8 +80,9 @@ function VerifyContent() {
     setLoading(false)
     setStep('success')
     // Save verified state + bonus points
+    const wasVerified = getUser().verified   // capture BEFORE setUser
     setUser({ verified: true, phone })
-    if (!getUser().verified) addPoints(200) // first-time KYC bonus
+    if (!wasVerified) addPoints(200)         // first-time KYC +200pts
   }
 
   const handleResend = async () => {

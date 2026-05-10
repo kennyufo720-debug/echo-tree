@@ -4,16 +4,17 @@ import { User, Star, ShoppingBag, Ticket, TreePine, ChevronRight, Crown, Shield,
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { useUser, getStoredOrders } from '@/lib/store'
+import { useUser, useOrders } from '@/lib/store'
 import { useConversations, useUnreadCount } from '@/lib/messages'
 
-// ── Store orders ───────────────────────────────────────────
+// ── Store orders ── BUG-05 fix: match actual shape written by store/page.tsx
 interface StoreOrder {
   id: string
-  itemId: string
-  name: string
-  image: string
-  points: number
+  items: { name: string; image: string; qty: number; price: number }[]
+  subtotal: number
+  discount: number
+  total: number
+  pointsUsed: number
   at: string
 }
 const STORE_ORDERS_KEY = 'echotree_store_orders'
@@ -84,7 +85,7 @@ type Tab = 'overview' | 'messages' | 'orders'
 
 export default function MemberPage() {
   const user = useUser()
-  const ticketOrders = getStoredOrders()
+  const ticketOrders = useOrders()
   const [storeOrders, setStoreOrders] = useState<StoreOrder[]>([])
   const [tab, setTab] = useState<Tab>('overview')
   const conversations = useConversations()
@@ -283,22 +284,29 @@ export default function MemberPage() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {storeOrders.slice(0, 10).map(o => (
-                    <div key={o.id} className="bg-white rounded-2xl border border-gray-100 p-3 flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl overflow-hidden bg-gray-100 shrink-0">
-                        <img src={o.image} alt={o.name} className="w-full h-full object-cover"
-                          onError={e => { e.currentTarget.style.display = 'none' }} />
+                  {storeOrders.slice(0, 10).map(o => {
+                    const firstItem = o.items?.[0]
+                    return (
+                      <div key={o.id} className="bg-white rounded-2xl border border-gray-100 p-3 flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl overflow-hidden bg-gray-100 shrink-0">
+                          {firstItem?.image && (
+                            <img src={firstItem.image} alt={firstItem.name} className="w-full h-full object-cover"
+                              onError={e => { e.currentTarget.style.display = 'none' }} />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-sm text-gray-900 truncate">
+                            {o.items?.map(i => i.name).join('、') ?? '商城訂單'}
+                          </div>
+                          <div className="text-xs text-gray-400">{o.at}</div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <div className="text-emerald-600 font-black text-sm">NT${o.total?.toLocaleString() ?? 0}</div>
+                          <div className="text-[10px] text-gray-400">台幣</div>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-sm text-gray-900 truncate">{o.name}</div>
-                        <div className="text-xs text-gray-400">{o.at}</div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <div className="text-emerald-600 font-black text-sm">NT${o.points.toLocaleString()}</div>
-                        <div className="text-[10px] text-gray-400">台幣</div>
-                      </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </div>

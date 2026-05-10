@@ -74,15 +74,17 @@ function MessagesInner() {
   const convs = useConversations()
   const [search, setSearch] = useState('')
 
+  // BUG-09 fix: extract primitives so effect doesn't re-run on every searchParams object recreation
+  const toParam = searchParams.get('to') ?? ''
+  const avatarParam = searchParams.get('avatar') ?? ''
+
   // Handle ?to=name&avatar=emoji redirect from forum
   useEffect(() => {
-    const to = searchParams.get('to')
-    const avatar = searchParams.get('avatar') ?? ''
-    if (!to) return
+    if (!toParam) return
     if (!user.verified) return   // needs auth
-    const convId = findOrCreateConversation(to, avatar)
+    const convId = findOrCreateConversation(toParam, avatarParam)
     router.replace(`/messages/${convId}`)
-  }, [searchParams, user.verified, router])
+  }, [toParam, avatarParam, user.verified, router])
 
   const filtered = convs.filter(c =>
     !search || c.contactName.includes(search) ||

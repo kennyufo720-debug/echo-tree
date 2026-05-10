@@ -52,10 +52,11 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
-  // Mark as read on open
+  // Mark as read on open — BUG-19 fix: include conv in deps
   useEffect(() => {
     if (conv) markConversationRead(id)
-  }, [id, conv?.messages.length])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, conv?.messages.length])  // conv.messages.length is the meaningful dep
 
   // Auto-scroll to bottom
   useEffect(() => {

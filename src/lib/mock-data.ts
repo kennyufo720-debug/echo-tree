@@ -1,5 +1,9 @@
 import { Event, SeatSection, Order } from './types'
 
+// Deterministic pseudo-random: avoids SSR/client hydration mismatch (BUG-07)
+const fakeRand = (i: number, j: number, seed: number) =>
+  ((i * 31 + j * 17 + seed * 7) % 97) / 97
+
 export const mockEvents: Event[] = [
   {
     id: '8',
@@ -159,7 +163,7 @@ export const mockSections: SeatSection[] = [
       seats: Array.from({ length: 20 }, (_, si) => ({
         id: `vip-${String.fromCharCode(65 + ri)}-${si + 1}`,
         number: si + 1,
-        status: Math.random() > 0.3 ? 'available' : 'sold',
+        status: fakeRand(ri, si, 1) > 0.3 ? 'available' : 'sold',
       })),
     })),
   },
@@ -175,7 +179,7 @@ export const mockSections: SeatSection[] = [
       seats: Array.from({ length: 30 }, (_, si) => ({
         id: `a-${String.fromCharCode(65 + ri)}-${si + 1}`,
         number: si + 1,
-        status: Math.random() > 0.4 ? 'available' : 'sold',
+        status: fakeRand(ri, si, 2) > 0.4 ? 'available' : 'sold',
       })),
     })),
   },
@@ -191,7 +195,7 @@ export const mockSections: SeatSection[] = [
       seats: Array.from({ length: 35 }, (_, si) => ({
         id: `b-${String.fromCharCode(65 + ri)}-${si + 1}`,
         number: si + 1,
-        status: Math.random() > 0.5 ? 'available' : 'sold',
+        status: fakeRand(ri, si, 3) > 0.5 ? 'available' : 'sold',
       })),
     })),
   },
@@ -207,7 +211,7 @@ export const mockSections: SeatSection[] = [
       seats: Array.from({ length: 40 }, (_, si) => ({
         id: `c-${String.fromCharCode(65 + ri)}-${si + 1}`,
         number: si + 1,
-        status: Math.random() > 0.6 ? 'available' : 'sold',
+        status: fakeRand(ri, si, 4) > 0.6 ? 'available' : 'sold',
       })),
     })),
   },

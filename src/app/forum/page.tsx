@@ -513,7 +513,7 @@ function NewPostModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: (p
       category,
       title: title.trim(),
       body: body.trim(),
-      author: user.phone ? `用戶 ${user.phone.slice(-4)}` : '匿名用戶',
+      author: user.phone ? `用戶 ${user.phone.slice(-4)}` : '訪客',
       avatar: '',
       createdAt: new Date().toISOString().slice(0, 10),
       replies: 0, likes: 0, views: 1,

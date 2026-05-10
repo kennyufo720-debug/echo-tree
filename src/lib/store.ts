@@ -52,6 +52,9 @@ const _sessionVideos = new Map<string, string>()
 const VIDEO_EVENT = 'echotree:video'
 
 export function setSessionVideo(postId: string, objectUrl: string): void {
+  // BUG-16 fix: revoke the previous URL for this post to prevent memory leak
+  const prev = _sessionVideos.get(postId)
+  if (prev && prev !== objectUrl) URL.revokeObjectURL(prev)
   _sessionVideos.set(postId, objectUrl)
   if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent(VIDEO_EVENT, { detail: postId }))
 }
@@ -98,8 +101,9 @@ export function useOrders(): Order[] {
 export function useTicketCount(): number {
   const [count, setCount] = useState(0)
   const refresh = useCallback(() => {
+    // BUG-13 fix: removed hardcoded +2; tickets page merges mockOrders separately
     const stored = getStoredOrders().filter(o => o.status === 'paid').length
-    setCount(stored + 2) // +2 for existing mock orders
+    setCount(stored)
   }, [])
   useEffect(() => {
     refresh()

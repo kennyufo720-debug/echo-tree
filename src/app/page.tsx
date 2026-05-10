@@ -128,10 +128,11 @@ export default function HomePage() {
   const [storeItems, setStoreItems] = useState<StoreItem[]>(DEFAULT_STORE)
   const [heroIdx, setHeroIdx] = useState(0)
   const touchStartX = useRef<number | null>(null)
-  const timerRef = useRef<ReturnType<typeof setTimeout>>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const next = useCallback(() => setHeroIdx(i => (i + 1) % featuredEvents.length), [])
-  const prev = useCallback(() => setHeroIdx(i => (i - 1 + featuredEvents.length) % featuredEvents.length), [])
+  const total = featuredEvents.length || 1  // BUG-18: guard against empty array → NaN
+  const next = useCallback(() => setHeroIdx(i => (i + 1) % total), [total])
+  const prev = useCallback(() => setHeroIdx(i => (i - 1 + total) % total), [total])
 
   // Auto-play
   useEffect(() => {

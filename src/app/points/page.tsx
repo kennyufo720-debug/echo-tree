@@ -1,7 +1,7 @@
 'use client'
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { Coins, Gift, History, Star, ChevronRight, Check, Lock, Zap, Ticket, TreePine, ShoppingBag, Search, ShoppingCart, X, Plus, Minus, ChevronDown } from 'lucide-react'
-import { useUser } from '@/lib/store'
+import { useUser, getUser, setUser } from '@/lib/store'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -178,9 +178,17 @@ export default function PointsPage() {
   const [treeAnim, setTreeAnim] = useState(false)
   const [treeStage, setTreeStage] = useState<'growing' | 'cert' | 'done'>('growing')
   const storeUser = useUser()
-  const [pts, setPts] = useState(USER_POINTS)
-  // Sync with store
+  // BUG-27 fix: init from store to avoid hardcoded flash
+  const [pts, setPts] = useState(() => getUser().points)
+  // BUG-21 fix: track animation timeouts for cleanup
+  const animTimers = useRef<ReturnType<typeof setTimeout>[]>([])
+  // Sync with store when other tabs/pages update points
   useEffect(() => { setPts(storeUser.points) }, [storeUser.points])
+  // BUG-21 fix: clear all animation timeouts on unmount
+  useEffect(() => {
+    const timers = animTimers.current
+    return () => timers.forEach(clearTimeout)
+  }, [])
 
   const currentTier = getTier(pts)
   const nextTier = getNextTier(pts)
@@ -217,14 +225,17 @@ export default function PointsPage() {
     if (pts < cartTotal) return
     const names = cart.map(c => c.name)
     const hasTree = cart.some(c => TREE_IDS.has(c.id))
-    setPts(p => p - cartTotal)
+    const newBalance = pts - cartTotal
+    setPts(newBalance)
+    setUser({ points: newBalance })   // BUG-03 fix: persist globally
     setCart([])
     setShowCart(false)
     if (hasTree) {
       setTreeStage('growing')
       setTreeAnim(true)
-      setTimeout(() => setTreeStage('cert'), 2000)
-      setTimeout(() => setTreeStage('done'), 3500)
+      // BUG-21 fix: track timers so they can be cleared on unmount
+      animTimers.current.push(setTimeout(() => setTreeStage('cert'), 2000))
+      animTimers.current.push(setTimeout(() => setTreeStage('done'), 3500))
     } else {
       setOrderDone(names)
     }

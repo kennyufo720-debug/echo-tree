@@ -78,7 +78,8 @@ function CheckoutContent() {
   const fee = Math.round(total * 0.03)
 
   // 點數折扣計算
-  const maxUsablePoints = Math.min(user.points, total * PTS_RATE)   // 最多折抵票面價
+  // BUG-17 fix: cap at full grand total (ticket + fee) so points can cover the entire order
+  const maxUsablePoints = Math.min(user.points, (total + fee) * PTS_RATE)
   const parsedPoints = Math.max(0, Math.min(parseInt(pointsInput || '0'), maxUsablePoints))
   const pointsUsed = usePointsOn ? parsedPoints : 0
   const discount = Math.floor(pointsUsed / PTS_RATE)
@@ -410,7 +411,7 @@ function CheckoutContent() {
               )}
 
               <p className="text-[11px] text-gray-400">
-                · 最多可折抵票券金額 NT$ {Math.floor(maxUsablePoints / PTS_RATE).toLocaleString()} 元（{maxUsablePoints.toLocaleString()} 點）
+                · 最多可折抵 NT$ {Math.floor(maxUsablePoints / PTS_RATE).toLocaleString()} 元（{maxUsablePoints.toLocaleString()} 點）
               </p>
             </CardContent>
           </Card>

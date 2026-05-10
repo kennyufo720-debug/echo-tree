@@ -14,7 +14,8 @@ import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { mockEvents, mockSections } from '@/lib/mock-data'
 import { SeatSection, Seat } from '@/lib/types'
-import { getUser } from '@/lib/store'
+import { getUser, useUser } from '@/lib/store'
+import { notFound } from 'next/navigation'
 
 interface SelectedSeat {
   sectionId: string
@@ -201,7 +202,10 @@ function FloatingVideo({ videoId, onClose }: { videoId: string; onClose: () => v
 export default function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const router = useRouter()
-  const event = mockEvents.find(e => e.id === id) ?? mockEvents[0]
+  const user = useUser()
+  const foundEvent = mockEvents.find(e => e.id === id)
+  if (!foundEvent) notFound()
+  const event = foundEvent
   const [selectedSeats, setSelectedSeats] = useState<SelectedSeat[]>([])
   const [maxSeats] = useState(4)
   const [showVideo, setShowVideo] = useState(false)
@@ -237,7 +241,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-6xl">
-      <Link href="/" className="inline-flex items-center gap-1 text-gray-500 hover:text-gray-900 mb-6 text-sm">
+      <Link href="/events" className="inline-flex items-center gap-1 text-gray-500 hover:text-gray-900 mb-6 text-sm">
         <ChevronLeft className="h-4 w-4" />
         返回活動列表
       </Link>
@@ -393,7 +397,7 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
               </Button>
 
               <p className="text-center text-xs text-gray-400 flex items-center justify-center gap-1">
-                {getUser().verified
+                {user.verified
                   ? <span className="text-green-500"> 已驗證，可直接結帳</span>
                   : <span>結帳前需完成手機驗證</span>
                 }

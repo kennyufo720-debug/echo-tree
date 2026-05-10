@@ -12,11 +12,8 @@ import { Order } from '@/lib/types'
 import { useOrders } from '@/lib/store'
 
 // ── Anydeee 跨站兌換 ──────────────────────────────────
-// 生產環境改成正式網址；本機開發指向 soul 資料夾
-const ANYDEEE_BASE_URL =
-  typeof window !== 'undefined' && window.location.hostname === 'localhost'
-    ? `${window.location.origin}/rwa-dex.html`
-    : 'https://anydeee.vercel.app/rwa-dex.html'
+// BUG-22 fix: 避免 module-level window 存取造成 SSR hydration mismatch
+const ANYDEEE_BASE_URL = 'https://anydeee.vercel.app/rwa-dex.html'
 
 /** 依票券事件挑選對應樹種 */
 function pickTreeSym(eventTitle: string): string {
@@ -515,7 +512,11 @@ export default function TicketsPage() {
   // Merge: stored orders first (newest purchases), then mock baseline orders
   const allOrders: Order[] = [...storedOrders, ...mockOrders]
   const now = new Date()
-  const upcoming = allOrders.filter(o => new Date(o.eventDate) >= now)
+  // BUG-04 fix: '待確認' is not a valid date → treat as upcoming
+  const upcoming = allOrders.filter(o => {
+    const d = new Date(o.eventDate)
+    return isNaN(d.getTime()) ? true : d >= now
+  })
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
