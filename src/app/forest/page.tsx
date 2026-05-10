@@ -131,28 +131,19 @@ function ArtistAvatar({ forest, size = 'md' }: { forest: typeof artistForests[0]
   )
 }
 
-// 使用 vectorlogo.zone 水平 SVG 真實 logo
-const CORPS = [
-  { name: 'Apple',     slug: 'apple' },
-  { name: 'Google',    slug: 'google' },
-  { name: 'Microsoft', slug: 'microsoft' },
-  { name: 'Tesla',     slug: 'tesla' },
-  { name: 'Samsung',   slug: 'samsung' },
-  { name: 'Sony',      slug: 'sony' },
-  { name: 'BMW',       slug: 'bmw-group' },
-  { name: 'IKEA',      slug: 'ikea' },
-  { name: 'Siemens',   slug: 'siemens' },
-  { name: 'Unilever',  slug: 'unilever' },
-  { name: 'TSMC',      slug: 'tsmc' },
-  { name: 'ASUS',      slug: 'asus' },
-  { name: 'Acer',      slug: 'acer' },
-  { name: 'MediaTek',  slug: 'mediatek' },
-  { name: 'HTC',       slug: 'htc' },
-  { name: 'Gogoro',    slug: 'gogoro' },
-  { name: 'Tencent',   slug: 'tencent' },
-  { name: 'Alibaba',   slug: 'alibaba' },
-  { name: 'Panasonic', slug: 'panasonic' },
-  { name: 'Philips',   slug: 'philips' },
+// 本地真實 logo（白底用深色背景，彩色 logo 用白底）
+const CORPS: { name: string; file: string; bg: string; filter?: string }[] = [
+  { name: 'Apple',    file: '/logos/apple.jpg',    bg: '#1d1d1f', filter: 'none' },
+  { name: 'Tesla',    file: '/logos/tesla.png',    bg: '#fff',    filter: 'none' },
+  { name: 'BMW',      file: '/logos/bmw.jpeg',     bg: '#fff',    filter: 'none' },
+  { name: 'Acer',     file: '/logos/acer.jpg',     bg: '#fff',    filter: 'none' },
+  { name: 'Nike',     file: '/logos/nike.jpeg',    bg: '#fff',    filter: 'none' },
+  { name: 'Tencent',  file: '/logos/tencent.png',  bg: '#fff',    filter: 'none' },
+  { name: 'O-Bank',   file: '/logos/obank.png',    bg: '#fff',    filter: 'none' },
+  { name: 'PIXELDOCK',file: '/logos/pixeldock.png',bg: '#fff',    filter: 'none' },
+  { name: '將捷集團', file: '/logos/fabulous.png', bg: '#fff',    filter: 'none' },
+  { name: 'aiwa',     file: '/logos/aiwa.png',     bg: '#fff',    filter: 'none' },
+  { name: 'Wynn',     file: '/logos/wynn.png',     bg: '#1a1206', filter: 'none' },
 ]
 
 const RANK_COLORS = ['#FFD700', '#C0C0C0', '#CD7F32', '#6EE7B7']
@@ -350,31 +341,26 @@ function ForestMap({ onSelect }: { onSelect: (f: typeof artistForests[0]) => voi
           <span className="text-emerald-700 text-[9px] font-mono ml-auto">ESG PARTNERS</span>
         </div>
         <div className="overflow-hidden py-3 px-2">
-          <div className="flex items-center gap-8" style={{ animation: 'corp-scroll 65s linear infinite', width: 'max-content' }}>
+          <div className="flex items-center gap-5" style={{ animation: 'corp-scroll 65s linear infinite', width: 'max-content' }}>
             {[...CORPS, ...CORPS].map((corp, i) => (
-              <div key={i} className="shrink-0 flex items-center">
-                <img
-                  src={`https://www.vectorlogo.zone/logos/${corp.slug}/${corp.slug}-ar21.svg`}
-                  alt={corp.name}
+              <div key={i} className="shrink-0 flex flex-col items-center gap-1">
+                <div
+                  className="rounded-xl overflow-hidden flex items-center justify-center"
                   style={{
-                    height: '22px',
-                    width: 'auto',
-                    maxWidth: '88px',
-                    objectFit: 'contain',
-                    filter: 'brightness(0) invert(1)',
-                    opacity: 0.7,
+                    background: corp.bg,
+                    width: '64px',
+                    height: '40px',
+                    border: '1px solid rgba(52,211,153,0.15)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
                   }}
-                  onError={(e) => {
-                    const img = e.target as HTMLImageElement
-                    img.style.display = 'none'
-                    const span = img.nextElementSibling as HTMLElement
-                    if (span) span.style.display = 'inline'
-                  }}
-                />
-                <span
-                  style={{ display: 'none' }}
-                  className="text-white/60 text-[11px] font-bold tracking-widest uppercase"
                 >
+                  <img
+                    src={corp.file}
+                    alt={corp.name}
+                    style={{ width: '52px', height: '32px', objectFit: 'contain' }}
+                  />
+                </div>
+                <span style={{ fontSize: '8px', fontFamily: 'monospace', color: 'rgba(180,220,190,0.6)', whiteSpace: 'nowrap' }}>
                   {corp.name}
                 </span>
               </div>
