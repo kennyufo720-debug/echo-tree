@@ -92,6 +92,27 @@ const artistForests = [
     zone: '宜蘭大同',
     description: '橫跨韓台的國際森林，每棵樹都是一次跨文化的 ESG 行動，Gangnam Style！',
   },
+  {
+    id: 'jjlin',
+    name: '林俊杰森林',
+    artist: '林俊杰',
+    initial: 'JJ',
+    trees: 178,
+    co2: 4530,
+    fans: 8940,
+    badge: '星光使者',
+    color: '#0284c7',
+    gradFrom: 'from-sky-400',
+    gradTo: 'to-blue-600',
+    bg: 'from-sky-400 to-blue-600',
+    textColor: 'text-sky-700',
+    lightBg: 'bg-sky-50',
+    borderColor: 'border-sky-200',
+    image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&q=80',
+    mapX: 55, mapY: 68, globeX: 57, globeY: 60,
+    zone: '新加坡 Punggol 生態森林',
+    description: 'Punggol 生態森林坐落於新加坡東北部濱海綠廊，JJ 以音樂為媒介跨越國界，每一張票根都化為一棵守護地球的樹，共同書寫星光與自然的永續故事。',
+  },
 ]
 
 // ── Hall of Fame (fans) ──────────────────────────────
@@ -113,6 +134,7 @@ const forestZones = [
   { id: 'huang', name: '花蓮秀林', lat: 24.06, lng: 121.51, trees: 134 },
   { id: 'jay', name: '南投仁愛', lat: 23.96, lng: 121.15, trees: 203 },
   { id: 'psy', name: '宜蘭大同', lat: 24.68, lng: 121.54, trees: 89 },
+  { id: 'jjlin', name: '新加坡 Punggol 生態森林', lat: 1.40, lng: 103.91, trees: 178 },
 ]
 
 function RankIcon({ rank }: { rank: number }) {
@@ -146,8 +168,8 @@ const CORPS: { name: string; file: string; bg: string }[] = [
   { name: 'Wynn',     file: '/logos/wynn.png',     bg: '#1a1206' },
 ]
 
-const RANK_COLORS = ['#FFD700', '#C0C0C0', '#CD7F32', '#6EE7B7']
-const RANK_LABELS = ['#1', '#2', '#3', '#4']
+const RANK_COLORS = ['#FFD700', '#C0C0C0', '#CD7F32', '#6EE7B7', '#93c5fd']
+const RANK_LABELS = ['#1', '#2', '#3', '#4', '#5']
 
 function ForestMap({ onSelect }: { onSelect: (f: typeof artistForests[0]) => void }) {
   const [hovered, setHovered] = useState<string | null>(null)
@@ -233,7 +255,7 @@ function ForestMap({ onSelect }: { onSelect: (f: typeof artistForests[0]) => voi
             <span className="text-[8px] font-mono tracking-[0.25em] text-emerald-400/70">ECHO FOREST GLOBE</span>
             <div className="text-center">
               <p className="text-emerald-300 text-sm font-mono font-bold">{artistForests.reduce((s, f) => s + f.trees, 0)} 棵</p>
-              <p className="text-emerald-600 text-[8px] font-mono">4 FORESTS ACTIVE</p>
+              <p className="text-emerald-600 text-[8px] font-mono">{artistForests.length} FORESTS ACTIVE</p>
             </div>
           </div>
 
