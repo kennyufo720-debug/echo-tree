@@ -132,18 +132,18 @@ function ArtistAvatar({ forest, size = 'md' }: { forest: typeof artistForests[0]
 }
 
 // 本地真實 logo（白底用深色背景，彩色 logo 用白底）
-const CORPS: { name: string; file: string; bg: string; filter?: string }[] = [
-  { name: 'Apple',    file: '/logos/apple.jpg',    bg: '#1d1d1f', filter: 'none' },
-  { name: 'Tesla',    file: '/logos/tesla.png',    bg: '#fff',    filter: 'none' },
-  { name: 'BMW',      file: '/logos/bmw.jpeg',     bg: '#fff',    filter: 'none' },
-  { name: 'Acer',     file: '/logos/acer.jpg',     bg: '#fff',    filter: 'none' },
-  { name: 'Nike',     file: '/logos/nike.jpeg',    bg: '#fff',    filter: 'none' },
-  { name: 'Tencent',  file: '/logos/tencent.png',  bg: '#fff',    filter: 'none' },
-  { name: 'O-Bank',   file: '/logos/obank.png',    bg: '#fff',    filter: 'none' },
-  { name: 'PIXELDOCK',file: '/logos/pixeldock.png',bg: '#fff',    filter: 'none' },
-  { name: '將捷集團', file: '/logos/fabulous.png', bg: '#fff',    filter: 'none' },
-  { name: 'aiwa',     file: '/logos/aiwa.png',     bg: '#fff',    filter: 'none' },
-  { name: 'Wynn',     file: '/logos/wynn.png',     bg: '#1a1206', filter: 'none' },
+const CORPS: { name: string; file: string; bg: string }[] = [
+  { name: 'Apple',    file: '/logos/apple.jpg',    bg: '#1d1d1f' },
+  { name: 'Tesla',    file: '/logos/tesla.png',    bg: '#fff'    },
+  { name: 'O-Bank',   file: '/logos/obank.png',    bg: '#fff'    },
+  { name: 'Acer',     file: '/logos/acer.jpg',     bg: '#fff'    },
+  { name: 'BMW',      file: '/logos/bmw.jpeg',     bg: '#fff'    },
+  { name: 'Nike',     file: '/logos/nike.jpeg',    bg: '#fff'    },
+  { name: 'Tencent',  file: '/logos/tencent.png',  bg: '#fff'    },
+  { name: 'PIXELDOCK',file: '/logos/pixeldock.png',bg: '#fff'    },
+  { name: '將捷集團', file: '/logos/fabulous.png', bg: '#fff'    },
+  { name: 'aiwa',     file: '/logos/aiwa.png',     bg: '#fff'    },
+  { name: 'Wynn',     file: '/logos/wynn.png',     bg: '#1a1206' },
 ]
 
 const RANK_COLORS = ['#FFD700', '#C0C0C0', '#CD7F32', '#6EE7B7']
@@ -153,6 +153,8 @@ function ForestMap({ onSelect }: { onSelect: (f: typeof artistForests[0]) => voi
   const [hovered, setHovered] = useState<string | null>(null)
   const [pulsing, setPulsing] = useState<string | null>(null)
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [zoomedLogo, setZoomedLogo] = useState<typeof CORPS[0] | null>(null)
+  const [marqueeHover, setMarqueeHover] = useState(false)
   const ranked = [...artistForests].sort((a, b) => b.trees - a.trees)
 
   const handleClick = (forest: typeof artistForests[0]) => {
@@ -340,34 +342,78 @@ function ForestMap({ onSelect }: { onSelect: (f: typeof artistForests[0]) => voi
           <span className="text-emerald-400 text-[9px] font-mono tracking-[0.2em]">感謝企業一起愛地球</span>
           <span className="text-emerald-700 text-[9px] font-mono ml-auto">ESG PARTNERS</span>
         </div>
-        <div className="overflow-hidden py-3 px-2">
-          <div className="flex items-center gap-5" style={{ animation: 'corp-scroll 65s linear infinite', width: 'max-content' }}>
+        <div
+          className="overflow-hidden py-3 px-2"
+          onMouseEnter={() => setMarqueeHover(true)}
+          onMouseLeave={() => setMarqueeHover(false)}
+        >
+          <div className="flex items-center gap-5" style={{
+            animation: 'corp-scroll 65s linear infinite',
+            animationPlayState: marqueeHover ? 'paused' : 'running',
+            width: 'max-content',
+          }}>
             {[...CORPS, ...CORPS].map((corp, i) => (
-              <div key={i} className="shrink-0 flex flex-col items-center gap-1">
+              <button
+                key={i}
+                className="shrink-0 flex flex-col items-center gap-1 group"
+                onClick={() => setZoomedLogo(corp)}
+              >
                 <div
-                  className="rounded-xl overflow-hidden flex items-center justify-center"
+                  className="rounded-xl overflow-hidden flex items-center justify-center transition-transform duration-200 group-hover:scale-110 group-hover:shadow-lg"
                   style={{
                     background: corp.bg,
                     width: '64px',
                     height: '40px',
-                    border: '1px solid rgba(52,211,153,0.15)',
+                    border: '1px solid rgba(52,211,153,0.2)',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
                   }}
                 >
-                  <img
-                    src={corp.file}
-                    alt={corp.name}
-                    style={{ width: '52px', height: '32px', objectFit: 'contain' }}
-                  />
+                  <img src={corp.file} alt={corp.name} style={{ width: '52px', height: '32px', objectFit: 'contain' }} />
                 </div>
                 <span style={{ fontSize: '8px', fontFamily: 'monospace', color: 'rgba(180,220,190,0.6)', whiteSpace: 'nowrap' }}>
                   {corp.name}
                 </span>
-              </div>
+              </button>
             ))}
           </div>
         </div>
+
       </div>
+
+      {/* ── Logo 放大 Modal（在 overflow:hidden 容器外） ── */}
+      {zoomedLogo && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center"
+          style={{ background: 'rgba(0,0,0,0.78)', backdropFilter: 'blur(12px)' }}
+          onClick={() => setZoomedLogo(null)}
+        >
+          <div
+            className="rounded-2xl p-8 flex flex-col items-center gap-4 mx-6"
+            style={{
+              background: zoomedLogo.bg,
+              maxWidth: '300px',
+              width: '100%',
+              animation: 'logo-zoom-in 0.32s cubic-bezier(0.34,1.56,0.64,1)',
+              boxShadow: '0 30px 80px rgba(0,0,0,0.6)',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <img
+              src={zoomedLogo.file}
+              alt={zoomedLogo.name}
+              style={{ width: '100%', maxHeight: '180px', objectFit: 'contain' }}
+            />
+            <p style={{
+              fontSize: '13px', fontWeight: 700,
+              color: (zoomedLogo.bg === '#1d1d1f' || zoomedLogo.bg === '#1a1206') ? '#fff' : '#333',
+              fontFamily: 'monospace', letterSpacing: '0.1em',
+            }}>
+              {zoomedLogo.name}
+            </p>
+          </div>
+          <p className="absolute bottom-10 text-white/40 text-xs tracking-wider">點擊任意處關閉</p>
+        </div>
+      )}
 
       <style>{`
         @keyframes corp-scroll {
@@ -399,6 +445,10 @@ function ForestMap({ onSelect }: { onSelect: (f: typeof artistForests[0]) => voi
         @keyframes forest-detail-enter {
           0%   { opacity: 0; transform: translateY(28px) scale(0.96); }
           100% { opacity: 1; transform: translateY(0)    scale(1); }
+        }
+        @keyframes logo-zoom-in {
+          0%   { opacity: 0; transform: scale(0.6); }
+          100% { opacity: 1; transform: scale(1); }
         }
       `}</style>
     </div>
