@@ -63,7 +63,7 @@ function MsgPreviewCard({ conv, unread }: {
               {conv.contactName}
             </span>
             <span className="text-[10px] text-gray-400 shrink-0 ml-2">
-              {last?.at?.split(' ')[0] ?? ''}
+              {last?.createdAt?.split(' ')[0] ?? ''}
             </span>
           </div>
           <div className="flex items-center gap-1 mt-0.5">
