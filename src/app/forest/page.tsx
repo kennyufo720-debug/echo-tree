@@ -24,7 +24,7 @@ const artistForests = [
     textColor: 'text-emerald-700',
     lightBg: 'bg-emerald-50',
     borderColor: 'border-emerald-200',
-    image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&q=80',
+    image: '/ziyu-forest.jpeg',
     mapX: 22, mapY: 25, globeX: 34, globeY: 62,
     zone: '馬來西亞 吉蘭州 ACACIA 森林',
     description: 'ACACIA 森林為一處退化森林，適合進行永續森林再造，結合當地住民共同守護這片珍貴的土地，每棵樹都是跨越國界的 ESG 行動。',
