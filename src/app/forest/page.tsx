@@ -94,8 +94,8 @@ const artistForests = [
   },
   {
     id: 'jjlin',
-    name: '林俊杰森林',
-    artist: '林俊杰',
+    name: '林俊傑森林',
+    artist: '林俊傑',
     initial: 'JJ',
     trees: 178,
     co2: 4530,

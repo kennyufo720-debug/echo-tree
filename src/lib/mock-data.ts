@@ -7,8 +7,8 @@ const fakeRand = (i: number, j: number, seed: number) =>
 export const mockEvents: Event[] = [
   {
     id: '9',
-    title: '林俊杰 JJ LIN 明日座標 世界巡迴演唱會 台北站',
-    artist: '林俊杰 JJ Lin',
+    title: '林俊傑 JJ LIN 明日座標 世界巡迴演唱會 台北站',
+    artist: '林俊傑 JJ Lin',
     venue: '台北大巨蛋',
     city: '台北',
     date: '2026-09-05',
