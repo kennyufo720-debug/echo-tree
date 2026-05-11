@@ -13,7 +13,7 @@ export const mockEvents: Event[] = [
     city: '台北',
     date: '2026-09-05',
     time: '19:30',
-    image: 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=800&q=80',
+    image: 'https://img.youtube.com/vi/Ra6tyMqBoss/maxresdefault.jpg',
     category: 'concert',
     priceFrom: 1800,
     priceTo: 6800,
@@ -21,7 +21,7 @@ export const mockEvents: Event[] = [
     availableSeats: 12000,
     status: 'on-sale',
     tags: ['熱門', '快售完', '星光'],
-    videoId: 'NDP7sBTO_HU',
+    videoId: 'Ra6tyMqBoss',
     imagePosition: '50% 30%',
   },
   {
