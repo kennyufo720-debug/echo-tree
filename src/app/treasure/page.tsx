@@ -161,6 +161,85 @@ const TW_FRAGMENTS: Fragment[] = TW_GROUPS.flatMap(g =>
   g.fragments.map(f => ({ ...f, group: g.name }))
 )
 
+// ── 九宮格元件 ───────────────────────────────────────────
+const GRID9 = TW_GROUPS[0].fragments  // 台北/森之呼吸 01–09
+
+function NineGrid({ onSelect }: { onSelect: (f: Fragment) => void }) {
+  const collected = GRID9.filter(f => f.obtained).length
+  return (
+    <div className="rounded-2xl overflow-hidden border border-emerald-800/60 bg-gray-900">
+      {/* Header */}
+      <div className="px-4 pt-3 pb-2 flex items-center justify-between bg-gradient-to-r from-emerald-950 to-gray-900">
+        <div>
+          <p className="text-sm font-bold text-white flex items-center gap-1.5">
+            <Sparkles className="h-4 w-4 text-amber-400" />子瑜 台灣限定九宮格
+          </p>
+          <p className="text-[11px] text-gray-500 mt-0.5">集齊 9 片解鎖完整照片</p>
+        </div>
+        <span className={`font-bold text-sm ${collected === 9 ? 'text-amber-400' : 'text-emerald-400'}`}>{collected}/9</span>
+      </div>
+      {/* 3×3 grid */}
+      <div className="grid grid-cols-3" style={{ gap: 2, background: '#111' }}>
+        {GRID9.map((frag, i) => {
+          const row = Math.floor(i / 3)   // 0 1 2
+          const col = i % 3               // 0 1 2
+          const num = String(i + 1).padStart(2, '0')
+          // 把整張圖放大 3 倍後，平移到正確位置
+          const translateX = -(col * 100 / 3)   // 0 / -33.33 / -66.66 %
+          const translateY = -(row * 100 / 3)
+          return (
+            <button
+              key={frag.id}
+              onClick={() => onSelect({ ...frag, group: '台北' })}
+              className="relative overflow-hidden group"
+              style={{ aspectRatio: '1' }}
+            >
+              {/* 圖片切片（img absolute，放大3倍後平移） */}
+              <img
+                src="/ziyu-forest.jpeg"
+                alt={num}
+                className="absolute pointer-events-none"
+                style={{
+                  width: '300%',
+                  height: '300%',
+                  top: 0,
+                  left: 0,
+                  objectFit: 'cover',
+                  transform: `translate(${translateX}%, ${translateY}%)`,
+                  filter: frag.obtained ? 'none' : 'brightness(0.07)',
+                  transition: 'filter 0.4s',
+                }}
+              />
+              {/* 未收集：鎖 + 編號 */}
+              {!frag.obtained && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5 z-10">
+                  <Lock className="h-5 w-5 text-gray-600" />
+                  <span className="text-[11px] font-mono font-bold text-gray-700">{num}</span>
+                </div>
+              )}
+              {/* 已收集：角標 */}
+              {frag.obtained && (
+                <>
+                  <span className="absolute top-1 left-1.5 text-[9px] font-mono font-bold text-white/80 drop-shadow z-10">{num}</span>
+                  <CheckCircle2 className="absolute bottom-1 right-1 h-3.5 w-3.5 text-emerald-400 drop-shadow z-10" />
+                </>
+              )}
+              <div className="absolute inset-0 bg-white/0 group-hover:bg-white/8 transition-colors z-10" />
+            </button>
+          )
+        })}
+      </div>
+      {/* 底部 */}
+      <div className="px-4 py-2 border-t border-gray-800 text-center">
+        {collected === 9
+          ? <p className="text-xs text-amber-400 font-medium">🎉 完整照片已解鎖！</p>
+          : <p className="text-[11px] text-gray-600">還差 <span className="text-emerald-500 font-bold">{9 - collected}</span> 片・購票 / 打卡 / 任務即可獲得</p>
+        }
+      </div>
+    </div>
+  )
+}
+
 // ── Region helpers ───────────────────────────────────────
 function toFragments(name: string, frags: Omit<Fragment, 'group'>[]): Fragment[] {
   return frags.map(f => ({ ...f, group: name }))
@@ -353,79 +432,7 @@ export default function TreasurePage() {
             </div>
 
             {/* Taiwan: 九宮格拼圖 */}
-            {activeRegion.id === 'taiwan' && (() => {
-              const grid9 = TW_GROUPS[0].fragments  // 台北/森之呼吸 01–09
-              const collectedCount = grid9.filter(f => f.obtained).length
-              return (
-                <div className="rounded-2xl overflow-hidden border border-gray-800 bg-gray-900">
-                  {/* 標題 */}
-                  <div className="px-4 pt-3 pb-2 flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-bold text-white flex items-center gap-1.5">
-                        <Sparkles className="h-4 w-4 text-amber-400" />子瑜 台灣限定九宮格
-                      </p>
-                      <p className="text-[11px] text-gray-500 mt-0.5">集齊 9 片解鎖完整照片</p>
-                    </div>
-                    <span className="text-emerald-400 font-bold text-sm">{collectedCount}/9</span>
-                  </div>
-                  {/* 九宮格 */}
-                  <div className="grid grid-cols-3 gap-0.5 bg-gray-800">
-                    {grid9.map((frag, i) => {
-                      const row = Math.floor(i / 3)
-                      const col = i % 3
-                      const num = String(i + 1).padStart(2, '0')
-                      const posX = `${col * 50}%`
-                      const posY = `${row * 50}%`
-                      return (
-                        <button
-                          key={frag.id}
-                          onClick={() => setSelectedFrag({ ...frag, group: '台北' })}
-                          className="relative aspect-square overflow-hidden group"
-                        >
-                          {/* 圖片切片 */}
-                          <div
-                            className="absolute inset-0 transition-all duration-500"
-                            style={{
-                              backgroundImage: 'url(/ziyu-forest.jpeg)',
-                              backgroundSize: '300% 300%',
-                              backgroundPosition: `${posX} ${posY}`,
-                              filter: frag.obtained ? 'none' : 'brightness(0.08)',
-                            }}
-                          />
-                          {/* 收集前：編號 + 鎖 */}
-                          {!frag.obtained && (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
-                              <Lock className="h-4 w-4 text-gray-600" />
-                              <span className="text-[10px] font-mono font-bold text-gray-700">{num}</span>
-                            </div>
-                          )}
-                          {/* 收集後：編號角標 */}
-                          {frag.obtained && (
-                            <>
-                              <div className="absolute top-1 left-1.5">
-                                <span className="text-[9px] font-mono font-bold text-white/70 drop-shadow">{num}</span>
-                              </div>
-                              <div className="absolute bottom-1 right-1">
-                                <CheckCircle2 className="h-3 w-3 text-emerald-400 drop-shadow" />
-                              </div>
-                            </>
-                          )}
-                          {/* hover ripple */}
-                          <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors" />
-                        </button>
-                      )
-                    })}
-                  </div>
-                  {/* 底部提示 */}
-                  <div className="px-4 py-2.5 border-t border-gray-800">
-                    {collectedCount === 9
-                      ? <p className="text-xs text-emerald-400 font-medium text-center">🎉 完整照片已解鎖！</p>
-                      : <p className="text-xs text-gray-600 text-center">還差 {9 - collectedCount} 片 · 購票、打卡、完成任務即可獲得</p>
-                    }
-                  </div>
-                </div>
-              )
-            })()}
+            {activeRegion.id === 'taiwan' && <NineGrid onSelect={f => setSelectedFrag(f)} />}
 
             {/* Taiwan: group tabs + search */}
             {activeRegion.id === 'taiwan' && (
@@ -584,6 +591,12 @@ export default function TreasurePage() {
                 )
               })}
             </div>
+
+            {/* ── 台灣九宮格（主頁面直接顯示） ── */}
+            <h2 className="text-sm font-bold text-gray-400 flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-amber-400" />🇹🇼 台灣限定九宮格
+            </h2>
+            <NineGrid onSelect={f => { setSelectedFrag(f) }} />
 
             {/* Rewards */}
             <h2 className="text-sm font-bold text-gray-400 flex items-center gap-2">
