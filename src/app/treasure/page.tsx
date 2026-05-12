@@ -27,19 +27,19 @@ function fragEmoji(f: { emoji: string; rarity: Rarity }) {
   return f.emoji || RARITY_EMOJI[f.rarity]
 }
 
-const TW_GROUPS: { name: string; emoji: string; series: string; fragments: Omit<Fragment, 'group'>[] }[] = [
+const TW_GROUPS: { name: string; emoji: string; series: string; image?: string; fragments: Omit<Fragment, 'group'>[] }[] = [
   {
-    name: '台北', emoji: '🏙️', series: '森之呼吸',
+    name: '台北', emoji: '🏙️', series: '根之連動', image: '/ziyu-forest.jpeg',
     fragments: [
-      { id: 'tw01', name: '森之呼吸 01', emoji: '🌬️', rarity: 'common',    obtained: true,  date: '2026-04-15', how: '購買台北場票券' },
-      { id: 'tw02', name: '森之呼吸 02', emoji: '🍃', rarity: 'common',    obtained: true,  date: '2026-04-16', how: '出席ESG音樂節' },
-      { id: 'tw03', name: '森之呼吸 03', emoji: '🌿', rarity: 'common',    obtained: true,  date: '2026-04-18', how: 'GPS打卡台北場地' },
-      { id: 'tw04', name: '森之呼吸 04', emoji: '🌱', rarity: 'rare',      obtained: false, date: null, how: '購買第2張台北場票' },
-      { id: 'tw05', name: '森之呼吸 05', emoji: '💨', rarity: 'rare',      obtained: false, date: null, how: '兌換 800 點數' },
-      { id: 'tw06', name: '森之呼吸 06', emoji: '🌲', rarity: 'common',    obtained: false, date: null, how: '邀請 1 位好友' },
-      { id: 'tw07', name: '森之呼吸 07', emoji: '🌳', rarity: 'rare',      obtained: false, date: null, how: '分享活動至社群' },
-      { id: 'tw08', name: '森之呼吸 08', emoji: '🌴', rarity: 'epic',      obtained: false, date: null, how: '完成個人資料' },
-      { id: 'tw09', name: '森之呼吸 09', emoji: '👑', rarity: 'legendary', obtained: false, date: null, how: '集齊森之呼吸 01–08' },
+      { id: 'tw01', name: '根之連動 01', emoji: '🌱', rarity: 'common',    obtained: true,  date: '2026-04-15', how: '購買台北場票券' },
+      { id: 'tw02', name: '根之連動 02', emoji: '🌿', rarity: 'common',    obtained: true,  date: '2026-04-16', how: '出席ESG音樂節' },
+      { id: 'tw03', name: '根之連動 03', emoji: '🍃', rarity: 'common',    obtained: true,  date: '2026-04-18', how: 'GPS打卡台北場地' },
+      { id: 'tw04', name: '根之連動 04', emoji: '🌲', rarity: 'rare',      obtained: false, date: null, how: '購買第2張台北場票' },
+      { id: 'tw05', name: '根之連動 05', emoji: '🌳', rarity: 'rare',      obtained: false, date: null, how: '兌換 800 點數' },
+      { id: 'tw06', name: '根之連動 06', emoji: '🌴', rarity: 'common',    obtained: false, date: null, how: '邀請 1 位好友' },
+      { id: 'tw07', name: '根之連動 07', emoji: '🪵', rarity: 'rare',      obtained: false, date: null, how: '分享活動至社群' },
+      { id: 'tw08', name: '根之連動 08', emoji: '🌾', rarity: 'epic',      obtained: false, date: null, how: '完成個人資料驗證' },
+      { id: 'tw09', name: '根之連動 09', emoji: '👑', rarity: 'legendary', obtained: false, date: null, how: '集齊根之連動 01–08' },
     ],
   },
   {
@@ -161,81 +161,118 @@ const TW_FRAGMENTS: Fragment[] = TW_GROUPS.flatMap(g =>
   g.fragments.map(f => ({ ...f, group: g.name }))
 )
 
-// ── 九宮格元件 ───────────────────────────────────────────
-const GRID9 = TW_GROUPS[0].fragments  // 台北/森之呼吸 01–09
+// ── 系列展示面板（九宮格 + 碎片清單一體） ──────────────────
+type TwGroup = typeof TW_GROUPS[0]
 
-function NineGrid({ onSelect }: { onSelect: (f: Fragment) => void }) {
-  const collected = GRID9.filter(f => f.obtained).length
+function SeriesPanel({ group, onSelect }: { group: TwGroup; onSelect: (f: Fragment) => void }) {
+  const frags = group.fragments
+  const collected = frags.filter(f => f.obtained).length
+  const hasImage = !!group.image
+
   return (
-    <div className="rounded-2xl overflow-hidden border border-emerald-800/60 bg-gray-900">
-      {/* Header */}
-      <div className="px-4 pt-3 pb-2 flex items-center justify-between bg-gradient-to-r from-emerald-950 to-gray-900">
+    <div className="space-y-3">
+      {/* 系列標題 */}
+      <div className="flex items-end justify-between px-1">
         <div>
-          <p className="text-sm font-bold text-white flex items-center gap-1.5">
-            <Sparkles className="h-4 w-4 text-amber-400" />子瑜 台灣限定九宮格
-          </p>
-          <p className="text-[11px] text-gray-500 mt-0.5">集齊 9 片解鎖完整照片</p>
+          <p className="text-[11px] text-gray-500 font-mono uppercase tracking-widest">No.{String(TW_GROUPS.indexOf(group) + 1).padStart(2, '0')} · {group.emoji} {group.name}</p>
+          <h3 className="text-xl font-bold text-white mt-0.5">{group.series}</h3>
         </div>
-        <span className={`font-bold text-sm ${collected === 9 ? 'text-amber-400' : 'text-emerald-400'}`}>{collected}/9</span>
+        <span className={`text-sm font-bold ${collected === 9 ? 'text-amber-400' : 'text-emerald-400'}`}>{collected} / 9</span>
       </div>
-      {/* 3×3 grid */}
-      <div className="grid grid-cols-3" style={{ gap: 2, background: '#111' }}>
-        {GRID9.map((frag, i) => {
-          const row = Math.floor(i / 3)   // 0 1 2
-          const col = i % 3               // 0 1 2
+
+      {/* 九宮格 */}
+      <div className="rounded-2xl overflow-hidden" style={{ background: '#0a0a0a' }}>
+        <div className="grid grid-cols-3" style={{ gap: 1 }}>
+          {frags.map((frag, i) => {
+            const row = Math.floor(i / 3)
+            const col = i % 3
+            const num = String(i + 1).padStart(2, '0')
+            const tx = -(col * 100 / 3)
+            const ty = -(row * 100 / 3)
+            return (
+              <button
+                key={frag.id}
+                onClick={() => onSelect({ ...frag, group: group.name })}
+                className="relative overflow-hidden group"
+                style={{ aspectRatio: '1' }}
+              >
+                {hasImage ? (
+                  <img
+                    src={group.image}
+                    alt={num}
+                    className="absolute pointer-events-none"
+                    style={{
+                      width: '300%', height: '300%',
+                      top: 0, left: 0, objectFit: 'cover',
+                      transform: `translate(${tx}%, ${ty}%)`,
+                      filter: frag.obtained ? 'none' : 'brightness(0.06)',
+                      transition: 'filter 0.4s',
+                    }}
+                  />
+                ) : (
+                  /* 尚未上傳圖片：顯示主題色占位 */
+                  <div className="absolute inset-0" style={{ background: frag.obtained ? '#134e2a' : '#0d0d0d' }} />
+                )}
+                {/* 未收集 */}
+                {!frag.obtained && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+                    <Lock className="h-4 w-4 text-gray-700" />
+                    <span className="text-[10px] font-mono text-gray-700 mt-0.5">{num}</span>
+                  </div>
+                )}
+                {/* 已收集 */}
+                {frag.obtained && (
+                  <>
+                    <span className="absolute top-1 left-1.5 text-[9px] font-mono font-bold text-white/70 drop-shadow z-10">{num}</span>
+                    <CheckCircle2 className="absolute bottom-1 right-1 h-3 w-3 text-emerald-400 drop-shadow z-10" />
+                  </>
+                )}
+                <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors z-10" />
+              </button>
+            )
+          })}
+        </div>
+        {/* 進度條 */}
+        <div className="h-0.5 bg-gray-900">
+          <div
+            className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-700"
+            style={{ width: `${(collected / 9) * 100}%` }}
+          />
+        </div>
+      </div>
+
+      {/* 碎片清單 */}
+      <div className="space-y-1.5">
+        {frags.map((frag, i) => {
           const num = String(i + 1).padStart(2, '0')
-          // 把整張圖放大 3 倍後，平移到正確位置
-          const translateX = -(col * 100 / 3)   // 0 / -33.33 / -66.66 %
-          const translateY = -(row * 100 / 3)
+          const r = RARITY[frag.rarity]
           return (
             <button
               key={frag.id}
-              onClick={() => onSelect({ ...frag, group: '台北' })}
-              className="relative overflow-hidden group"
-              style={{ aspectRatio: '1' }}
+              onClick={() => onSelect({ ...frag, group: group.name })}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all text-left ${
+                frag.obtained
+                  ? 'bg-gray-900 border-gray-800 hover:border-emerald-800'
+                  : 'bg-gray-950 border-gray-900 hover:border-gray-700'
+              }`}
             >
-              {/* 圖片切片（img absolute，放大3倍後平移） */}
-              <img
-                src="/ziyu-forest.jpeg"
-                alt={num}
-                className="absolute pointer-events-none"
-                style={{
-                  width: '300%',
-                  height: '300%',
-                  top: 0,
-                  left: 0,
-                  objectFit: 'cover',
-                  transform: `translate(${translateX}%, ${translateY}%)`,
-                  filter: frag.obtained ? 'none' : 'brightness(0.07)',
-                  transition: 'filter 0.4s',
-                }}
-              />
-              {/* 未收集：鎖 + 編號 */}
-              {!frag.obtained && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5 z-10">
-                  <Lock className="h-5 w-5 text-gray-600" />
-                  <span className="text-[11px] font-mono font-bold text-gray-700">{num}</span>
-                </div>
-              )}
-              {/* 已收集：角標 */}
-              {frag.obtained && (
-                <>
-                  <span className="absolute top-1 left-1.5 text-[9px] font-mono font-bold text-white/80 drop-shadow z-10">{num}</span>
-                  <CheckCircle2 className="absolute bottom-1 right-1 h-3.5 w-3.5 text-emerald-400 drop-shadow z-10" />
-                </>
-              )}
-              <div className="absolute inset-0 bg-white/0 group-hover:bg-white/8 transition-colors z-10" />
+              <span className="text-[11px] font-mono text-gray-600 w-5 shrink-0">{num}</span>
+              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${frag.obtained ? 'bg-emerald-400' : 'bg-gray-800'}`} />
+              <span className={`flex-1 text-sm ${frag.obtained ? 'text-white' : 'text-gray-600'}`}>
+                {frag.obtained ? frag.name : '未解鎖'}
+              </span>
+              <span className={`text-[10px] shrink-0 ${r.color}`}>{r.label}</span>
+              {frag.obtained
+                ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                : <ChevronRight className="h-3.5 w-3.5 text-gray-700 shrink-0" />}
             </button>
           )
         })}
       </div>
-      {/* 底部 */}
-      <div className="px-4 py-2 border-t border-gray-800 text-center">
-        {collected === 9
-          ? <p className="text-xs text-amber-400 font-medium">🎉 完整照片已解鎖！</p>
-          : <p className="text-[11px] text-gray-600">還差 <span className="text-emerald-500 font-bold">{9 - collected}</span> 片・購票 / 打卡 / 任務即可獲得</p>
-        }
-      </div>
+
+      {collected === 9 && (
+        <p className="text-center text-xs text-amber-400 font-medium py-1">🎉 完整畫作已解鎖！</p>
+      )}
     </div>
   )
 }
@@ -431,84 +468,64 @@ export default function TreasurePage() {
               </div>
             </div>
 
-            {/* Taiwan: 九宮格拼圖 */}
-            {activeRegion.id === 'taiwan' && <NineGrid onSelect={f => setSelectedFrag(f)} />}
+            {/* Taiwan: 系列選擇 + 九宮格 + 碎片清單 */}
+            {activeRegion.id === 'taiwan' && (() => {
+              const activeGrp = TW_GROUPS.find(g => g.name === activeGroup) ?? TW_GROUPS[0]
+              return (
+                <>
+                  {/* 系列橫向捲動選擇 */}
+                  <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                    {TW_GROUPS.map((g, idx) => {
+                      const got = g.fragments.filter(f => f.obtained).length
+                      const isActive = activeGroup === g.name || (activeGroup === '全部' && idx === 0)
+                      return (
+                        <button
+                          key={g.name}
+                          onClick={() => setActiveGroup(g.name)}
+                          className={`shrink-0 flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl text-xs font-medium transition-all ${isActive ? 'bg-emerald-700 text-white' : 'bg-gray-900 text-gray-500 hover:bg-gray-800'}`}
+                        >
+                          <span className="text-base">{g.emoji}</span>
+                          <span>{g.name}</span>
+                          <span className={`text-[9px] ${isActive ? 'text-emerald-200' : 'text-gray-700'}`}>{got}/9</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {/* 九宮格 + 碎片清單 */}
+                  <SeriesPanel group={activeGrp} onSelect={f => setSelectedFrag(f)} />
+                </>
+              )
+            })()}
 
-            {/* Taiwan: group tabs + search */}
-            {activeRegion.id === 'taiwan' && (
-              <>
-                {/* Search */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                  <Input
-                    placeholder="搜尋碎片名稱..."
-                    className="pl-9 bg-gray-900 border-gray-700 text-white placeholder:text-gray-600 h-9 text-sm"
-                    value={fragSearch}
-                    onChange={e => setFragSearch(e.target.value)}
-                  />
-                </div>
-                {/* Group pills */}
-                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-                  {['全部', ...TW_GROUPS.map(g => g.name)].map(g => {
-                    const grp = TW_GROUPS.find(x => x.name === g)
-                    const got = grp ? TW_FRAGMENTS.filter(f => f.group === g && f.obtained).length : TW_FRAGMENTS.filter(f => f.obtained).length
-                    const tot = grp ? grp.fragments.length : TW_FRAGMENTS.length
-                    return (
-                      <button
-                        key={g}
-                        onClick={() => setActiveGroup(g)}
-                        className={`shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${activeGroup === g ? 'bg-emerald-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
-                      >
-                        {grp?.emoji ?? ''} {g}
-                        <span className={`${activeGroup === g ? 'text-emerald-200' : 'text-gray-600'}`}>{got}/{tot}</span>
-                      </button>
-                    )
-                  })}
-                </div>
-              </>
-            )}
-
-            {/* Fragment grid */}
-            {(() => {
-              const frags = activeRegion.fragments.filter(f => {
-                const matchGroup = activeGroup === '全部' || ('group' in f ? (f as Fragment).group === activeGroup : true)
-                const matchSearch = !fragSearch || f.name.includes(fragSearch) || f.emoji.includes(fragSearch)
-                return matchGroup && matchSearch
-              })
+            {/* 非台灣地區：原有碎片格子 */}
+            {activeRegion.id !== 'taiwan' && (() => {
+              const frags = activeRegion.fragments
               return (
                 <>
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-bold text-gray-400 flex items-center gap-1.5">
-                      <Sparkles className="h-4 w-4 text-amber-400" />
-                      {activeGroup === '全部' ? `全部碎片` : `${activeGroup}碎片`}
+                      <Sparkles className="h-4 w-4 text-amber-400" />{activeRegion.name} 碎片
                     </p>
-                    <span className="text-xs text-gray-600">{frags.filter(f=>f.obtained).length}/{frags.length} 已收集</span>
+                    <span className="text-xs text-gray-600">{frags.filter(f=>f.obtained).length}/{frags.length}</span>
                   </div>
                   <div className="grid grid-cols-4 gap-2">
                     {frags.map(frag => {
                       const r = RARITY[frag.rarity]
                       return (
-                        <button
-                          key={frag.id}
-                          onClick={() => setSelectedFrag(frag)}
-                          className={`rounded-xl border ${frag.obtained ? r.border : 'border-dashed border-gray-800'} bg-gray-900 p-2 flex flex-col items-center gap-1 transition-all hover:scale-105 active:scale-95`}
+                        <button key={frag.id} onClick={() => setSelectedFrag(frag)}
+                          className={`rounded-xl border ${frag.obtained ? r.border : 'border-dashed border-gray-800'} bg-gray-900 p-2 flex flex-col items-center gap-1 transition-all hover:scale-105`}
                         >
                           <span className={`text-2xl ${frag.obtained ? '' : 'opacity-20'}`}>
                             {frag.obtained ? fragEmoji(frag) : RARITY_EMOJI[frag.rarity as Rarity]}
                           </span>
-                          <span className={`text-[9px] font-medium leading-tight text-center line-clamp-2 ${frag.obtained ? 'text-white' : 'text-gray-700'}`}>
-                            {frag.obtained ? frag.name : `#${frag.id.replace(/[a-z]/g,'')}`}
+                          <span className={`text-[9px] text-center line-clamp-2 ${frag.obtained ? 'text-white' : 'text-gray-700'}`}>
+                            {frag.obtained ? frag.name : `未解鎖`}
                           </span>
                           <span className={`text-[8px] ${frag.obtained ? r.color : 'text-gray-800'}`}>{r.label}</span>
                         </button>
                       )
                     })}
                   </div>
-                  {frags.length === 0 && (
-                    <div className="text-center py-8 text-gray-600">
-                      <p className="text-sm">找不到碎片</p>
-                    </div>
-                  )}
                 </>
               )
             })()}
@@ -591,12 +608,6 @@ export default function TreasurePage() {
                 )
               })}
             </div>
-
-            {/* ── 台灣九宮格（主頁面直接顯示） ── */}
-            <h2 className="text-sm font-bold text-gray-400 flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-amber-400" />🇹🇼 台灣限定九宮格
-            </h2>
-            <NineGrid onSelect={f => { setSelectedFrag(f) }} />
 
             {/* Rewards */}
             <h2 className="text-sm font-bold text-gray-400 flex items-center gap-2">
