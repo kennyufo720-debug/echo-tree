@@ -352,6 +352,81 @@ export default function TreasurePage() {
               </div>
             </div>
 
+            {/* Taiwan: 九宮格拼圖 */}
+            {activeRegion.id === 'taiwan' && (() => {
+              const grid9 = TW_GROUPS[0].fragments  // 台北/森之呼吸 01–09
+              const collectedCount = grid9.filter(f => f.obtained).length
+              return (
+                <div className="rounded-2xl overflow-hidden border border-gray-800 bg-gray-900">
+                  {/* 標題 */}
+                  <div className="px-4 pt-3 pb-2 flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-bold text-white flex items-center gap-1.5">
+                        <Sparkles className="h-4 w-4 text-amber-400" />子瑜 台灣限定九宮格
+                      </p>
+                      <p className="text-[11px] text-gray-500 mt-0.5">集齊 9 片解鎖完整照片</p>
+                    </div>
+                    <span className="text-emerald-400 font-bold text-sm">{collectedCount}/9</span>
+                  </div>
+                  {/* 九宮格 */}
+                  <div className="grid grid-cols-3 gap-0.5 bg-gray-800">
+                    {grid9.map((frag, i) => {
+                      const row = Math.floor(i / 3)
+                      const col = i % 3
+                      const num = String(i + 1).padStart(2, '0')
+                      const posX = `${col * 50}%`
+                      const posY = `${row * 50}%`
+                      return (
+                        <button
+                          key={frag.id}
+                          onClick={() => setSelectedFrag({ ...frag, group: '台北' })}
+                          className="relative aspect-square overflow-hidden group"
+                        >
+                          {/* 圖片切片 */}
+                          <div
+                            className="absolute inset-0 transition-all duration-500"
+                            style={{
+                              backgroundImage: 'url(/ziyu-forest.jpeg)',
+                              backgroundSize: '300% 300%',
+                              backgroundPosition: `${posX} ${posY}`,
+                              filter: frag.obtained ? 'none' : 'brightness(0.08)',
+                            }}
+                          />
+                          {/* 收集前：編號 + 鎖 */}
+                          {!frag.obtained && (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
+                              <Lock className="h-4 w-4 text-gray-600" />
+                              <span className="text-[10px] font-mono font-bold text-gray-700">{num}</span>
+                            </div>
+                          )}
+                          {/* 收集後：編號角標 */}
+                          {frag.obtained && (
+                            <>
+                              <div className="absolute top-1 left-1.5">
+                                <span className="text-[9px] font-mono font-bold text-white/70 drop-shadow">{num}</span>
+                              </div>
+                              <div className="absolute bottom-1 right-1">
+                                <CheckCircle2 className="h-3 w-3 text-emerald-400 drop-shadow" />
+                              </div>
+                            </>
+                          )}
+                          {/* hover ripple */}
+                          <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors" />
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {/* 底部提示 */}
+                  <div className="px-4 py-2.5 border-t border-gray-800">
+                    {collectedCount === 9
+                      ? <p className="text-xs text-emerald-400 font-medium text-center">🎉 完整照片已解鎖！</p>
+                      : <p className="text-xs text-gray-600 text-center">還差 {9 - collectedCount} 片 · 購票、打卡、完成任務即可獲得</p>
+                    }
+                  </div>
+                </div>
+              )
+            })()}
+
             {/* Taiwan: group tabs + search */}
             {activeRegion.id === 'taiwan' && (
               <>
