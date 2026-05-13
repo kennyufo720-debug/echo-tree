@@ -41,12 +41,12 @@ const DEFAULT_MERCHS: MerchItem[] = [
   { id: 'm2', name: '刺繡徽章組',    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80', points: 290,  tag: '新品', tagColor: '#8b5cf6', description: '精緻刺繡徽章 5 入組，涵蓋回音樹各場次主題設計。', stock: 120 },
   { id: 'm3', name: '演唱會手環',    image: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=600&q=80', points: 199,  tag: '限量', tagColor: '#ec4899', description: '螢光矽膠手環，演唱會限定配色，僅在活動期間開放兌換。', stock: 80 },
   { id: 'm4', name: 'ESG 種樹證書',  image: 'https://images.unsplash.com/photo-1542601906897-edc9b0d6be72?w=600&q=80', points: 780,  tag: 'ESG',  tagColor: '#10b981', description: '印有你名字的種樹座標證書，加入回音森林名人堂。', stock: 200 },
+  { id: 'm10', name: 'AIWA 愛華 藍芽耳機', image: '/aiwa-earphone.jpeg', points: 2980, tag: '聯名', tagColor: '#6366f1', description: 'AIWA × ECHO TREE 限量聯名款真無線藍芽耳機，主動降噪 ANC，單次續航 8hr，附充電盒總計 32hr，IP54 防水，限量發售。', stock: 30 },
   { id: 'm5', name: '限定 Tee 上衣', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80', points: 1480, tag: '限量', tagColor: '#ec4899', description: '100% 有機棉 T-Shirt，回音樹 2026 巡演限定款，尺碼 S–XL。', stock: 30 },
   { id: 'm6', name: '音樂節馬克杯',  image: 'https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=600&q=80', points: 590,  tag: '熱門', tagColor: '#f97316', description: '陶瓷馬克杯 350ml，雙面印刷回音樹 Logo，微波爐安全。', stock: 60 },
   { id: 'm7', name: '折疊雨傘',      image: 'https://images.unsplash.com/photo-1558618047-3c5c3a4ed6c6?w=600&q=80', points: 980,  tag: '實用', tagColor: '#3b82f6', description: '超輕量折疊傘，附收納袋，抗UV塗層，直徑 100cm。', stock: 40 },
   { id: 'm8', name: 'PSY X ECHO 森林滅火器', image: '/psy-x-echo-extinguisher.jpg', points: 2480, tag: '聯名', tagColor: '#0ea5e9', description: 'PSY × ECHO TREE 限量聯名款森林滅火器，天空藍消光塗裝，COLLAB EDITION // MODEL: PAS-01，附收納掛架，限量發售。', stock: 50 },
   { id: 'm9', name: 'echo tree 低碳限量T雪', image: '/echo-tree-tee-white.jpg', points: 890, tag: '限量', tagColor: '#10b981', description: 'echo tree 低碳系列限量T雪（白），100% 有機棉，深森綠字樣印刷，尺碼 S–XL，限量發售。', stock: 60 },
-  { id: 'm10', name: 'AIWA 愛華 藍芽耳機', image: '/aiwa-earphone.jpeg', points: 2980, tag: '聯名', tagColor: '#6366f1', description: 'AIWA × ECHO TREE 限量聯名款真無線藍芽耳機，主動降噪 ANC，單次續航 8hr，附充電盒總計 32hr，IP54 防水，限量發售。', stock: 30 },
 ]
 
 function loadMerchs(): MerchItem[] {

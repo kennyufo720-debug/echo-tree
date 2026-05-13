@@ -112,6 +112,7 @@ const DEFAULT_STORE: StoreItem[] = [
   { id: 'm1', name: '限定帆布袋',    image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&q=80', points: 490,  tag: '熱門', tagColor: '#f97316', stock: 50 },
   { id: 'm2', name: '刺繡徽章組',    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80', points: 290,  tag: '新品', tagColor: '#8b5cf6', stock: 120 },
   { id: 'm3', name: '演唱會手環',    image: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=400&q=80', points: 199,  tag: '限量', tagColor: '#ec4899', stock: 80 },
+  { id: 'm10', name: 'AIWA 愛華 藍芽耳機', image: '/aiwa-earphone.jpeg', points: 2980, tag: '聯名', tagColor: '#6366f1', stock: 30 },
   { id: 'm5', name: '限定 Tee 上衣', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80', points: 1480, tag: '限量', tagColor: '#ec4899', stock: 30 },
   { id: 'm6', name: '音樂節馬克杯',  image: 'https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=400&q=80', points: 590,  tag: '熱門', tagColor: '#f97316', stock: 60 },
   { id: 'm7', name: '折疊雨傘',      image: 'https://images.unsplash.com/photo-1558618047-3c5c3a4ed6c6?w=400&q=80', points: 980,  tag: '實用', tagColor: '#3b82f6', stock: 40 },
