@@ -46,6 +46,7 @@ const DEFAULT_MERCHS: MerchItem[] = [
   { id: 'm7', name: '折疊雨傘',      image: 'https://images.unsplash.com/photo-1558618047-3c5c3a4ed6c6?w=600&q=80', points: 980,  tag: '實用', tagColor: '#3b82f6', description: '超輕量折疊傘，附收納袋，抗UV塗層，直徑 100cm。', stock: 40 },
   { id: 'm8', name: 'PSY X ECHO 森林滅火器', image: '/psy-x-echo-extinguisher.jpg', points: 2480, tag: '聯名', tagColor: '#0ea5e9', description: 'PSY × ECHO TREE 限量聯名款森林滅火器，天空藍消光塗裝，COLLAB EDITION // MODEL: PAS-01，附收納掛架，限量發售。', stock: 50 },
   { id: 'm9', name: 'echo tree 低碳限量T雪', image: '/echo-tree-tee-white.jpg', points: 890, tag: '限量', tagColor: '#10b981', description: 'echo tree 低碳系列限量T雪（白），100% 有機棉，深森綠字樣印刷，尺碼 S–XL，限量發售。', stock: 60 },
+  { id: 'm10', name: 'AIWA 愛華 藍芽耳機', image: '/aiwa-earphone.jpeg', points: 2980, tag: '聯名', tagColor: '#6366f1', description: 'AIWA × ECHO TREE 限量聯名款真無線藍芽耳機，主動降噪 ANC，單次續航 8hr，附充電盒總計 32hr，IP54 防水，限量發售。', stock: 30 },
 ]
 
 function loadMerchs(): MerchItem[] {
