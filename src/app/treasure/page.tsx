@@ -189,8 +189,6 @@ function SeriesPanel({ group, onSelect }: { group: TwGroup; onSelect: (f: Fragme
             const row = Math.floor(i / 3)
             const col = i % 3
             const num = String(i + 1).padStart(2, '0')
-            const tx = -(col * 100 / 3)
-            const ty = -(row * 100 / 3)
             return (
               <button
                 key={frag.id}
@@ -198,23 +196,18 @@ function SeriesPanel({ group, onSelect }: { group: TwGroup; onSelect: (f: Fragme
                 className="relative overflow-hidden group"
                 style={{ aspectRatio: '1' }}
               >
-                {hasImage ? (
-                  <img
-                    src={group.image}
-                    alt={num}
-                    className="absolute pointer-events-none"
-                    style={{
-                      width: '300%', height: '300%',
-                      top: 0, left: 0, objectFit: 'cover',
-                      transform: `translate(${tx}%, ${ty}%)`,
-                      filter: frag.obtained ? 'none' : 'brightness(0.06)',
-                      transition: 'filter 0.4s',
-                    }}
-                  />
-                ) : (
-                  /* 尚未上傳圖片：顯示主題色占位 */
-                  <div className="absolute inset-0" style={{ background: frag.obtained ? '#134e2a' : '#0d0d0d' }} />
-                )}
+                <div
+                  className="absolute inset-0"
+                  style={hasImage ? {
+                    backgroundImage: `url(${group.image})`,
+                    backgroundSize: '300% 300%',
+                    backgroundPosition: `${col * 50}% ${row * 50}%`,
+                    filter: frag.obtained ? 'none' : 'brightness(0.06)',
+                    transition: 'filter 0.4s',
+                  } : {
+                    background: frag.obtained ? '#134e2a' : '#0d0d0d',
+                  }}
+                />
                 {/* 未收集 */}
                 {!frag.obtained && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
