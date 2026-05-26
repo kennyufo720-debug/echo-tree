@@ -11,7 +11,8 @@ const NAV_ITEMS = [
   { label: '首頁',         href: '/'         },
   { label: '活動',         href: '/events'   },
   { label: '論壇',         href: '/forum'    },
-  { label: '藏寶圖',       href: '/treasure' },
+  // [MODULE: Treasure] 暫時關閉，移除此行的註解即可重新啟用
+  // { label: '藏寶圖',       href: '/treasure' },
   { label: '回音森林名人堂', href: '/forest'   },
   { label: '限量商城',     href: '/store'    },
   { label: '點數兌換',     href: '/points'   },

@@ -165,7 +165,8 @@ const CATEGORIES = [
   { id: 'fan',    label: '粉絲心得', icon: '', color: 'bg-pink-50 text-pink-700' },
   { id: 'esg',    label: 'ESG 行動', icon: '', color: 'bg-green-50 text-green-700' },
   { id: 'social',   label: '揪人交友', icon: '', color: 'bg-orange-50 text-orange-600' },
-  { id: 'treasure', label: '藏寶圖',   icon: '', color: 'bg-yellow-50 text-yellow-700' },
+  // [MODULE: Treasure] 暫時關閉，移除此行的註解即可重新啟用
+  // { id: 'treasure', label: '藏寶圖',   icon: '', color: 'bg-yellow-50 text-yellow-700' },
 ]
 
 const SORT_OPTIONS = [
