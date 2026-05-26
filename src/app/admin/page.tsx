@@ -507,15 +507,25 @@ function MerchEditModal({ item, onSave, onClose }: { item: MerchItem; onSave: (i
 // ═════════════════════════════════════════════════════════
 // Main Admin Page
 // ═════════════════════════════════════════════════════════
-const ADMIN_PIN = 'echo2026'  // BUG-06: simple PIN gate for the hidden admin route
-
-// BUG-06 fix: PIN gate component (separate so hooks aren't called conditionally)
+// PIN gate component — password is verified server-side via /api/admin/verify
 function AdminPinGate({ onUnlock }: { onUnlock: () => void }) {
   const [pinInput, setPinInput] = useState('')
   const [pinError, setPinError] = useState(false)
-  const check = () => {
-    if (pinInput === ADMIN_PIN) onUnlock()
-    else { setPinError(true); setPinInput('') }
+  const [checking, setChecking] = useState(false)
+  const check = async () => {
+    if (!pinInput.trim()) return
+    setChecking(true)
+    try {
+      const res = await fetch('/api/admin/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pinInput }),
+      })
+      if (res.ok) { onUnlock() }
+      else { setPinError(true); setPinInput('') }
+    } catch {
+      setPinError(true); setPinInput('')
+    } finally { setChecking(false) }
   }
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
@@ -538,10 +548,11 @@ function AdminPinGate({ onUnlock }: { onUnlock: () => void }) {
         />
         {pinError && <p className="text-red-400 text-xs mb-3">密碼錯誤</p>}
         <button
-          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-3 text-sm font-medium transition-colors"
+          className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl py-3 text-sm font-medium transition-colors"
           onClick={check}
+          disabled={checking}
         >
-          進入後台
+          {checking ? '驗證中...' : '進入後台'}
         </button>
       </div>
     </div>

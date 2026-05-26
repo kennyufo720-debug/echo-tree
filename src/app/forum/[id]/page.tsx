@@ -229,14 +229,50 @@ export default function ForumThreadPage({ params }: { params: Promise<{ id: stri
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    const found = MOCK_POSTS.find(p => p.id === id) ?? getStoredPost(id)
-    if (found) {
-      setPost(found)
-      setLikeCount(found.likes)
+    // Try API first; fall back to MOCK_POSTS / localStorage
+    const loadPost = async () => {
+      try {
+        const res = await fetch(`/api/forum/${id}`)
+        if (res.ok) {
+          const data: ForumPost = await res.json()
+          setPost(data)
+          setLikeCount(data.likes)
+          return
+        }
+      } catch { /* network error — fall through */ }
+      const found = MOCK_POSTS.find(p => p.id === id) ?? getStoredPost(id)
+      if (found) {
+        setPost(found)
+        setLikeCount(found.likes)
+      }
     }
-    const base = MOCK_REPLIES[id] ?? []
-    const stored = getStoredReplies(id)
-    setReplies([...base, ...stored])
+
+    const loadReplies = async () => {
+      try {
+        const res = await fetch(`/api/forum/${id}/comments`)
+        if (res.ok) {
+          const data = await res.json()
+          if (Array.isArray(data) && data.length > 0) {
+            setReplies(data.map((c: { id: string; author: string; author_avatar: string; content: string; created_at: string; likes: number }) => ({
+              id: c.id,
+              author: c.author,
+              avatar: c.author_avatar ?? '',
+              body: c.content,
+              createdAt: c.created_at,
+              likes: c.likes ?? 0,
+            })))
+            return
+          }
+        }
+      } catch { /* fall through */ }
+      // Fallback: merge mock + locally stored replies
+      const base = MOCK_REPLIES[id] ?? []
+      const stored = getStoredReplies(id)
+      setReplies([...base, ...stored])
+    }
+
+    loadPost()
+    loadReplies()
   }, [id])
 
   if (!post) {

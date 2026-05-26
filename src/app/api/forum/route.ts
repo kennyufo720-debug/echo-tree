@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabase } from '@/lib/supabase-server'
 import { cacheGet, cacheSet, cacheDelPattern } from '@/lib/cache'
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
 
 const FALLBACK_POSTS = [
   { id: 'p1', title: 'PSY 濕身演唱會 — 強烈建議帶換洗衣物！！', content: '昨晚去看了 PSY 演唱會，超級濕身，整個人都淋透了，記得帶換洗衣物！', author: '林大地', author_avatar: '', category: '活動討論', tags: ['PSY', '濕身'], likes: 127, views: 4521, pinned: false, hot: true, created_at: '2026-05-20T10:00:00Z' },
@@ -44,12 +45,24 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  // Rate-limit: 5 posts per IP per hour
+  const ip = getClientIp(req.headers)
+  const { allowed } = await checkRateLimit(`forum-post:${ip}`, 5, 3600)
+  if (!allowed) {
+    return NextResponse.json({ error: '發文次數過多，請稍後再試' }, { status: 429 })
+  }
+
   const body = await req.json()
   const { title, content, author, author_avatar = '', category, tags = [] } = body
 
   if (!title || !content || !author || !category) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
+
+  // Input length caps
+  if (title.length > 100)   return NextResponse.json({ error: '標題最多 100 字' }, { status: 422 })
+  if (content.length > 5000) return NextResponse.json({ error: '內容最多 5000 字' }, { status: 422 })
+  if (author.length > 50)   return NextResponse.json({ error: '作者名稱過長' }, { status: 422 })
 
   const id = `p${Date.now()}`
   const { data, error } = await getSupabase()

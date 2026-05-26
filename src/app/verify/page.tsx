@@ -12,8 +12,6 @@ import { Suspense } from 'react'
 
 type Step = 'phone' | 'otp' | 'success'
 
-const MOCK_OTP = '123456'
-
 function VerifyContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -40,7 +38,23 @@ function VerifyContent() {
     }
     setLoading(true)
     setError('')
-    await new Promise(r => setTimeout(r, 1200))
+    try {
+      const res = await fetch('/api/verify/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        setError(data.error ?? '發送失敗，請稍後再試')
+        setLoading(false)
+        return
+      }
+    } catch {
+      setError('網路錯誤，請稍後再試')
+      setLoading(false)
+      return
+    }
     setLoading(false)
     setStep('otp')
     setCountdown(60)
@@ -52,7 +66,7 @@ function VerifyContent() {
     next[index] = value.slice(-1)
     setOtp(next)
     if (value && index < 5) inputRefs.current[index + 1]?.focus()
-    if (next.every(v => v) && next.join('') === MOCK_OTP) {
+    if (next.every(v => v)) {
       handleVerify(next.join(''))
     }
   }
@@ -71,9 +85,20 @@ function VerifyContent() {
     }
     setLoading(true)
     setError('')
-    await new Promise(r => setTimeout(r, 1000))
-    if (finalCode !== MOCK_OTP) {
-      setError('驗證碼錯誤，請重新輸入')
+    try {
+      const res = await fetch('/api/verify/check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, code: finalCode }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        setError(data.error ?? '驗證碼錯誤，請重新輸入')
+        setLoading(false)
+        return
+      }
+    } catch {
+      setError('網路錯誤，請稍後再試')
       setLoading(false)
       return
     }
@@ -211,9 +236,11 @@ function VerifyContent() {
 
               {error && <p className="text-center text-red-500 text-sm">{error}</p>}
 
-              <p className="text-center text-xs text-gray-400">
-                提示：測試用驗證碼為 <span className="font-mono font-bold text-emerald-600">123456</span>
-              </p>
+              {process.env.NODE_ENV !== 'production' && (
+                <p className="text-center text-xs text-gray-400">
+                  提示：測試用驗證碼為 <span className="font-mono font-bold text-emerald-600">123456</span>
+                </p>
+              )}
 
               <Button
                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-12 text-base"
