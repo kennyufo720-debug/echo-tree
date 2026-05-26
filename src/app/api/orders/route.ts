@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabase } from '@/lib/supabase-server'
+import { cacheGet, cacheSet, cacheDel } from '@/lib/cache'
 
 // GET /api/orders?phone=0912345678
 export async function GET(req: NextRequest) {
   const phone = req.nextUrl.searchParams.get('phone')
   if (!phone) return NextResponse.json({ error: 'phone required' }, { status: 400 })
+
+  const ck = `orders:${phone}`
+  const cached = await cacheGet(ck)
+  if (cached) return NextResponse.json(cached)
 
   const { data, error } = await getSupabase()
     .from('orders')
@@ -13,6 +18,7 @@ export async function GET(req: NextRequest) {
     .order('created_at', { ascending: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  await cacheSet(ck, data ?? [], 10)  // 10 s — invalidated immediately on POST
   return NextResponse.json(data ?? [])
 }
 
@@ -27,5 +33,9 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // New order placed — bust this user's order cache so tickets page refreshes
+  if (body.user_phone) await cacheDel(`orders:${body.user_phone}`)
+
   return NextResponse.json(data, { status: 201 })
 }

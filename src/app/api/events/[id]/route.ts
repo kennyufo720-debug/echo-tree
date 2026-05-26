@@ -6,9 +6,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabase } from '@/lib/supabase-server'
 import { mockEvents } from '@/lib/mock-data'
+import { cacheGet, cacheSet } from '@/lib/cache'
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+
+  const ck = `event:${id}`
+  const cached = await cacheGet(ck)
+  if (cached) return NextResponse.json(cached)
 
   try {
     const { data, error } = await getSupabase()
@@ -20,7 +25,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     if (error) throw error
     if (!data) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-    return NextResponse.json({
+    const event = {
       id: data.id, title: data.title, artist: data.artist,
       venue: data.venue, city: data.city, date: data.date, time: data.time,
       image: data.image, category: data.category,
@@ -28,7 +33,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       totalSeats: data.total_seats, availableSeats: data.available_seats,
       status: data.status, tags: data.tags ?? [],
       videoId: data.video_id, imagePosition: data.image_position,
-    })
+    }
+    await cacheSet(ck, event, 60)   // 60 s — event details rarely change
+    return NextResponse.json(event)
   } catch {
     const event = mockEvents.find(e => e.id === id)
     if (!event) return NextResponse.json({ error: 'Not found' }, { status: 404 })

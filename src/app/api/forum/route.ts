@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabase } from '@/lib/supabase-server'
+import { cacheGet, cacheSet, cacheDelPattern } from '@/lib/cache'
 
 const FALLBACK_POSTS = [
   { id: 'p1', title: 'PSY 濕身演唱會 — 強烈建議帶換洗衣物！！', content: '昨晚去看了 PSY 演唱會，超級濕身，整個人都淋透了，記得帶換洗衣物！', author: '林大地', author_avatar: '', category: '活動討論', tags: ['PSY', '濕身'], likes: 127, views: 4521, pinned: false, hot: true, created_at: '2026-05-20T10:00:00Z' },
@@ -17,6 +18,13 @@ export async function GET(req: NextRequest) {
   const category = searchParams.get('category')
   const search = searchParams.get('search')
 
+  // Skip cache for free-text searches — results are highly variable
+  const ck = search ? null : `forum:${category ?? 'all'}`
+  if (ck) {
+    const cached = await cacheGet(ck)
+    if (cached) return NextResponse.json(cached)
+  }
+
   try {
     let query = getSupabase().from('forum_posts').select('id, title, author, author_avatar, category, content, tags, views, likes, replies, pinned, hot, created_at')
     if (category) query = query.eq('category', category)
@@ -25,6 +33,7 @@ export async function GET(req: NextRequest) {
 
     const { data, error } = await query
     if (error) throw error
+    if (ck) await cacheSet(ck, data ?? [], 20)  // 20 s — new posts appear quickly
     return NextResponse.json(data ?? [])
   } catch {
     let posts = FALLBACK_POSTS
@@ -50,5 +59,9 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // New post → wipe all forum list caches so it appears immediately
+  await cacheDelPattern('forum:*')
+
   return NextResponse.json(data, { status: 201 })
 }

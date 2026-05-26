@@ -70,6 +70,27 @@ export async function cacheDel(key: string): Promise<void> {
   }
 }
 
+/**
+ * Delete every key matching a glob pattern (e.g. 'forum:*').
+ * Uses SCAN instead of KEYS so it never blocks Redis in production.
+ */
+export async function cacheDelPattern(pattern: string): Promise<void> {
+  try {
+    const r = getClient()
+    if (!r) return
+    let cursor = '0'
+    const toDelete: string[] = []
+    do {
+      const [next, keys] = await r.scan(cursor, 'MATCH', pattern, 'COUNT', 100)
+      cursor = next
+      toDelete.push(...keys)
+    } while (cursor !== '0')
+    if (toDelete.length) await r.del(...toDelete)
+  } catch {
+    // best-effort
+  }
+}
+
 /** Build a namespaced cache key from parts, e.g. key('events', category, city) */
 export function key(...parts: (string | null | undefined)[]): string {
   return parts.filter(Boolean).join(':')

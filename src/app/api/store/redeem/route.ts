@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabase } from '@/lib/supabase-server'
+import { cacheDel } from '@/lib/cache'
 
 export async function POST(req: NextRequest) {
   const { phone, item_id } = await req.json()
@@ -46,6 +47,9 @@ export async function POST(req: NextRequest) {
       description: `兌換：${item.name}`, points: item.points,
     }]),
   ])
+
+  // Stock just changed — bust the store listing cache immediately
+  await cacheDel('store')
 
   return NextResponse.json({ order: orderResult.data, remaining_points: user.points - item.points })
 }

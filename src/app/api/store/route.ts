@@ -5,8 +5,12 @@
 
 import { NextResponse } from 'next/server'
 import { getSupabase } from '@/lib/supabase-server'
+import { cacheGet, cacheSet } from '@/lib/cache'
 
 export async function GET() {
+  const cached = await cacheGet('store')
+  if (cached) return NextResponse.json(cached)
+
   try {
     const { data, error } = await getSupabase()
       .from('reward_items')
@@ -15,6 +19,7 @@ export async function GET() {
       .order('popular', { ascending: false })
 
     if (error) throw error
+    await cacheSet('store', data ?? [], 30)  // 30 s — stock changes on redemption (invalidated there)
     return NextResponse.json(data ?? [])
   } catch {
     return NextResponse.json(STORE_FALLBACK)
