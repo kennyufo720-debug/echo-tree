@@ -6,12 +6,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabase } from '@/lib/supabase-server'
 import { mockEvents } from '@/lib/mock-data'
+import { cacheGet, cacheSet, key as ckey } from '@/lib/cache'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
   const category = searchParams.get('category')
   const city = searchParams.get('city')
   const status = searchParams.get('status')
+
+  const ck = ckey('events', category, city, status)
+  const cached = await cacheGet(ck)
+  if (cached) return NextResponse.json(cached)
 
   try {
     let query = getSupabase().from('events').select(
@@ -27,6 +32,7 @@ export async function GET(req: NextRequest) {
 
     // Map DB snake_case → frontend camelCase
     const events = (data ?? []).map(dbToEvent)
+    await cacheSet(ck, events, 30)   // 30 s TTL — events list changes infrequently
     return NextResponse.json(events)
   } catch {
     // Fallback to mock data if Supabase is not configured

@@ -1,0 +1,34 @@
+# ── Version control ───────────────────────────────────
+.git
+.github
+.gitignore
+
+# ── Build artefacts (rebuilt inside container) ────────
+.next
+node_modules
+
+# ── Local environment (secrets must never enter image) ─
+.env
+.env.*
+!.env.example
+
+# ── Dev / editor tooling ──────────────────────────────
+.claude
+.vscode
+*.md
+README*
+AGENTS*
+CLAUDE*
+
+# ── Large archive files ───────────────────────────────
+*.zip
+*.tar.gz
+
+# ── OS noise ─────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Test / lint output ────────────────────────────────
+coverage
+.eslintcache
+tsconfig.tsbuildinfo

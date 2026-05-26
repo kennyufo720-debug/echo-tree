@@ -5,8 +5,12 @@
 
 import { NextResponse } from 'next/server'
 import { getSupabase } from '@/lib/supabase-server'
+import { cacheGet, cacheSet } from '@/lib/cache'
 
 export async function GET() {
+  const cached = await cacheGet('forests')
+  if (cached) return NextResponse.json(cached)
+
   try {
     const { data, error } = await getSupabase()
       .from('artist_forests')
@@ -14,6 +18,7 @@ export async function GET() {
       .order('rank', { ascending: true })
 
     if (error) throw error
+    await cacheSet('forests', data ?? [], 60)  // 60 s TTL — leaderboard changes rarely
     return NextResponse.json(data ?? [])
   } catch {
     // Fallback: return seed data matching the schema

@@ -1,0 +1,93 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  docker-compose.yml — Echo Tree                              ║
+# ║  Services: app (Next.js) · postgres · redis                  ║
+# ║                                                              ║
+# ║  Quick start:                                                ║
+# ║    cp .env.example .env.docker                               ║
+# ║    docker compose --env-file .env.docker up --build          ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+services:
+
+  # ── Next.js application ──────────────────────────────────────
+  app:
+    build:
+      context: .
+      target: runner
+      args:
+        # NEXT_PUBLIC_* must be baked in at build time
+        NEXT_PUBLIC_SUPABASE_URL:      ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      NODE_ENV:                  production
+      # Server-side secrets — injected at runtime, never in the image
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+      REDIS_URL:                 redis://:${REDIS_PASSWORD:-echotree_redis}@redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - backend
+
+  # ── PostgreSQL 16 ─────────────────────────────────────────────
+  # Primary database (mirrors Supabase cloud for local / self-hosted use).
+  # Schema and seed data are loaded automatically on first boot.
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB:       echotree
+      POSTGRES_USER:     echotree
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-echotree_pg}
+    volumes:
+      # Init scripts run once, in filename order, on an empty data volume
+      - ./supabase/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./supabase/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U echotree -d echotree"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - backend
+
+  # ── Redis 7 ───────────────────────────────────────────────────
+  # Caching layer for read-heavy API responses (events, forest, store).
+  # LRU eviction at 256 MB; AOF persistence for crash safety.
+  redis:
+    image: redis:7-alpine
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-echotree_redis}
+    command: >
+      sh -c "redis-server
+        --requirepass $$REDIS_PASSWORD
+        --appendonly yes
+        --maxmemory 256mb
+        --maxmemory-policy allkeys-lru
+        --save 60 1"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD ping | grep -q PONG"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+    networks:
+      - backend
+
+volumes:
+  postgres_data:   # persists DB across container restarts
+  redis_data:      # persists Redis AOF log
+
+networks:
+  backend:
+    driver: bridge  # isolated network; only 'app' exposes a host port
