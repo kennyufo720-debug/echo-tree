@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { MOCK_POSTS, ForumPost } from '../page'
-import { useUser, useSessionVideo } from '@/lib/store'
+import { useUser } from '@/lib/store'
 import { findOrCreateConversation } from '@/lib/messages'
 import { mockEvents } from '@/lib/mock-data'
 
@@ -218,7 +218,7 @@ export default function ForumThreadPage({ params }: { params: Promise<{ id: stri
   const { id } = use(params)
   const router = useRouter()
   const user = useUser()
-  const sessionVideoUrl = useSessionVideo(id)
+
 
   const [post, setPost] = useState<ForumPost | null>(null)
   const [replies, setReplies] = useState<Reply[]>([])
@@ -348,23 +348,21 @@ export default function ForumThreadPage({ params }: { params: Promise<{ id: stri
           )}
 
           {/* Video Player */}
-          {(post.video || sessionVideoUrl || post.videoName) && (
+          {(post.video || post.videoName) && (
             <div className="mb-4">
-              {(post.video || sessionVideoUrl) ? (
+              {post.video ? (
                 <div className="rounded-2xl overflow-hidden bg-black aspect-video">
                   <video
-                    src={post.video || sessionVideoUrl}
+                    src={post.video}
                     controls
                     className="w-full h-full"
                     preload="metadata"
                   />
                 </div>
               ) : (
-                /* Video not available (session expired / page reloaded) */
                 <div className="rounded-2xl bg-gray-100 aspect-video flex flex-col items-center justify-center text-gray-400 gap-2">
                   <Video className="h-10 w-10 opacity-30" />
-                  <p className="text-sm">影片僅在上傳當次瀏覽有效</p>
-                  <p className="text-xs opacity-70">（重新整理後影片連結失效）</p>
+                  <p className="text-sm">影片載入中...</p>
                 </div>
               )}
               {post.videoName && (

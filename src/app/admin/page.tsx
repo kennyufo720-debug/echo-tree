@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import { mockEvents, mockOrders } from '@/lib/mock-data'
 import { Event } from '@/lib/types'
+import { uploadFile } from '@/lib/upload-client'
 
 // ── Admin Config Types ────────────────────────────────────
 interface AppearanceConfig {
@@ -114,18 +115,7 @@ function loadAdminState(): AdminState {
 
 function saveAdminState(state: AdminState): string | null {
   try {
-    // Strip oversized base64 images to URL hints before saving
-    const safe: AdminState = {
-      ...state,
-      merchs: state.merchs.map(m => {
-        // base64 strings start with "data:"; keep but warn if > 400KB each
-        if (m.image?.startsWith('data:') && m.image.length > 400_000) {
-          console.warn(`商品「${m.name}」圖片過大 (${Math.round(m.image.length/1024)}KB)，建議改用 URL`)
-        }
-        return m
-      }),
-    }
-    localStorage.setItem(ADMIN_KEY, JSON.stringify(safe))
+    localStorage.setItem(ADMIN_KEY, JSON.stringify(state))
     return null
   } catch (e) {
     const msg = (e as Error).message ?? '未知錯誤'
@@ -175,25 +165,28 @@ function ColorField({ label, value, onChange, hint }: { label: string; value: st
 
 function ImageField({ label, value, onChange, hint }: { label: string; value: string; onChange: (v: string) => void; hint?: string }) {
   const fileRef = useRef<HTMLInputElement>(null)
-  // Sync displayed URL input with external value changes (e.g. when modal opens for different item)
-  const [urlInput, setUrlInput] = useState(() => value?.startsWith('data:') ? '（已上傳）' : (value ?? ''))
-  const [sizeWarn, setSizeWarn] = useState('')
+  const [urlInput, setUrlInput] = useState(value ?? '')
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
   useEffect(() => {
-    setUrlInput(value?.startsWith('data:') ? '（已上傳）' : (value ?? ''))
+    setUrlInput(value ?? '')
   }, [value])
 
-  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    // Warn if file > 300 KB (becomes ~400 KB base64, risky for localStorage)
-    if (file.size > 300_000) {
-      setSizeWarn(`圖片 ${Math.round(file.size / 1024)} KB，建議 < 300 KB 或改用圖片 URL`)
-    } else {
-      setSizeWarn('')
+    setUploadError('')
+    setUploading(true)
+    try {
+      const url = await uploadFile(file, 'admin')
+      onChange(url)
+      setUrlInput(url)
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : '上傳失敗，請重試')
+    } finally {
+      setUploading(false)
+      if (fileRef.current) fileRef.current.value = ''
     }
-    const reader = new FileReader()
-    reader.onload = () => { const r = reader.result as string; onChange(r); setUrlInput('（已上傳）') }
-    reader.readAsDataURL(file)
   }
 
   return (
@@ -206,14 +199,14 @@ function ImageField({ label, value, onChange, hint }: { label: string; value: st
             onChange={e => { setUrlInput(e.target.value); onChange(e.target.value) }}
             className="flex-1 text-sm"
           />
-          <Button type="button" size="sm" variant="outline" className="shrink-0 gap-1" onClick={() => fileRef.current?.click()}>
-            <Upload className="h-3.5 w-3.5" />上傳
+          <Button type="button" size="sm" variant="outline" className="shrink-0 gap-1" onClick={() => fileRef.current?.click()} disabled={uploading}>
+            <Upload className="h-3.5 w-3.5" />{uploading ? '上傳中...' : '上傳'}
           </Button>
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
         </div>
-        {sizeWarn && (
-          <div className="text-xs text-orange-600 bg-orange-50 border border-orange-200 rounded-lg px-3 py-1.5">
-            ⚠️ {sizeWarn}
+        {uploadError && (
+          <div className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5">
+            ⚠️ {uploadError}
           </div>
         )}
         {value && !value.startsWith('（') && (

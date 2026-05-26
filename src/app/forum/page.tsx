@@ -5,7 +5,8 @@ import { MessageSquare, Heart, Eye, Pin, Flame, Clock, Search, Plus, ImageIcon, 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { useUser, setSessionVideo } from '@/lib/store'
+import { useUser } from '@/lib/store'
+import { uploadFile } from '@/lib/upload-client'
 
 // ── Types ──────────────────────────────────────────────
 export interface ForumPost {
@@ -193,15 +194,6 @@ function formatBytes(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`
 }
 
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result as string)
-    reader.onerror = reject
-    reader.readAsDataURL(file)
-  })
-}
-
 // ── Sub-components ─────────────────────────────────────
 function CategoryBadge({ cat }: { cat: string }) {
   const c = CATEGORIES.find(c => c.id === cat)
@@ -295,12 +287,12 @@ function PostCard({ post }: { post: ForumPost }) {
 
 // ── Upload Preview Components ──────────────────────────
 function ImageUploadArea({
-  images, videoFile, onImagesChange, onVideoChange
+  images, videoUrl, onImagesChange, onVideoChange
 }: {
   images: string[]
-  videoFile: File | null
+  videoUrl: string | null
   onImagesChange: (imgs: string[]) => void
-  onVideoChange: (file: File | null) => void
+  onVideoChange: (url: string | null) => void
 }) {
   const imgRef = useRef<HTMLInputElement>(null)
   const vidRef = useRef<HTMLInputElement>(null)
@@ -312,7 +304,7 @@ function ImageUploadArea({
     if (!files) return
     setImgError('')
     setProcessing(true)
-    const newImages: string[] = []
+    const newUrls: string[] = []
     const remaining = MAX_IMAGES - images.length
 
     for (let i = 0; i < Math.min(files.length, remaining); i++) {
@@ -322,18 +314,20 @@ function ImageUploadArea({
         setImgError(`圖片大小不能超過 ${MAX_IMAGE_SIZE_MB} MB（${file.name} 為 ${formatBytes(file.size)}）`)
         continue
       }
-      const b64 = await fileToBase64(file)
-      newImages.push(b64)
+      try {
+        const url = await uploadFile(file, 'forum')
+        newUrls.push(url)
+      } catch {
+        setImgError('圖片上傳失敗，請重試')
+      }
     }
-    if (files.length > remaining) {
-      setImgError(`最多上傳 ${MAX_IMAGES} 張圖片`)
-    }
-    onImagesChange([...images, ...newImages])
+    if (files.length > remaining) setImgError(`最多上傳 ${MAX_IMAGES} 張圖片`)
+    onImagesChange([...images, ...newUrls])
     setProcessing(false)
     if (imgRef.current) imgRef.current.value = ''
   }
 
-  function handleVideoFile(files: FileList | null) {
+  async function handleVideoFile(files: FileList | null) {
     if (!files || !files[0]) return
     setVidError('')
     const file = files[0]
@@ -342,8 +336,16 @@ function ImageUploadArea({
       setVidError(`影片大小不能超過 ${MAX_VIDEO_SIZE_MB} MB（目前 ${formatBytes(file.size)}）`)
       return
     }
-    onVideoChange(file)
-    if (vidRef.current) vidRef.current.value = ''
+    setProcessing(true)
+    try {
+      const url = await uploadFile(file, 'forum')
+      onVideoChange(url)
+    } catch {
+      setVidError('影片上傳失敗，請重試')
+    } finally {
+      setProcessing(false)
+      if (vidRef.current) vidRef.current.value = ''
+    }
   }
 
   function removeImage(idx: number) {
@@ -368,7 +370,7 @@ function ImageUploadArea({
               disabled={processing}
               className="text-xs text-sky-600 hover:text-sky-700 font-medium disabled:opacity-50"
             >
-              {processing ? '處理中...' : '+ 新增'}
+              {processing ? '上傳中...' : '+ 新增'}
             </button>
           )}
         </div>
@@ -432,7 +434,7 @@ function ImageUploadArea({
             上傳影片
             <span className="text-gray-400 font-normal ml-1">（1 支，≤ {MAX_VIDEO_SIZE_MB} MB）</span>
           </p>
-          {!videoFile && (
+          {!videoUrl && !processing && (
             <button
               type="button"
               onClick={() => vidRef.current?.click()}
@@ -450,14 +452,14 @@ function ImageUploadArea({
           onChange={e => handleVideoFile(e.target.files)}
         />
 
-        {videoFile ? (
+        {videoUrl ? (
           <div className="flex items-center gap-3 bg-purple-50 border border-purple-100 rounded-xl p-3">
             <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
               <Video className="h-5 w-5 text-purple-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-800 truncate">{videoFile.name}</p>
-              <p className="text-xs text-gray-400">{formatBytes(videoFile.size)}</p>
+              <p className="text-sm font-medium text-gray-800 truncate">{videoUrl.split('/').pop()}</p>
+              <p className="text-xs text-emerald-600">✓ 已上傳至雲端</p>
             </div>
             <button
               type="button"
@@ -471,10 +473,11 @@ function ImageUploadArea({
           <button
             type="button"
             onClick={() => vidRef.current?.click()}
-            className="w-full h-16 rounded-xl border-2 border-dashed border-gray-200 hover:border-purple-400 text-gray-400 hover:text-purple-500 flex items-center justify-center gap-2 transition-colors text-sm"
+            disabled={processing}
+            className="w-full h-16 rounded-xl border-2 border-dashed border-gray-200 hover:border-purple-400 text-gray-400 hover:text-purple-500 flex items-center justify-center gap-2 transition-colors text-sm disabled:opacity-50"
           >
             <Video className="h-5 w-5" />
-            點擊選擇影片
+            {processing ? '上傳中...' : '點擊選擇影片'}
           </button>
         )}
 
@@ -483,18 +486,13 @@ function ImageUploadArea({
             <AlertCircle className="h-3.5 w-3.5 shrink-0" />{vidError}
           </div>
         )}
-        {videoFile && (
-          <p className="text-[10px] text-amber-600 mt-1 flex items-center gap-1">
-            <AlertCircle className="h-3 w-3" />影片僅在本次瀏覽階段顯示，重新整理後需重新上傳
-          </p>
-        )}
       </div>
     </div>
   )
 }
 
 // ── New Post Modal ─────────────────────────────────────
-function NewPostModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: (p: ForumPost, video: File | null) => void }) {
+function NewPostModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: (p: ForumPost) => void }) {
   const user = useUser()
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
@@ -502,7 +500,7 @@ function NewPostModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: (p
   const [tags, setTags] = useState('')
   const [error, setError] = useState('')
   const [images, setImages] = useState<string[]>([])
-  const [videoFile, setVideoFile] = useState<File | null>(null)
+  const [videoUrl, setVideoUrl] = useState<string | null>(null)
 
   function handleSubmit() {
     if (!title.trim()) { setError('請輸入標題'); return }
@@ -520,9 +518,10 @@ function NewPostModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: (p
       replies: 0, likes: 0, views: 1,
       tags: tags.split(/[,，\s]+/).filter(Boolean).slice(0, 5),
       images: images.length > 0 ? images : undefined,
-      videoName: videoFile?.name,
+      video: videoUrl ?? undefined,
+      videoName: videoUrl ? videoUrl.split('/').pop() : undefined,
     }
-    onSubmit(post, videoFile)
+    onSubmit(post)
   }
 
   return (
@@ -579,9 +578,9 @@ function NewPostModal({ onClose, onSubmit }: { onClose: () => void; onSubmit: (p
             </p>
             <ImageUploadArea
               images={images}
-              videoFile={videoFile}
+              videoUrl={videoUrl}
               onImagesChange={setImages}
-              onVideoChange={setVideoFile}
+              onVideoChange={setVideoUrl}
             />
           </div>
 
@@ -640,13 +639,7 @@ export default function ForumPage() {
     return 0
   })
 
-  function handleNewPost(post: ForumPost, videoFile: File | null) {
-    // Register video object URL in the session store so the thread page can access it
-    if (videoFile) {
-      const url = URL.createObjectURL(videoFile)
-      setSessionVideo(post.id, url)
-    }
-    // Save post to localStorage (images as base64; video is session-only)
+  function handleNewPost(post: ForumPost) {
     const stored = getStoredPosts()
     const updated = [post, ...stored]
     localStorage.setItem('echotree_forum', JSON.stringify(updated))
