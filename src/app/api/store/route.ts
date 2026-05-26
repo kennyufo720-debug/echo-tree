@@ -10,7 +10,7 @@ export async function GET() {
   try {
     const { data, error } = await getSupabase()
       .from('reward_items')
-      .select('*')
+      .select('id, name, description, points, stock, category, emoji, bg, image, popular, limited, is_new')
       .gt('stock', 0)
       .order('popular', { ascending: false })
 

@@ -13,7 +13,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   try {
     const { data, error } = await getSupabase()
       .from('events')
-      .select('*')
+      .select('id, title, artist, venue, city, date, time, image, category, price_from, price_to, total_seats, available_seats, status, tags, video_id, image_position')
       .eq('id', id)
       .single()
 

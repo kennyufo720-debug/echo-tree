@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
 
   const { data, error } = await getSupabase()
     .from('store_orders')
-    .select('*')
+    .select('id, user_phone, item_id, name, image, points, created_at')
     .eq('user_phone', phone)
     .order('created_at', { ascending: false })
 

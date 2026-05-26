@@ -12,7 +12,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
   const { data, error } = await getSupabase()
     .from('messages')
-    .select('*')
+    .select('id, conversation_id, sender_id, body, read, created_at')
     .eq('conversation_id', id)
     .order('created_at', { ascending: true })
 

@@ -17,16 +17,16 @@ export async function POST(req: NextRequest) {
 
   const newPoints = Math.max(0, (user.points ?? 0) + delta)
 
-  const { error: updateErr } = await sb
-    .from('users').update({ points: newPoints }).eq('phone', phone)
+  const [{ error: updateErr }] = await Promise.all([
+    sb.from('users').update({ points: newPoints }).eq('phone', phone),
+    sb.from('point_transactions').insert([{
+      user_phone: phone,
+      type: type ?? (delta > 0 ? 'earn' : 'redeem'),
+      description: description ?? (delta > 0 ? '點數獲得' : '點數兌換'),
+      points: Math.abs(delta),
+    }]),
+  ])
   if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
-
-  await sb.from('point_transactions').insert([{
-    user_phone: phone,
-    type: type ?? (delta > 0 ? 'earn' : 'redeem'),
-    description: description ?? (delta > 0 ? '點數獲得' : '點數兌換'),
-    points: Math.abs(delta),
-  }])
 
   return NextResponse.json({ points: newPoints })
 }
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
 
   const { data, error } = await getSupabase()
     .from('point_transactions')
-    .select('*')
+    .select('id, user_phone, type, description, points, created_at')
     .eq('user_phone', phone)
     .order('created_at', { ascending: false })
     .limit(50)

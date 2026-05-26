@@ -10,7 +10,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   const { id } = await params
   const sb = getSupabase()
 
-  const { data, error } = await sb.from('forum_posts').select('*').eq('id', id).single()
+  const { data, error } = await sb.from('forum_posts').select('id, title, author, author_avatar, category, content, tags, views, likes, replies, pinned, hot, created_at').eq('id', id).single()
   if (error || !data) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   // Increment views (fire-and-forget)

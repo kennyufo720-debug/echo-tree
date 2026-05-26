@@ -11,7 +11,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
   const { data, error } = await getSupabase()
     .from('artist_forests')
-    .select('*')
+    .select('id, name, artist, trees, co2, fans, badge, zone, description, globe_x, globe_y, color, grad_from, grad_to, image, rank')
     .eq('id', id)
     .single()
 

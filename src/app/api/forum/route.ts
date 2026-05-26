@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
   const search = searchParams.get('search')
 
   try {
-    let query = getSupabase().from('forum_posts').select('*')
+    let query = getSupabase().from('forum_posts').select('id, title, author, author_avatar, category, content, tags, views, likes, replies, pinned, hot, created_at')
     if (category) query = query.eq('category', category)
     if (search) query = query.ilike('title', `%${search}%`)
     query = query.order('pinned', { ascending: false }).order('created_at', { ascending: false })

@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
 
   const { data, error } = await getSupabase()
     .from('conversations')
-    .select('*, messages(body, created_at, read)')
+    .select('id, user_phone, contact_name, contact_avatar, created_at, messages(body, created_at, read)')
     .eq('user_phone', phone)
     .order('created_at', { ascending: false })
 

@@ -14,7 +14,9 @@ export async function GET(req: NextRequest) {
   const status = searchParams.get('status')
 
   try {
-    let query = getSupabase().from('events').select('*')
+    let query = getSupabase().from('events').select(
+      'id, title, artist, venue, city, date, time, image, category, price_from, price_to, total_seats, available_seats, status, tags, video_id, image_position'
+    )
     if (category) query = query.eq('category', category)
     if (city) query = query.eq('city', city)
     if (status) query = query.eq('status', status)

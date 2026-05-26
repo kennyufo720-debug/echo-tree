@@ -12,7 +12,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   const { id } = await params
   const { data, error } = await getSupabase()
     .from('forum_comments')
-    .select('*')
+    .select('id, post_id, author, author_avatar, content, likes, created_at')
     .eq('post_id', id)
     .order('created_at', { ascending: true })
 
