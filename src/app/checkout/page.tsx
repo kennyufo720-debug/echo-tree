@@ -99,7 +99,7 @@ function CheckoutContent() {
 
     if (data) {
       const ticketCode = `TK-${Date.now().toString(36).toUpperCase()}`
-      addStoredOrder({
+      const order = {
         id: orderId,
         eventId: data.eventId,
         eventTitle: data.eventTitle,
@@ -107,11 +107,48 @@ function CheckoutContent() {
         eventVenue: '詳見活動頁面',
         seats: seats.map(s => ({ section: s.sectionName, row: s.row, seat: s.seatNumber })),
         totalAmount: grandTotal,
-        status: 'paid',
+        status: 'paid' as const,
         createdAt: new Date().toISOString().slice(0, 10),
         ticketCode,
-      })
-      // 回饋點數 - 扣除已使用點數
+      }
+
+      // Persist to Supabase (fire-and-forget; localStorage is the fallback)
+      if (user.phone) {
+        fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: orderId,
+            user_phone: user.phone,
+            event_id: data.eventId,
+            event_title: data.eventTitle,
+            event_date: '待確認',
+            event_venue: '詳見活動頁面',
+            seats: order.seats,
+            total_amount: grandTotal,
+            status: 'paid',
+            ticket_code: ticketCode,
+          }),
+        }).catch(() => {})
+
+        // Update points in DB
+        const pointsDelta = earnedPoints - pointsUsed
+        if (pointsDelta !== 0) {
+          fetch('/api/points', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              phone: user.phone,
+              delta: pointsDelta,
+              type: pointsDelta > 0 ? 'earn' : 'redeem',
+              description: `購票 - ${data.eventTitle}`,
+            }),
+          }).catch(() => {})
+        }
+      }
+
+      // Always sync localStorage so UI updates immediately
+      addStoredOrder(order)
       addPoints(earnedPoints - pointsUsed)
     }
 

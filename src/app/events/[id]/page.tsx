@@ -1,10 +1,10 @@
 'use client'
-import { useState, use } from 'react'
+import { useState, use, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
-  Calendar, MapPin, Clock, ChevronLeft, Info,
-  Minus, Plus, ShoppingCart, Users, AlertCircle,
+  Calendar, MapPin, Clock, ChevronLeft,
+  ShoppingCart, Users, AlertCircle,
   Play, X, Minimize2, Maximize2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -12,8 +12,8 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { mockEvents, mockSections } from '@/lib/mock-data'
-import { SeatSection, Seat } from '@/lib/types'
+import { mockSections } from '@/lib/mock-data'
+import { Event, SeatSection, Seat } from '@/lib/types'
 import { getUser, useUser } from '@/lib/store'
 import { notFound } from 'next/navigation'
 
@@ -203,12 +203,25 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
   const { id } = use(params)
   const router = useRouter()
   const user = useUser()
-  const foundEvent = mockEvents.find(e => e.id === id)
-  if (!foundEvent) notFound()
-  const event = foundEvent
+  const [event, setEvent] = useState<Event | null>(null)
+  const [loading, setLoading] = useState(true)
   const [selectedSeats, setSelectedSeats] = useState<SelectedSeat[]>([])
   const [maxSeats] = useState(4)
   const [showVideo, setShowVideo] = useState(false)
+
+  useEffect(() => {
+    fetch(`/api/events/${id}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { setEvent(data); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [id])
+
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="w-10 h-10 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
+    </div>
+  )
+  if (!event) { notFound(); return null }
 
   const toggleSeat = (seat: SelectedSeat) => {
     setSelectedSeats(prev => {

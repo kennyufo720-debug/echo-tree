@@ -1,11 +1,10 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Search, MapPin, Calendar, Play } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { mockEvents } from '@/lib/mock-data'
 import { Event } from '@/lib/types'
 
 const categories = [
@@ -115,8 +114,13 @@ export default function EventsPage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedCity, setSelectedCity] = useState('全部城市')
   const [search, setSearch] = useState('')
+  const [events, setEvents] = useState<Event[]>([])
 
-  const filtered = mockEvents.filter(e => {
+  useEffect(() => {
+    fetch('/api/events').then(r => r.json()).then(setEvents).catch(() => {})
+  }, [])
+
+  const filtered = events.filter(e => {
     const matchCategory = selectedCategory === 'all' || e.category === selectedCategory
     const matchCity = selectedCity === '全部城市' || e.city === selectedCity
     const matchSearch = !search || e.title.includes(search) || e.artist.includes(search)

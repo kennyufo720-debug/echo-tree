@@ -1,5 +1,6 @@
 // [MODULE: Treasure] 暫時關閉 — 此頁面導向 404，功能完整保留未刪除
 // 重新啟用：刪除下面 3 行 notFound() 區塊，取消 navbar.tsx 與 forum/page.tsx 中的對應註解
+// @ts-nocheck
 import { notFound } from 'next/navigation'
 export default function TreasurePage() { notFound() }
 // ── 以下為完整頁面原始碼（暫停使用）──────────────────────────────

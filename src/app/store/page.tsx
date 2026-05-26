@@ -30,9 +30,7 @@ interface StoreOrder {
 }
 
 // ── Constants ──────────────────────────────────────────────────────────
-const ADMIN_KEY  = 'echotree_admin_config'
 const ORDERS_KEY = 'echotree_store_orders'
-// 1 點 = NT$0.1  →  NT$X 折抵 = X×10 點
 const POINT_RATE = 10  // 每 NT$1 折抵消耗 10 點
 const DISCOUNT_PCT = 0.1  // 10%
 
@@ -50,14 +48,21 @@ const DEFAULT_MERCHS: MerchItem[] = [
 ]
 
 function loadMerchs(): MerchItem[] {
-  if (typeof window === 'undefined') return DEFAULT_MERCHS
-  try {
-    const saved = JSON.parse(localStorage.getItem(ADMIN_KEY) ?? '{}')
-    if (!saved.merchs?.length) return DEFAULT_MERCHS
-    const savedIds = new Set(saved.merchs.map((m: MerchItem) => m.id))
-    const merged = [...saved.merchs, ...DEFAULT_MERCHS.filter(d => !savedIds.has(d.id))]
-    return merged
-  } catch { return DEFAULT_MERCHS }
+  return DEFAULT_MERCHS
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function apiToMerch(d: Record<string, any>): MerchItem {
+  return {
+    id: d.id,
+    name: d.name,
+    image: d.image ?? '',
+    points: d.points,
+    tag: d.popular ? '熱門' : d.limited ? '限量' : d.is_new ? '新品' : '精選',
+    tagColor: d.popular ? '#f97316' : d.limited ? '#ec4899' : d.is_new ? '#8b5cf6' : '#10b981',
+    description: d.description ?? '',
+    stock: d.stock ?? 0,
+  }
 }
 
 function saveOrder(o: StoreOrder) {
@@ -81,10 +86,10 @@ export default function StorePage() {
   const [success, setSuccess]     = useState(false)
 
   useEffect(() => {
-    setItems(loadMerchs())
-    const h = () => setItems(loadMerchs())
-    window.addEventListener('storage', h)
-    return () => window.removeEventListener('storage', h)
+    fetch('/api/store')
+      .then(r => r.json())
+      .then(data => Array.isArray(data) && data.length > 0 ? setItems(data.map(apiToMerch)) : setItems(loadMerchs()))
+      .catch(() => setItems(loadMerchs()))
   }, [])
 
   // ── Cart calculations ─────────────────────────────────────────────

@@ -182,13 +182,31 @@ export default function PointsPage() {
   const [pts, setPts] = useState(() => getUser().points)
   // BUG-21 fix: track animation timeouts for cleanup
   const animTimers = useRef<ReturnType<typeof setTimeout>[]>([])
-  // Sync with store when other tabs/pages update points
   useEffect(() => { setPts(storeUser.points) }, [storeUser.points])
-  // BUG-21 fix: clear all animation timeouts on unmount
   useEffect(() => {
     const timers = animTimers.current
     return () => timers.forEach(clearTimeout)
   }, [])
+
+  // Fetch point history from API
+  const [apiHistory, setApiHistory] = useState<typeof HISTORY>([])
+  useEffect(() => {
+    const phone = getUser().phone
+    if (!phone) return
+    fetch(`/api/points?phone=${encodeURIComponent(phone)}`)
+      .then(r => r.json())
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .then(data => Array.isArray(data) && data.length > 0 && setApiHistory(data.map((d: any, i: number) => ({
+        id: i + 1,
+        type: d.type as 'earn' | 'redeem',
+        desc: d.description,
+        points: d.type === 'earn' ? d.points : -d.points,
+        date: d.created_at?.slice(0, 10) ?? '',
+      }))))
+      .catch(() => {})
+  }, [storeUser.phone])
+
+  const displayHistory = apiHistory.length > 0 ? apiHistory : HISTORY
 
   const currentTier = getTier(pts)
   const nextTier = getNextTier(pts)
@@ -228,6 +246,18 @@ export default function PointsPage() {
     const newBalance = pts - cartTotal
     setPts(newBalance)
     setUser({ points: newBalance })   // BUG-03 fix: persist globally
+
+    // Persist to Supabase
+    const phone = getUser().phone
+    if (phone) {
+      const desc = `兌換：${names.join('、')}`
+      fetch('/api/points', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, delta: -cartTotal, type: 'redeem', description: desc }),
+      }).catch(() => {})
+    }
+
     setCart([])
     setShowCart(false)
     if (hasTree) {
@@ -369,10 +399,10 @@ export default function PointsPage() {
           <div className="bg-white rounded-2xl shadow-sm overflow-hidden mb-8">
             <div className="px-4 py-3 border-b bg-gray-50 flex items-center justify-between">
               <span className="text-sm font-semibold text-gray-700">交易紀錄</span>
-              <span className="text-xs text-gray-400">最近 {HISTORY.length} 筆</span>
+              <span className="text-xs text-gray-400">最近 {displayHistory.length} 筆</span>
             </div>
-            {HISTORY.map((h, i) => (
-              <div key={h.id} className={`flex items-center gap-3 px-4 py-3.5 ${i < HISTORY.length - 1 ? 'border-b' : ''}`}>
+            {displayHistory.map((h, i) => (
+              <div key={h.id} className={`flex items-center gap-3 px-4 py-3.5 ${i < displayHistory.length - 1 ? 'border-b' : ''}`}>
                 <div className={`w-9 h-9 rounded-full flex items-center justify-center text-base shrink-0 ${
                   h.type === 'earn' ? 'bg-emerald-50' : 'bg-red-50'
                 }`}>

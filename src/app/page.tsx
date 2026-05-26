@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { mockEvents } from '@/lib/mock-data'
 import { Event } from '@/lib/types'
 
 const categories = [
@@ -106,62 +105,55 @@ function EventCard({ event }: { event: Event }) {
   )
 }
 
-interface StoreItem { id: string; name: string; image: string; points: number; tag: string; tagColor: string; stock: number }
-const ADMIN_KEY = 'echotree_admin_config'
-const DEFAULT_STORE: StoreItem[] = [
-  { id: 'm1', name: '限定帆布袋',    image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&q=80', points: 490,  tag: '熱門', tagColor: '#f97316', stock: 50 },
-  { id: 'm2', name: '刺繡徽章組',    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80', points: 290,  tag: '新品', tagColor: '#8b5cf6', stock: 120 },
-  { id: 'm3', name: '演唱會手環',    image: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=400&q=80', points: 199,  tag: '限量', tagColor: '#ec4899', stock: 80 },
-  { id: 'm10', name: 'AIWA 愛華 藍芽耳機', image: '/aiwa-earphone.jpeg', points: 2980, tag: '聯名', tagColor: '#6366f1', stock: 30 },
-  { id: 'm5', name: '限定 Tee 上衣', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80', points: 1480, tag: '限量', tagColor: '#ec4899', stock: 30 },
-  { id: 'm6', name: '音樂節馬克杯',  image: 'https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=400&q=80', points: 590,  tag: '熱門', tagColor: '#f97316', stock: 60 },
-  { id: 'm7', name: '折疊雨傘',      image: 'https://images.unsplash.com/photo-1558618047-3c5c3a4ed6c6?w=400&q=80', points: 980,  tag: '實用', tagColor: '#3b82f6', stock: 40 },
-  { id: 'm8', name: 'PSY X ECHO 森林滅火器', image: '/psy-x-echo-extinguisher.jpg', points: 2480, tag: '聯名', tagColor: '#0ea5e9', stock: 50 },
-  { id: 'm9', name: 'echo tree 低碳限量T雪', image: '/echo-tree-tee-white.jpg', points: 890, tag: '限量', tagColor: '#10b981', stock: 60 },
-]
-
-const featuredEvents = mockEvents.filter(e => e.status === 'on-sale').slice(0, 5)
+interface StoreItem { id: string; name: string; image: string; points: number; tag: string; tagColor: string; stock: number; total?: number }
 
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedCity, setSelectedCity] = useState('全部城市')
   const [search, setSearch] = useState('')
-  const [storeItems, setStoreItems] = useState<StoreItem[]>(DEFAULT_STORE)
+  const [events, setEvents] = useState<Event[]>([])
+  const [storeItems, setStoreItems] = useState<StoreItem[]>([])
   const [heroIdx, setHeroIdx] = useState(0)
   const touchStartX = useRef<number | null>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const total = featuredEvents.length || 1  // BUG-18: guard against empty array → NaN
+  const featuredEvents = events.filter(e => e.status === 'on-sale').slice(0, 5)
+  const total = featuredEvents.length || 1
   const next = useCallback(() => setHeroIdx(i => (i + 1) % total), [total])
   const prev = useCallback(() => setHeroIdx(i => (i - 1 + total) % total), [total])
 
-  // Auto-play
+  // Fetch events from API
+  useEffect(() => {
+    fetch('/api/events').then(r => r.json()).then(setEvents).catch(() => {})
+  }, [])
+
+  // Fetch store items from API
+  useEffect(() => {
+    fetch('/api/store')
+      .then(r => r.json())
+      .then((data: Array<{ id: string; name: string; image: string; points: number; stock: number; is_new?: boolean; limited?: boolean; popular?: boolean }>) => {
+        setStoreItems(data.map(d => ({
+          id: d.id, name: d.name, image: d.image ?? '', points: d.points, stock: d.stock,
+          tag: d.popular ? '熱門' : d.limited ? '限量' : d.is_new ? '新品' : '精選',
+          tagColor: d.popular ? '#f97316' : d.limited ? '#ec4899' : d.is_new ? '#8b5cf6' : '#10b981',
+        })))
+      })
+      .catch(() => {})
+  }, [])
+
+  // Auto-play carousel
   useEffect(() => {
     timerRef.current = setTimeout(next, 4500)
     return () => { if (timerRef.current) clearTimeout(timerRef.current) }
   }, [heroIdx, next])
 
-  useEffect(() => {
-    const load = () => {
-      try {
-        const saved = JSON.parse(localStorage.getItem(ADMIN_KEY) ?? '{}')
-        if (saved.merchs?.length) {
-          const savedIds = new Set(saved.merchs.map((m: StoreItem) => m.id))
-          setStoreItems([...saved.merchs, ...DEFAULT_STORE.filter(d => !savedIds.has(d.id))])
-        }
-      } catch { /* noop */ }
-    }
-    load()
-    window.addEventListener('storage', load)
-    return () => window.removeEventListener('storage', load)
-  }, [])
-
-  const filtered = mockEvents.filter(e => {
+  const filtered = events.filter(e => {
     const matchCategory = selectedCategory === 'all' || e.category === selectedCategory
     const matchCity = selectedCity === '全部城市' || e.city === selectedCity
     const matchSearch = !search || e.title.includes(search) || e.artist.includes(search)
     return matchCategory && matchCity && matchSearch
   })
+
 
   return (
     <div>

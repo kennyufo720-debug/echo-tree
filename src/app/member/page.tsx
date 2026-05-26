@@ -92,11 +92,34 @@ export default function MemberPage() {
   const unreadCount = useUnreadCount()
 
   useEffect(() => {
-    setStoreOrders(loadStoreOrders())
-    const handler = () => setStoreOrders(loadStoreOrders())
-    window.addEventListener('storage', handler)
-    return () => window.removeEventListener('storage', handler)
-  }, [])
+    // Try API first; fall back to localStorage
+    if (user.phone) {
+      fetch(`/api/store/orders?phone=${encodeURIComponent(user.phone)}`)
+        .then(r => r.json())
+        .then(data => {
+          if (Array.isArray(data) && data.length > 0) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            setStoreOrders(data.map((d: any) => ({
+              id: d.id,
+              items: [{ name: d.name, image: d.image ?? '', qty: 1, price: d.points }],
+              subtotal: d.points,
+              discount: 0,
+              total: d.points,
+              pointsUsed: 0,
+              at: d.created_at?.slice(0, 10) ?? '',
+            })))
+          } else {
+            setStoreOrders(loadStoreOrders())
+          }
+        })
+        .catch(() => setStoreOrders(loadStoreOrders()))
+    } else {
+      setStoreOrders(loadStoreOrders())
+      const handler = () => setStoreOrders(loadStoreOrders())
+      window.addEventListener('storage', handler)
+      return () => window.removeEventListener('storage', handler)
+    }
+  }, [user.phone])
 
   const tier = getTier(user.points)
   const nextTier = TIERS[TIERS.indexOf(tier) + 1]

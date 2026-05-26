@@ -7,9 +7,24 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
-import { mockOrders } from '@/lib/mock-data'
 import { Order } from '@/lib/types'
-import { useOrders } from '@/lib/store'
+import { useOrders, useUser } from '@/lib/store'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function dbToOrder(r: Record<string, any>): Order {
+  return {
+    id: r.id,
+    eventId: r.event_id ?? '',
+    eventTitle: r.event_title ?? '',
+    eventDate: r.event_date ?? '',
+    eventVenue: r.event_venue ?? '',
+    seats: r.seats ?? [],
+    totalAmount: r.total_amount ?? 0,
+    status: r.status ?? 'paid',
+    createdAt: r.created_at?.slice(0, 10) ?? '',
+    ticketCode: r.ticket_code ?? '',
+  }
+}
 
 // ── Anydeee 跨站兌換 ──────────────────────────────────
 // BUG-22 fix: 避免 module-level window 存取造成 SSR hydration mismatch
@@ -509,8 +524,19 @@ export default function TicketsPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [redeemOrder, setRedeemOrder] = useState<Order | null>(null)
   const storedOrders = useOrders()
-  // Merge: stored orders first (newest purchases), then mock baseline orders
-  const allOrders: Order[] = [...storedOrders, ...mockOrders]
+  const user = useUser()
+  const [apiOrders, setApiOrders] = useState<Order[]>([])
+
+  useEffect(() => {
+    if (!user.phone) return
+    fetch(`/api/orders?phone=${encodeURIComponent(user.phone)}`)
+      .then(r => r.json())
+      .then(data => Array.isArray(data) ? setApiOrders(data.map(dbToOrder)) : null)
+      .catch(() => {})
+  }, [user.phone])
+
+  // API orders take precedence; fall back to localStorage + empty baseline
+  const allOrders: Order[] = apiOrders.length > 0 ? apiOrders : storedOrders
   const now = new Date()
   // BUG-04 fix: '待確認' is not a valid date → treat as upcoming
   const upcoming = allOrders.filter(o => {
