@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabase } from '@/lib/supabase-server'
+import { readVerifiedCookie } from '@/lib/security/session'
 
-// POST /api/points  { phone, delta, type?, description? }
+// POST /api/points  { delta, type?, description? }
 export async function POST(req: NextRequest) {
+  const session = readVerifiedCookie(req.headers.get('cookie'))
+  if (!session?.phone) return NextResponse.json({ error: 'UNAUTHENTICATED' }, { status: 401 })
   const body = await req.json()
-  const { phone, delta, type, description } = body
-  if (!phone || delta === undefined) {
-    return NextResponse.json({ error: 'phone and delta required' }, { status: 400 })
+  const { delta, description } = body
+  const phone = session.phone
+  if (delta === undefined || typeof delta !== 'number' || delta >= 0) {
+    return NextResponse.json({ error: 'INVALID_POINTS_DELTA' }, { status: 400 })
   }
 
   const sb = getSupabase()
@@ -21,20 +25,21 @@ export async function POST(req: NextRequest) {
     sb.from('users').update({ points: newPoints }).eq('phone', phone),
     sb.from('point_transactions').insert([{
       user_phone: phone,
-      type: type ?? (delta > 0 ? 'earn' : 'redeem'),
-      description: description ?? (delta > 0 ? '點數獲得' : '點數兌換'),
+      type: 'redeem',
+      description: description ?? '點數兌換',
       points: Math.abs(delta),
     }]),
   ])
-  if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
+  if (updateErr) return NextResponse.json({ error: 'REQUEST_FAILED' }, { status: 500 })
 
   return NextResponse.json({ points: newPoints })
 }
 
 // GET /api/points?phone=...
 export async function GET(req: NextRequest) {
-  const phone = req.nextUrl.searchParams.get('phone')
-  if (!phone) return NextResponse.json({ error: 'phone required' }, { status: 400 })
+  const session = readVerifiedCookie(req.headers.get('cookie'))
+  if (!session?.phone) return NextResponse.json({ error: 'UNAUTHENTICATED' }, { status: 401 })
+  const phone = session.phone
 
   const { data, error } = await getSupabase()
     .from('point_transactions')
@@ -43,6 +48,6 @@ export async function GET(req: NextRequest) {
     .order('created_at', { ascending: false })
     .limit(50)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'REQUEST_FAILED' }, { status: 500 })
   return NextResponse.json(data ?? [])
 }

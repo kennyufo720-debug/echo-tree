@@ -34,3 +34,16 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Production Environment
+
+Set these variables in Vercel before opening the site for public testing:
+
+```bash
+AUTH_SECRET=use-a-long-random-secret
+ADMIN_PASSWORD=use-a-strong-admin-password
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+`AUTH_SECRET` signs verified-user cookies and checkout sessions. Rotate it if it is ever exposed.

@@ -7,30 +7,12 @@ import { Order } from '@/lib/types'
 
 const BASE = '/api/orders'
 
-export async function getOrders(phone: string): Promise<Order[]> {
-  const res = await fetch(`${BASE}?phone=${encodeURIComponent(phone)}`)
+export async function getOrders(): Promise<Order[]> {
+  const res = await fetch(BASE)
   if (!res.ok) throw new Error('Failed to fetch orders')
   return res.json()
 }
 
-export async function createOrder(order: Omit<Order, 'id' | 'createdAt'>): Promise<Order> {
-  const res = await fetch(BASE, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      id: `ORD-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`,
-      user_phone: order.ticketCode, // filled by caller with actual phone
-      event_id: order.eventId,
-      event_title: order.eventTitle,
-      event_date: order.eventDate,
-      event_venue: order.eventVenue,
-      seats: order.seats,
-      total_amount: order.totalAmount,
-      status: order.status,
-      ticket_code: order.ticketCode,
-      created_at: new Date().toISOString(),
-    }),
-  })
-  if (!res.ok) throw new Error('Failed to create order')
-  return res.json()
+export async function createOrder(): Promise<Order> {
+  throw new Error('Use signed checkout sessions to create orders')
 }

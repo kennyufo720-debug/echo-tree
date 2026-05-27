@@ -193,7 +193,7 @@ export default function PointsPage() {
   useEffect(() => {
     const phone = getUser().phone
     if (!phone) return
-    fetch(`/api/points?phone=${encodeURIComponent(phone)}`)
+    fetch('/api/points')
       .then(r => r.json())
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .then(data => Array.isArray(data) && data.length > 0 && setApiHistory(data.map((d: any, i: number) => ({
@@ -254,7 +254,7 @@ export default function PointsPage() {
       fetch('/api/points', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, delta: -cartTotal, type: 'redeem', description: desc }),
+        body: JSON.stringify({ delta: -cartTotal, type: 'redeem', description: desc }),
       }).catch(() => {})
     }
 

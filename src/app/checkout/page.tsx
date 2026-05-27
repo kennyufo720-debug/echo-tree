@@ -1,14 +1,13 @@
 'use client'
-import { useState, useEffect, useCallback, Suspense } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import {
   ChevronLeft, CreditCard, Shield, CheckCircle,
-  Lock, Clock, Ticket, AlertCircle, RefreshCw, Star, Minus, Plus
+  Clock, Ticket, AlertCircle, RefreshCw, Star, Minus, Plus
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
@@ -29,8 +28,11 @@ const CONCERT_IMAGES = [
 interface CheckoutData {
   eventId: string
   eventTitle: string
+  eventDate: string
+  eventVenue: string
   seats: { sectionId: string; sectionName: string; row: string; seatNumber: number; price: number }[]
   total: number
+  expiresAt: number
 }
 
 type PayStep = 'info' | 'payment' | 'processing' | 'success'
@@ -52,26 +54,35 @@ function CountdownTimer({ seconds }: { seconds: number }) {
 }
 
 function CheckoutContent() {
-  const router = useRouter()
   const searchParams = useSearchParams()
+  const session = searchParams.get('session')
   const user = useUser()
   const [step, setStep] = useState<PayStep>('info')
   const [payMethod, setPayMethod] = useState<'credit' | 'atm' | 'cvs'>('credit')
-  const [cardNum, setCardNum] = useState('')
-  const [cardExp, setCardExp] = useState('')
-  const [cardCvc, setCardCvc] = useState('')
-  const [cardName, setCardName] = useState('')
   const [loading, setLoading] = useState(false)
-  const [orderId] = useState(`ORD-${Date.now()}`)
+  const [orderId] = useState(() => `ORD-${Date.now()}`)
   const [pointsInput, setPointsInput] = useState('')
   const [usePointsOn, setUsePointsOn] = useState(false)
   const [eventImg] = useState(() => CONCERT_IMAGES[Math.floor(Math.random() * CONCERT_IMAGES.length)])
+  const [data, setData] = useState<CheckoutData | null>(null)
+  const [loadError, setLoadError] = useState(() => session ? '' : '找不到安全結帳資料')
 
-  let data: CheckoutData | null = null
-  try {
-    const raw = searchParams.get('data')
-    if (raw) data = JSON.parse(decodeURIComponent(raw))
-  } catch {}
+  useEffect(() => {
+    if (!session) return
+    let cancelled = false
+    fetch(`/api/orders/checkout?session=${encodeURIComponent(session)}`)
+      .then(async res => {
+        const body = await res.json()
+        if (!res.ok) throw new Error(body.error || 'INVALID_CHECKOUT_SESSION')
+        if (!cancelled) setData(body)
+      })
+      .catch(() => {
+        if (!cancelled) setLoadError('結帳資料已過期或無效，請重新選位')
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [session])
 
   const seats = data?.seats ?? []
   const total = data?.total ?? 0
@@ -79,32 +90,29 @@ function CheckoutContent() {
 
   // 點數折扣計算
   // BUG-17 fix: cap at full grand total (ticket + fee) so points can cover the entire order
-  const maxUsablePoints = Math.min(user.points, (total + fee) * PTS_RATE)
+  // Security: points redemption must be computed server-side. Keep redemption disabled
+  // until the backend can reserve points and include the discount in the signed checkout session.
+  const maxUsablePoints = 0
   const parsedPoints = Math.max(0, Math.min(parseInt(pointsInput || '0'), maxUsablePoints))
   const pointsUsed = usePointsOn ? parsedPoints : 0
   const discount = Math.floor(pointsUsed / PTS_RATE)
   const grandTotal = Math.max(0, total + fee - discount)
   const earnedPoints = Math.round(total)   // 每元得 1 點（購票回饋）
 
-  const formatCard = (val: string) => val.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim()
-  const formatExp = (val: string) => {
-    const clean = val.replace(/\D/g, '').slice(0, 4)
-    return clean.length > 2 ? clean.slice(0, 2) + '/' + clean.slice(2) : clean
-  }
-
   const handlePay = async () => {
+    if (!data || !session) return
     setLoading(true)
     setStep('processing')
     await new Promise(r => setTimeout(r, 2500))
 
-    if (data) {
+    try {
       const ticketCode = `TK-${Date.now().toString(36).toUpperCase()}`
       const order = {
         id: orderId,
         eventId: data.eventId,
         eventTitle: data.eventTitle,
-        eventDate: '待確認',
-        eventVenue: '詳見活動頁面',
+        eventDate: data.eventDate,
+        eventVenue: data.eventVenue,
         seats: seats.map(s => ({ section: s.sectionName, row: s.row, seat: s.seatNumber })),
         totalAmount: grandTotal,
         status: 'paid' as const,
@@ -112,44 +120,28 @@ function CheckoutContent() {
         ticketCode,
       }
 
-      // Persist to Supabase (fire-and-forget; localStorage is the fallback)
+      // Persist to Supabase with a signed checkout session. Server recalculates trusted fields.
       if (user.phone) {
-        fetch('/api/orders', {
+        const orderRes = await fetch('/api/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             id: orderId,
-            user_phone: user.phone,
-            event_id: data.eventId,
-            event_title: data.eventTitle,
-            event_date: '待確認',
-            event_venue: '詳見活動頁面',
-            seats: order.seats,
-            total_amount: grandTotal,
-            status: 'paid',
-            ticket_code: ticketCode,
+            session,
           }),
-        }).catch(() => {})
+        })
+        if (!orderRes.ok) throw new Error('ORDER_CREATE_FAILED')
 
-        // Update points in DB
-        const pointsDelta = earnedPoints - pointsUsed
-        if (pointsDelta !== 0) {
-          fetch('/api/points', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              phone: user.phone,
-              delta: pointsDelta,
-              type: pointsDelta > 0 ? 'earn' : 'redeem',
-              description: `購票 - ${data.eventTitle}`,
-            }),
-          }).catch(() => {})
-        }
       }
 
       // Always sync localStorage so UI updates immediately
       addStoredOrder(order)
       addPoints(earnedPoints - pointsUsed)
+    } catch {
+      setLoadError('付款建立失敗，請重新選位後再試')
+      setStep('info')
+      setLoading(false)
+      return
     }
 
     setStep('success')
@@ -160,7 +152,7 @@ function CheckoutContent() {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <AlertCircle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-        <p className="text-gray-500 mb-4">找不到訂單資料</p>
+        <p className="text-gray-500 mb-4">{loadError || '載入結帳資料中...'}</p>
         <Link href="/"><Button>返回首頁</Button></Link>
       </div>
     )
@@ -304,37 +296,12 @@ function CheckoutContent() {
             <Card className="border-0 shadow-sm">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Lock className="h-4 w-4 text-green-500" /> 信用卡資訊（SSL 加密）
+                  <Shield className="h-4 w-4 text-green-500" /> 信用卡付款
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-1">
-                  <Label>卡號</Label>
-                  <Input placeholder="1234 5678 9012 3456" value={cardNum}
-                    onChange={e => setCardNum(formatCard(e.target.value))}
-                    className="font-mono text-lg tracking-widest" />
-                </div>
-                <div className="space-y-1">
-                  <Label>持卡人姓名</Label>
-                  <Input placeholder="WANG XIAO MING" value={cardName}
-                    onChange={e => setCardName(e.target.value.toUpperCase())} className="uppercase" />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label>有效期限</Label>
-                    <Input placeholder="MM/YY" value={cardExp}
-                      onChange={e => setCardExp(formatExp(e.target.value))} maxLength={5} className="font-mono" />
-                  </div>
-                  <div className="space-y-1">
-                    <Label>安全碼 (CVV)</Label>
-                    <Input placeholder="123" value={cardCvc}
-                      onChange={e => setCardCvc(e.target.value.replace(/\D/g, '').slice(0, 3))}
-                      maxLength={3} className="font-mono" type="password" />
-                  </div>
-                </div>
-                <div className="flex gap-2 items-center text-xs text-gray-400">
-                  <Shield className="h-3.5 w-3.5 text-green-500" />
-                  <span>您的付款資訊受到 256-bit SSL 加密保護</span>
+              <CardContent className="space-y-3">
+                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm text-emerald-800">
+                  正式環境不在本站收集卡號或 CVV。點擊確認付款後，應導向合規金流供應商的安全付款頁完成刷卡。
                 </div>
                 <div className="flex gap-2">
                   {['VISA', 'MC', 'JCB', '銀聯'].map(brand => (
@@ -389,11 +356,13 @@ function CheckoutContent() {
                 </div>
                 <button
                   onClick={() => {
+                    if (maxUsablePoints <= 0) return
                     setUsePointsOn(!usePointsOn)
                     if (!usePointsOn) setPointsInput(String(maxUsablePoints))
                     else setPointsInput('')
                   }}
-                  className={`relative w-12 h-6 rounded-full transition-colors ${usePointsOn ? 'bg-amber-400' : 'bg-gray-200'}`}
+                  disabled={maxUsablePoints <= 0}
+                  className={`relative w-12 h-6 rounded-full transition-colors ${usePointsOn ? 'bg-amber-400' : 'bg-gray-200'} ${maxUsablePoints <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${usePointsOn ? 'left-6' : 'left-0.5'}`} />
                 </button>
@@ -448,7 +417,7 @@ function CheckoutContent() {
               )}
 
               <p className="text-[11px] text-gray-400">
-                · 最多可折抵 NT$ {Math.floor(maxUsablePoints / PTS_RATE).toLocaleString()} 元（{maxUsablePoints.toLocaleString()} 點）
+                · 點數折抵已暫停，待後端完成點數保留與金額簽章後再開放。
               </p>
             </CardContent>
           </Card>
@@ -506,7 +475,7 @@ function CheckoutContent() {
               <Button
                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-12 text-base"
                 onClick={handlePay}
-                disabled={loading || (payMethod === 'credit' && (!cardNum || !cardExp || !cardCvc || !cardName))}
+                disabled={loading}
               >
                 {loading ? (
                   <span className="flex items-center gap-2">

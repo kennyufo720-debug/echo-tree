@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { mockSections } from '@/lib/mock-data'
-import { Event, SeatSection, Seat } from '@/lib/types'
+import { Event, SeatSection } from '@/lib/types'
 import { getUser, useUser } from '@/lib/store'
 import { notFound } from 'next/navigation'
 
@@ -208,6 +208,8 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
   const [selectedSeats, setSelectedSeats] = useState<SelectedSeat[]>([])
   const [maxSeats] = useState(4)
   const [showVideo, setShowVideo] = useState(false)
+  const [checkoutLoading, setCheckoutLoading] = useState(false)
+  const [checkoutError, setCheckoutError] = useState('')
 
   useEffect(() => {
     fetch(`/api/events/${id}`)
@@ -235,21 +237,38 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
   }
 
   const total = selectedSeats.reduce((sum, s) => sum + s.price, 0)
+  const canBuy = event.status === 'on-sale' && event.availableSeats > 0
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
+    if (!canBuy || selectedSeats.length === 0) return
     const user = getUser()
     if (!user.verified) {
       const returnUrl = encodeURIComponent(`/events/${event.id}`)
       router.push(`/verify?redirect=${returnUrl}`)
       return
     }
-    const query = encodeURIComponent(JSON.stringify({
-      eventId: event.id,
-      eventTitle: event.title,
-      seats: selectedSeats,
-      total,
-    }))
-    router.push(`/checkout?data=${query}`)
+    setCheckoutLoading(true)
+    setCheckoutError('')
+    try {
+      const res = await fetch('/api/orders/prepare', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventId: event.id,
+          seats: selectedSeats.map(({ sectionId, row, seatNumber }) => ({ sectionId, row, seatNumber })),
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.session) {
+        setCheckoutError(data.error === 'EVENT_NOT_ON_SALE' ? '此活動目前未開放購票' : '無法建立結帳，請重新選位')
+        return
+      }
+      router.push(`/checkout?session=${encodeURIComponent(data.session)}`)
+    } catch {
+      setCheckoutError('網路錯誤，請稍後再試')
+    } finally {
+      setCheckoutLoading(false)
+    }
   }
 
   return (
@@ -314,16 +333,30 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
             </TabsList>
 
             <TabsContent value="seats" className="mt-4">
+              {!canBuy && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex gap-2 mb-4">
+                  <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
+                  <p className="text-xs text-red-700">
+                    {event.status === 'sold-out' ? '此活動已售完，暫停選位與結帳。' : '此活動尚未開賣，暫停選位與結帳。'}
+                  </p>
+                </div>
+              )}
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex gap-2 mb-4">
                 <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
                 <p className="text-xs text-amber-700">每次購票最多 {maxSeats} 張，已選 {selectedSeats.length} 張。點選區域展開座位圖。</p>
               </div>
-              <SeatMap
-                sections={mockSections}
-                selectedSeats={selectedSeats}
-                onToggleSeat={toggleSeat}
-                maxSeats={maxSeats}
-              />
+              {canBuy ? (
+                <SeatMap
+                  sections={mockSections}
+                  selectedSeats={selectedSeats}
+                  onToggleSeat={toggleSeat}
+                  maxSeats={maxSeats}
+                />
+              ) : (
+                <div className="bg-white rounded-2xl border p-8 text-center text-sm text-gray-500">
+                  票券目前不可選購
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="info" className="mt-4">
@@ -402,12 +435,13 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
 
               <Button
                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
-                disabled={selectedSeats.length === 0}
+                disabled={!canBuy || selectedSeats.length === 0 || checkoutLoading}
                 onClick={handleCheckout}
               >
-                前往結帳
+                {checkoutLoading ? '建立結帳中...' : canBuy ? '前往結帳' : '暫停購票'}
                 {selectedSeats.length > 0 && ` (${selectedSeats.length} 張)`}
               </Button>
+              {checkoutError && <p className="text-center text-xs text-red-500">{checkoutError}</p>}
 
               <p className="text-center text-xs text-gray-400 flex items-center justify-center gap-1">
                 {user.verified

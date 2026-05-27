@@ -116,6 +116,26 @@ function applySecurityHeaders(res: NextResponse): void {
   h.set('X-Content-Type-Options', 'nosniff')
   h.set('Referrer-Policy',    'strict-origin-when-cross-origin')
   h.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+  h.set('Cross-Origin-Opener-Policy', 'same-origin')
+  h.set('Cross-Origin-Resource-Policy', 'same-site')
+  h.set(
+    'Content-Security-Policy',
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https://images.unsplash.com https://img.youtube.com https://*.supabase.co",
+      "font-src 'self' data:",
+      "connect-src 'self' https://*.supabase.co",
+      "frame-src https://www.youtube.com https://www.youtube-nocookie.com",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'none'",
+      'upgrade-insecure-requests',
+    ].join('; '),
+  )
+  h.set('Access-Control-Allow-Origin', 'https://echotree-5usy.vercel.app')
 }
 
 export const config = {

@@ -31,8 +31,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '發送次數過多，請稍後再試' }, { status: 429 })
   }
 
-  // Use fixed OTP_SECRET in dev/staging, or generate a random code
-  const code = process.env.OTP_SECRET ?? generateCode()
+  // Production must use a one-time random OTP. OTP_SECRET is only a local/staging helper.
+  const code = process.env.NODE_ENV === 'production'
+    ? generateCode()
+    : (process.env.OTP_SECRET ?? generateCode())
   await cacheSet(`otp:${phone}`, code, 300)  // 5-minute TTL
 
   // ── TODO: Real SMS provider ───────────────────────────────────
