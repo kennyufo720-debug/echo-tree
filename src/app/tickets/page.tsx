@@ -312,7 +312,36 @@ function TicketCard({ order, onView, onRedeem, isPastTab }: { order: Order; onVi
   )
 }
 
+type ClaimStep = 'idle' | 'loading' | 'success' | 'already' | 'error'
+
 function TicketModal({ order, onClose }: { order: Order; onClose: () => void }) {
+  const user = useUser()
+  const [claimStep, setClaimStep] = useState<ClaimStep>('idle')
+  const [claimCount, setClaimCount] = useState(0)
+
+  async function handleClaim() {
+    setClaimStep('loading')
+    try {
+      const res = await fetch('/api/certificates/claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_id:    order.id,
+          user_phone:  user.phone,
+          event_id:    order.eventId,
+          event_title: order.eventTitle,
+          seat_count:  order.seats.length,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setClaimStep('error'); return }
+      setClaimCount(data.certs?.length ?? order.seats.length)
+      setClaimStep(data.already_claimed ? 'already' : 'success')
+    } catch {
+      setClaimStep('error')
+    }
+  }
+
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-sm">
@@ -341,6 +370,45 @@ function TicketModal({ order, onClose }: { order: Order; onClose: () => void }) 
               </div>
             ))}
           </div>
+
+          {/* 兌換樹憑證區塊 */}
+          {claimStep === 'idle' && (
+            <Button
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0"
+              onClick={handleClaim}
+            >
+              <TreePine className="h-4 w-4 mr-2" />
+              兌換樹憑證（{order.seats.length} 張）
+            </Button>
+          )}
+
+          {claimStep === 'loading' && (
+            <div className="flex items-center justify-center gap-2 py-2 text-emerald-600">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm">產生憑證中...</span>
+            </div>
+          )}
+
+          {claimStep === 'success' && (
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center space-y-1">
+              <CheckCircle2 className="h-8 w-8 text-emerald-500 mx-auto" />
+              <p className="font-bold text-emerald-700">兌換成功！</p>
+              <p className="text-xs text-emerald-600">已取得 {claimCount} 張樹憑證，前往「🌳 樹資產票夾」查看</p>
+            </div>
+          )}
+
+          {claimStep === 'already' && (
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 flex items-center gap-2 text-sm text-blue-700">
+              <CheckCircle2 className="h-4 w-4 shrink-0" />
+              此票券已完成兌換，請至「🌳 樹資產票夾」查看
+            </div>
+          )}
+
+          {claimStep === 'error' && (
+            <div className="bg-red-50 border border-red-100 rounded-xl p-3 text-xs text-red-600 text-center">
+              兌換失敗，請稍後再試
+            </div>
+          )}
 
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-700">
             入場時請出示此 QR Code，每張票限掃描一次
