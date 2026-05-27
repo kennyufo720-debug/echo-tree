@@ -15,7 +15,10 @@ function generateCode(): string {
 }
 
 export async function POST(req: NextRequest) {
-  const { phone } = await req.json()
+  let body: { phone?: string }
+  try { body = await req.json() }
+  catch { return NextResponse.json({ error: '無效的請求格式' }, { status: 400 }) }
+  const { phone } = body
 
   if (!phone || !/^09\d{8}$/.test(phone)) {
     return NextResponse.json({ error: '無效的手機號碼' }, { status: 400 })

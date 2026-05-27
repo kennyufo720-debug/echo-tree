@@ -8,7 +8,10 @@ import { cacheGet, cacheDel } from '@/lib/cache'
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
 
 export async function POST(req: NextRequest) {
-  const { phone, code } = await req.json()
+  let body: { phone?: string; code?: string }
+  try { body = await req.json() }
+  catch { return NextResponse.json({ ok: false, error: '無效的請求格式' }, { status: 400 }) }
+  const { phone, code } = body
 
   if (!phone || !code) {
     return NextResponse.json({ ok: false, error: '缺少參數' }, { status: 400 })

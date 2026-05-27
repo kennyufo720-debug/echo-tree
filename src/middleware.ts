@@ -21,6 +21,17 @@ const WINDOW_MS   = 60_000  // 1 minute
 const MAX_REQUESTS = 60     // per IP per window
 
 // ── In-process sliding-window store ───────────────────
+// ⚠️  VERCEL / SERVERLESS NOTE:
+// Each edge worker is an isolated V8 sandbox.  A single-region warm worker
+// accumulates counts correctly across sequential requests, but a burst of
+// concurrent traffic is spread across MANY workers — each with its own Map —
+// so the global cap is not enforced under load.
+//
+// ✅  Works as-is: Docker (single process), single-region dev server.
+// 🔧  For Vercel / multi-instance: replace rateLimit() with an
+//     Upstash Redis call (HTTP, Edge-safe):
+//       await redis.incr(key); await redis.expire(key, 60)
+//     Add UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN to env.
 interface Window { count: number; resetAt: number }
 const store = new Map<string, Window>()
 let sweepCounter = 0

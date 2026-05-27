@@ -52,17 +52,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '發文次數過多，請稍後再試' }, { status: 429 })
   }
 
-  const body = await req.json()
-  const { title, content, author, author_avatar = '', category, tags = [] } = body
+  let body: Record<string, unknown>
+  try { body = await req.json() }
+  catch { return NextResponse.json({ error: '無效的請求格式' }, { status: 400 }) }
+
+  const { author_avatar = '', tags = [] } = body
+  // Strip HTML tags to prevent stored XSS
+  const strip = (v: unknown) => String(v ?? '').replace(/<[^>]*>/g, '').trim()
+  const title    = strip(body.title)
+  const content  = strip(body.content)
+  const author   = strip(body.author)
+  const category = strip(body.category)
 
   if (!title || !content || !author || !category) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
   // Input length caps
-  if (title.length > 100)   return NextResponse.json({ error: '標題最多 100 字' }, { status: 422 })
+  if (title.length > 100)    return NextResponse.json({ error: '標題最多 100 字' }, { status: 422 })
   if (content.length > 5000) return NextResponse.json({ error: '內容最多 5000 字' }, { status: 422 })
-  if (author.length > 50)   return NextResponse.json({ error: '作者名稱過長' }, { status: 422 })
+  if (author.length > 50)    return NextResponse.json({ error: '作者名稱過長' }, { status: 422 })
 
   const id = `p${Date.now()}`
   const { data, error } = await getSupabase()

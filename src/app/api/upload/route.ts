@@ -26,7 +26,9 @@ const ALLOWED_TYPES: Record<string, { ext: string; magic?: number[] }> = {
   'image/png':       { ext: 'png',  magic: [0x89, 0x50, 0x4e, 0x47] },
   'image/gif':       { ext: 'gif',  magic: [0x47, 0x49, 0x46, 0x38] },
   'image/webp':      { ext: 'webp' },   // "RIFF" header — checked by Supabase bucket
-  'image/svg+xml':   { ext: 'svg' },
+  // image/svg+xml intentionally excluded: SVGs are XML/text with no reliable magic
+  // bytes and can embed <script> / onload= handlers that execute when the CDN URL
+  // is opened in a browser tab (stored XSS via CDN).
   'video/mp4':       { ext: 'mp4' },
   'video/quicktime': { ext: 'mov' },
   'video/webm':      { ext: 'webm' },
