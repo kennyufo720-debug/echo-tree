@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cacheGet, cacheDel } from '@/lib/cache'
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
+import { verifiedCookie } from '@/lib/security/session'
 
 export async function POST(req: NextRequest) {
   const { phone, code } = await req.json()
@@ -33,5 +34,9 @@ export async function POST(req: NextRequest) {
   // Invalidate the code so it can't be reused
   await cacheDel(`otp:${phone}`)
 
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true }, {
+    headers: {
+      'Set-Cookie': verifiedCookie(phone),
+    },
+  })
 }

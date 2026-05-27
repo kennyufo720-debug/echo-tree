@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
+import { adminCookie } from '@/lib/security/session'
 
 export async function POST(req: NextRequest) {
   // Rate-limit: 5 attempts per IP per 15 minutes
@@ -24,5 +25,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false }, { status: 401 })
   }
 
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true }, {
+    headers: {
+      'Set-Cookie': adminCookie(),
+    },
+  })
 }

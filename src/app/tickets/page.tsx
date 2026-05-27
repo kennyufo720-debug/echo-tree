@@ -529,7 +529,7 @@ export default function TicketsPage() {
 
   useEffect(() => {
     if (!user.phone) return
-    fetch(`/api/orders?phone=${encodeURIComponent(user.phone)}`)
+    fetch('/api/orders')
       .then(r => r.json())
       .then(data => Array.isArray(data) ? setApiOrders(data.map(dbToOrder)) : null)
       .catch(() => {})
