@@ -1,10 +1,10 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { User, Star, ShoppingBag, Ticket, TreePine, ChevronRight, Crown, Shield, Music, MessageCircle, CheckCheck, Send } from 'lucide-react'
+import { User, Star, ShoppingBag, Ticket, TreePine, ChevronRight, Crown, Shield, Music, MessageCircle, CheckCheck, Send, Mail, Bell, Check, Pencil } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { useUser, useOrders } from '@/lib/store'
+import { useUser, useOrders, setUser } from '@/lib/store'
 import { useConversations, useUnreadCount } from '@/lib/messages'
 
 // ── Store orders ── BUG-05 fix: match actual shape written by store/page.tsx
@@ -90,6 +90,33 @@ export default function MemberPage() {
   const [tab, setTab] = useState<Tab>('overview')
   const conversations = useConversations()
   const unreadCount = useUnreadCount()
+
+  // ── Email notification state ──────────────────────────
+  const [emailEdit, setEmailEdit] = useState(false)
+  const [emailInput, setEmailInput] = useState(user.email ?? '')
+  const [emailSaving, setEmailSaving] = useState(false)
+  const [emailSaved, setEmailSaved] = useState(false)
+
+  // Keep input in sync when user loads
+  useEffect(() => { setEmailInput(user.email ?? '') }, [user.email])
+
+  async function saveEmail() {
+    if (!user.phone) return
+    setEmailSaving(true)
+    try {
+      await fetch('/api/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: user.phone, email: emailInput.trim() || null }),
+      })
+      setUser({ email: emailInput.trim() })
+      setEmailSaved(true)
+      setEmailEdit(false)
+      setTimeout(() => setEmailSaved(false), 3000)
+    } finally {
+      setEmailSaving(false)
+    }
+  }
 
   useEffect(() => {
     // Try API first; fall back to localStorage
@@ -223,6 +250,59 @@ export default function MemberPage() {
                   </div>
                 </Link>
               ))}
+            </div>
+
+            {/* 通知設定 — Email */}
+            <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="font-black text-gray-900 flex items-center gap-2 text-sm">
+                  <Bell className="h-4 w-4 text-emerald-600" /> 通知設定
+                </h2>
+                {emailSaved && (
+                  <span className="text-xs text-emerald-600 flex items-center gap-1">
+                    <Check className="h-3.5 w-3.5" />已儲存
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                  <Mail className="h-4 w-4 text-blue-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-gray-400 mb-0.5">通知 Email</p>
+                  {emailEdit ? (
+                    <div className="flex gap-2">
+                      <input
+                        type="email"
+                        value={emailInput}
+                        onChange={e => setEmailInput(e.target.value)}
+                        placeholder="your@email.com"
+                        className="flex-1 text-sm border rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-emerald-300 min-w-0"
+                      />
+                      <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 h-7 text-xs shrink-0"
+                        onClick={saveEmail} disabled={emailSaving}>
+                        {emailSaving ? '...' : '儲存'}
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-7 px-2 text-xs shrink-0"
+                        onClick={() => { setEmailEdit(false); setEmailInput(user.email ?? '') }}>
+                        取消
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-700 truncate">
+                        {user.email || <span className="text-gray-400 italic">尚未設定</span>}
+                      </span>
+                      <button onClick={() => setEmailEdit(true)} className="shrink-0 text-gray-400 hover:text-emerald-600 transition-colors">
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <p className="text-xs text-gray-400 leading-relaxed">
+                票券超過 7 天未兌換樹憑證時，系統將透過平台私訊與此 Email 提醒您。
+              </p>
             </div>
 
             {/* 最新私訊預覽 */}

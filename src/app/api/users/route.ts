@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
 
   const { data, error } = await getSupabase()
     .from('users')
-    .select('id, phone, verified, points, created_at, updated_at')
+    .select('id, phone, email, verified, points, created_at, updated_at')
     .eq('phone', phone)
     .single()
 

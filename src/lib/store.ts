@@ -12,9 +12,10 @@ export interface UserState {
   verified: boolean
   phone: string
   points: number
+  email: string
 }
 
-const DEFAULT_USER: UserState = { verified: false, phone: '', points: 2450 }
+const DEFAULT_USER: UserState = { verified: false, phone: '', points: 2450, email: '' }
 
 export function getUser(): UserState {
   if (typeof window === 'undefined') return DEFAULT_USER
