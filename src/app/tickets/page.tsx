@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { Calendar, MapPin, Ticket, Download, QrCode, Leaf, TreePine, Sprout, Star, Repeat2, CheckCircle2, XCircle, Loader2, ExternalLink, Copy, Check } from 'lucide-react'
+import { Calendar, MapPin, Ticket, Download, QrCode, Leaf, TreePine, Sprout, Star, Repeat2, CheckCircle2, XCircle, Loader2, ExternalLink, Copy, Check, ArrowRightLeft, Phone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -353,130 +353,302 @@ function TicketModal({ order, onClose }: { order: Order; onClose: () => void }) 
   )
 }
 
-const treeAssets = [
-  {
-    id: 'T001',
-    name: '台灣欒樹 #001',
-    event: '2026 念念不忘必有回音 回音樹ESG音樂節',
-    date: '2026-05-02',
-    location: '南投縣仁愛鄉',
-    co2: 12.4,
-    status: '健康成長中',
-    age: '剛種下',
-    emoji: '',
-    level: 1,
-    certCode: 'TREE-ESG-2026-001',
-  },
-  {
-    id: 'T002',
-    name: '台灣杉 #047',
-    event: '2025 草東沒有派對巡迴',
-    date: '2025-10-05',
-    location: '花蓮縣秀林鄉',
-    co2: 28.7,
-    status: '茁壯成長',
-    age: '6 個月',
-    emoji: '',
-    level: 2,
-    certCode: 'TREE-IND-2025-047',
-  },
-]
+// ── Tree Certificate types ─────────────────────────────
+interface TreeCert {
+  id: string
+  user_phone: string
+  original_phone: string
+  order_id: string
+  event_id: string
+  event_title: string
+  tree_species: string
+  forest_location: string
+  cert_code: string
+  issued_at: string
+  status: string
+  source_cert_id: string | null
+  co2_kg: number
+}
 
-function TreeAssetCard({ asset }: { asset: typeof treeAssets[0] }) {
-  const [flipped, setFlipped] = useState(false)
+function speciesEmoji(species: string): string {
+  if (species.includes('扁柏') || species.includes('梅'))  return ''
+  if (species.includes('欒樹') || species.includes('楓香')) return ''
+  if (species.includes('光蠟'))                             return ''
+  return ''
+}
+
+function treeAge(issuedAt: string): string {
+  const days = Math.floor((Date.now() - new Date(issuedAt).getTime()) / 86_400_000)
+  if (days < 30)  return `${days} 天`
+  if (days < 365) return `${Math.floor(days / 30)} 個月`
+  return `${Math.floor(days / 365)} 年`
+}
+
+// ── Transfer Modal ─────────────────────────────────────
+type TransferStep = 'input' | 'confirm' | 'loading' | 'success' | 'error'
+
+function TransferModal({ cert, phone, onClose }: { cert: TreeCert; phone: string; onClose: () => void }) {
+  const [step, setStep]         = useState<TransferStep>('input')
+  const [toPhone, setToPhone]   = useState('')
+  const [errMsg, setErrMsg]     = useState('')
+
+  async function handleTransfer() {
+    setStep('loading')
+    try {
+      const res = await fetch('/api/certificates/transfer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cert_id: cert.id, from_phone: phone, to_phone: toPhone }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setErrMsg(data.error ?? '移轉失敗'); setStep('error'); return }
+      setStep('success')
+    } catch {
+      setErrMsg('網路錯誤，請稍後再試')
+      setStep('error')
+    }
+  }
 
   return (
-    <Card
-      className="border-0 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden"
-      onClick={() => setFlipped(f => !f)}
-    >
-      <div className="h-1.5 bg-gradient-to-r from-green-400 to-emerald-500" />
-      <CardContent className="p-5">
-        {!flipped ? (
-          /* 正面 */
-          <div className="space-y-3">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-100 to-emerald-200 flex items-center justify-center text-2xl">
-                  {asset.emoji}
-                </div>
-                <div>
-                  <p className="font-bold text-gray-900">{asset.name}</p>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    {Array.from({ length: asset.level }).map((_, i) => (
-                      <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                    ))}
-                    <span className="text-xs text-gray-400 ml-1">Lv.{asset.level}</span>
-                  </div>
-                </div>
-              </div>
-              <Badge className="bg-green-50 text-green-700 border border-green-200 text-xs">
-                {asset.status}
-              </Badge>
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <ArrowRightLeft className="h-5 w-5 text-emerald-600" />
+            移轉樹憑證
+          </DialogTitle>
+        </DialogHeader>
+
+        {step === 'input' && (
+          <div className="space-y-4">
+            <div className="bg-emerald-50 rounded-2xl p-4 space-y-2 text-sm">
+              <p className="font-bold text-gray-900">{cert.tree_species} {speciesEmoji(cert.tree_species)}</p>
+              <p className="text-xs text-gray-500">{cert.cert_code}</p>
+              <p className="text-xs text-gray-500">{cert.event_title}</p>
             </div>
-
-            <div className="bg-green-50 rounded-xl p-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Leaf className="h-4 w-4 text-green-500" />
-                <span className="text-sm text-green-700 font-medium">累積固碳</span>
-              </div>
-              <span className="font-bold text-green-700">{asset.co2} kg CO₂</span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
-              <div className="flex items-center gap-1">
-                <MapPin className="h-3 w-3" />
-                {asset.location}
-              </div>
-              <div className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                樹齡 {asset.age}
-              </div>
-            </div>
-
-            <p className="text-xs text-gray-400 text-center">點擊查看來源活動 →</p>
-          </div>
-        ) : (
-          /* 背面 */
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 mb-1">
-              <Ticket className="h-4 w-4 text-emerald-500" />
-              <p className="font-bold text-gray-900 text-sm">來源活動</p>
-            </div>
-            <p className="text-sm text-gray-700 font-medium">{asset.event}</p>
-            <p className="text-xs text-gray-400">{asset.date}</p>
-
-            <Separator />
-
             <div className="space-y-2">
-              <div className="flex justify-between text-xs">
-                <span className="text-gray-500">憑證編號</span>
-                <span className="font-mono text-gray-700">{asset.certCode}</span>
-              </div>
-              <div className="flex justify-between text-xs">
-                <span className="text-gray-500">樹木狀態</span>
-                <span className="text-green-600 font-medium">{asset.status}</span>
-              </div>
-              <div className="flex justify-between text-xs">
-                <span className="text-gray-500">種植地點</span>
-                <span className="text-gray-700">{asset.location}</span>
-              </div>
+              <label className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
+                <Phone className="h-3.5 w-3.5" />接收人手機號碼
+              </label>
+              <input
+                type="tel"
+                placeholder="09xxxxxxxx"
+                maxLength={10}
+                value={toPhone}
+                onChange={e => { setToPhone(e.target.value); setErrMsg('') }}
+                className="w-full border rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-300"
+              />
+              {errMsg && <p className="text-xs text-red-500">{errMsg}</p>}
             </div>
-
-            <div className="bg-emerald-50 rounded-xl p-3 text-xs text-emerald-700 text-center">
-               感謝您為地球貢獻了 {asset.co2} kg 固碳量
+            <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 text-xs text-amber-700">
+              移轉後此憑證將從您的票夾移除，且操作不可撤銷。
             </div>
-
-            <p className="text-xs text-gray-400 text-center">點擊返回 ←</p>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={onClose}>取消</Button>
+              <Button
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                disabled={!/^09\d{8}$/.test(toPhone)}
+                onClick={() => setStep('confirm')}
+              >下一步</Button>
+            </div>
           </div>
         )}
+
+        {step === 'confirm' && (
+          <div className="space-y-4">
+            <div className="text-center space-y-1">
+              <p className="text-sm text-gray-500">確認移轉給</p>
+              <p className="text-xl font-bold text-gray-900">{toPhone}</p>
+            </div>
+            <div className="bg-red-50 border border-red-100 rounded-xl p-3 text-xs text-red-600">
+              此操作不可撤銷！確認後憑證將立即轉移。
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setStep('input')}>返回</Button>
+              <Button className="flex-1 bg-red-500 hover:bg-red-600 text-white" onClick={handleTransfer}>
+                確認移轉
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {step === 'loading' && (
+          <div className="py-10 text-center space-y-3">
+            <Loader2 className="h-10 w-10 text-emerald-500 mx-auto animate-spin" />
+            <p className="text-sm text-gray-500">移轉中...</p>
+          </div>
+        )}
+
+        {step === 'success' && (
+          <div className="space-y-4">
+            <div className="text-center py-4">
+              <CheckCircle2 className="h-14 w-14 text-emerald-500 mx-auto mb-3" />
+              <p className="text-lg font-bold text-gray-900">移轉成功！</p>
+              <p className="text-sm text-gray-400 mt-1">憑證已移轉至 {toPhone}</p>
+            </div>
+            <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white" onClick={onClose}>完成</Button>
+          </div>
+        )}
+
+        {step === 'error' && (
+          <div className="space-y-4">
+            <div className="text-center py-4">
+              <XCircle className="h-14 w-14 text-red-400 mx-auto mb-3" />
+              <p className="text-lg font-bold text-gray-900">移轉失敗</p>
+              <p className="text-sm text-red-500 mt-1">{errMsg}</p>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={onClose}>關閉</Button>
+              <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => setStep('input')}>重試</Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ── Tree Cert Card ─────────────────────────────────────
+function TreeAssetCard({ cert, phone, onTransfer }: { cert: TreeCert; phone: string; onTransfer: (c: TreeCert) => void }) {
+  const [flipped, setFlipped] = useState(false)
+  const emoji = speciesEmoji(cert.tree_species)
+  const age   = treeAge(cert.issued_at)
+
+  return (
+    <Card className="border-0 shadow-sm hover:shadow-md transition-all overflow-hidden">
+      <div className="h-1.5 bg-gradient-to-r from-green-400 to-emerald-500" />
+      <CardContent className="p-5">
+        <div
+          className="cursor-pointer"
+          onClick={() => setFlipped(f => !f)}
+        >
+          {!flipped ? (
+            /* 正面 */
+            <div className="space-y-3">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-100 to-emerald-200 flex items-center justify-center text-2xl">
+                    {emoji}
+                  </div>
+                  <div>
+                    <p className="font-bold text-gray-900">{cert.tree_species}</p>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                      <span className="text-xs text-gray-400 ml-0.5">樹齡 {age}</span>
+                    </div>
+                  </div>
+                </div>
+                <Badge className="bg-green-50 text-green-700 border border-green-200 text-xs">健康成長中</Badge>
+              </div>
+
+              <div className="bg-green-50 rounded-xl p-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Leaf className="h-4 w-4 text-green-500" />
+                  <span className="text-sm text-green-700 font-medium">累積固碳</span>
+                </div>
+                <span className="font-bold text-green-700">{cert.co2_kg} kg CO₂</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
+                <div className="flex items-center gap-1">
+                  <MapPin className="h-3 w-3" />{cert.forest_location}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  {cert.issued_at.slice(0, 10)}
+                </div>
+              </div>
+              <p className="text-xs text-gray-400 text-center">點擊查看憑證詳情 →</p>
+            </div>
+          ) : (
+            /* 背面 */
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 mb-1">
+                <Ticket className="h-4 w-4 text-emerald-500" />
+                <p className="font-bold text-gray-900 text-sm">來源活動</p>
+              </div>
+              <p className="text-sm text-gray-700 font-medium">{cert.event_title}</p>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs">
+                  <span className="text-gray-500">憑證編號</span>
+                  <span className="font-mono text-gray-700 text-[10px]">{cert.cert_code}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-gray-500">原始購買人</span>
+                  <span className="text-gray-700">{cert.original_phone.replace(/(\d{4})\d{3}(\d{3})/, '$1***$2')}</span>
+                </div>
+                {cert.source_cert_id && (
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">取得方式</span>
+                    <span className="text-blue-600">移轉取得</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-xs">
+                  <span className="text-gray-500">種植地點</span>
+                  <span className="text-gray-700">{cert.forest_location}</span>
+                </div>
+              </div>
+
+              <div className="bg-emerald-50 rounded-xl p-3 text-xs text-emerald-700 text-center">
+                感謝您為地球貢獻了 {cert.co2_kg} kg 固碳量
+              </div>
+              <p className="text-xs text-gray-400 text-center">點擊返回 ←</p>
+            </div>
+          )}
+        </div>
+
+        {/* 移轉按鈕 — 固定在卡片底部，不觸發翻面 */}
+        <div className="mt-3 pt-3 border-t border-gray-100">
+          <Button
+            size="sm"
+            variant="outline"
+            className="w-full text-xs text-emerald-700 border-emerald-200 hover:bg-emerald-50"
+            onClick={e => { e.stopPropagation(); onTransfer(cert) }}
+          >
+            <ArrowRightLeft className="h-3.5 w-3.5 mr-1.5" />
+            移轉此憑證
+          </Button>
+        </div>
       </CardContent>
     </Card>
   )
 }
 
-function TreeWallet() {
-  const totalCo2 = treeAssets.reduce((sum, t) => sum + t.co2, 0)
+// ── Tree Wallet ────────────────────────────────────────
+function TreeWallet({ phone }: { phone: string }) {
+  const [certs, setCerts]           = useState<TreeCert[]>([])
+  const [loading, setLoading]       = useState(true)
+  const [transferCert, setTransferCert] = useState<TreeCert | null>(null)
+  const [refreshKey, setRefreshKey] = useState(0)
+
+  useEffect(() => {
+    if (!phone) { setLoading(false); return }
+    setLoading(true)
+    fetch(`/api/certificates?phone=${encodeURIComponent(phone)}`)
+      .then(r => r.json())
+      .then(data => Array.isArray(data) ? setCerts(data) : null)
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [phone, refreshKey])
+
+  const totalCo2   = certs.reduce((s, c) => s + c.co2_kg, 0)
+  const eventCount = new Set(certs.map(c => c.event_id).filter(Boolean)).size
+
+  function handleTransferDone() {
+    setTransferCert(null)
+    setRefreshKey(k => k + 1)   // re-fetch after successful transfer
+  }
+
+  if (loading) {
+    return (
+      <div className="py-16 text-center">
+        <Loader2 className="h-8 w-8 text-emerald-400 mx-auto animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">
@@ -484,19 +656,19 @@ function TreeWallet() {
       <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-5 text-white">
         <div className="flex items-center gap-2 mb-4">
           <TreePine className="h-5 w-5" />
-          <span className="font-bold">樹資產總覽</span>
+          <span className="font-bold">樹憑證票夾</span>
         </div>
         <div className="grid grid-cols-3 gap-3 text-center">
           <div>
-            <p className="text-2xl font-bold">{treeAssets.length}</p>
-            <p className="text-green-100 text-xs mt-0.5">棵樹</p>
+            <p className="text-2xl font-bold">{certs.length}</p>
+            <p className="text-green-100 text-xs mt-0.5">張憑證</p>
           </div>
           <div>
             <p className="text-2xl font-bold">{totalCo2.toFixed(1)}</p>
             <p className="text-green-100 text-xs mt-0.5">kg CO₂ 固碳</p>
           </div>
           <div>
-            <p className="text-2xl font-bold">2</p>
+            <p className="text-2xl font-bold">{eventCount}</p>
             <p className="text-green-100 text-xs mt-0.5">場 ESG 活動</p>
           </div>
         </div>
@@ -506,16 +678,37 @@ function TreeWallet() {
       <div className="bg-green-50 border border-green-100 rounded-xl p-3 flex gap-2">
         <Sprout className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
         <p className="text-xs text-green-700">
-          每購買一張 ESG 活動票券，Echo Goo 將為您種植一棵樹。點擊卡片可查看來源活動與憑證。
+          每購買一張票券，Echo Tree 將為您種植一棵樹並核發憑證。憑證可移轉給他人，未來亦可掛牌交易所。
         </p>
       </div>
 
-      {/* 樹資產卡片 */}
-      <div className="space-y-3">
-        {treeAssets.map(asset => (
-          <TreeAssetCard key={asset.id} asset={asset} />
-        ))}
-      </div>
+      {/* 空狀態 */}
+      {certs.length === 0 ? (
+        <div className="text-center py-14 text-gray-400">
+          <TreePine className="h-12 w-12 mx-auto mb-3 opacity-30" />
+          <p className="font-medium">尚無樹憑證</p>
+          <p className="text-xs mt-1">購票後憑證將自動出現在此</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {certs.map(cert => (
+            <TreeAssetCard
+              key={cert.id}
+              cert={cert}
+              phone={phone}
+              onTransfer={setTransferCert}
+            />
+          ))}
+        </div>
+      )}
+
+      {transferCert && (
+        <TransferModal
+          cert={transferCert}
+          phone={phone}
+          onClose={handleTransferDone}
+        />
+      )}
     </div>
   )
 }
@@ -589,7 +782,7 @@ export default function TicketsPage() {
         </TabsContent>
 
         <TabsContent value="tree">
-          <TreeWallet />
+          <TreeWallet phone={user.phone} />
         </TabsContent>
       </Tabs>
 
